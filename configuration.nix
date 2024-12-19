@@ -13,8 +13,9 @@ let
     appindicator
     alphabetical-app-grid
     search-light
-    #battery-health-charging
+    battery-health-charging
     system-monitor
+    bluetooth-battery-meter
     blur-my-shell
   ];
 
@@ -47,7 +48,7 @@ in
   };
 
   networking = {
-    hostName = "nixos";
+    hostName = "asus-nixos";
     networkmanager.enable = true;
     firewall.enable = true;
   };
@@ -124,14 +125,14 @@ in
     gnome.excludePackages = unneededGnomePackages;
   };
 
-  # programs = {
-  #   steam = {
-  #     enable = true;
-  #     remotePlay.openFirewall = true;
-  #     dedicatedServer.openFirewall = true;
-  #     localNetworkGameTransfers.openFirewall = true;
-  #   };
-  # };
+  programs = {
+    steam = {
+      enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = true;
+      localNetworkGameTransfers.openFirewall = true;
+    };
+  };
 
   nixpkgs.config.allowUnfree = true;
 
