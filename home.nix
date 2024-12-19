@@ -5,24 +5,24 @@
   home.homeDirectory = "/home/tom";
 
   home.packages = with pkgs; [ 
-    # teams-for-linux
-    # remmina
-    # obsidian
-    # blanket
-    # papers
-    # whatip
-    # vscode
-    # mullvad-browser
-    # ciscoPacketTracer8
-    # gnome-software
-    # resources
-    # dconf-editor
-    # vesktop
-    # trayscale
-    # youtube-music
-    # showtime
-    # parabolic
-    # libreoffice
+    teams-for-linux
+    remmina
+    obsidian
+    blanket
+    papers
+    whatip
+    vscode
+    mullvad-browser
+    ciscoPacketTracer8
+    gnome-software
+    resources
+    dconf-editor
+    vesktop
+    trayscale
+    youtube-music
+    showtime
+    parabolic
+    libreoffice
     # pdfarranger
     # librewolf
     # upscayl
