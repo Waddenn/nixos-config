@@ -151,6 +151,11 @@ in
       allowReboot = false;
       dates = "daily";
       persistent = true;
+      flake = inputs.self.outPath;
+      flags = [
+        "--update-input"
+        "nixpkgs"
+  ];
     };
     stateVersion = "24.05";
   };
