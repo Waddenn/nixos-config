@@ -24,6 +24,7 @@
     parabolic
     libreoffice
     fastfetch
+    vim
     # pdfarranger
     # librewolf
     # upscayl
