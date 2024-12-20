@@ -151,7 +151,7 @@ in
       allowReboot = false;
       dates = "daily";
       persistent = true;
-      flake = inputs.self.outPath;
+      #flake = inputs.self.outPath;
       flags = [
         "--update-input"
         "nixpkgs"
