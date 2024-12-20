@@ -3,7 +3,7 @@
 {
   home.username = "tom";
   home.homeDirectory = "/home/tom";
-
+  
   home.packages = with pkgs; [ 
     teams-for-linux
     remmina
@@ -23,6 +23,7 @@
     showtime
     parabolic
     libreoffice
+    fastfetch
     # pdfarranger
     # librewolf
     # upscayl
