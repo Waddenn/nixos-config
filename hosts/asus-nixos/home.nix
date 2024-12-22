@@ -3,6 +3,12 @@
 {
   home.username = "tom";
   home.homeDirectory = "/home/tom";
+
+  # Version de l'état Home Manager
+  home.stateVersion = "24.05";
+
+  # Activation de Home Manager
+  programs.home-manager.enable = true;
   
   home.packages = with pkgs; [ 
     teams-for-linux
@@ -139,9 +145,4 @@
     };
   };
 
-  # Version de l'état Home Manager
-  home.stateVersion = "24.05";
-
-  # Activation de Home Manager
-  programs.home-manager.enable = true;
 }

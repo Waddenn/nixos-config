@@ -1,31 +1,33 @@
 {
-  description = "NixOS configuration";
+  description = "NixOS configurations";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ nixpkgs, home-manager, ... }: {
+  outputs = inputs@{ nixpkgs, home-manager, ... }:
+  {
     nixosConfigurations = {
       asus-nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
-          ./configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            home-manager.users.tom = import ./home.nix;
-
-          }
+          ./hosts/asus-nixos/configuration.nix
         ];
       };
+
+      # # Second hôte
+      # macbook-nixos = nixpkgs.lib.nixosSystem {
+      #   system = "x86_64-darwin"; # ou x86_64-linux si c’est un Linux 
+      #   modules = [
+      #     ./hosts/macbook-nixos/configuration.nix
+      #   ];
+      # };
     };
   };
 }
