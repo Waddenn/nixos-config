@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 {
   imports = [
@@ -19,7 +19,7 @@
     inputs.home-manager.nixosModules.home-manager
   ];
 
-  networking.hostName = "asus-nixos";
+  networking.hostName = lib.mkForce "asus-nixos";
 
   users.users.tom = {
     isNormalUser = true;
@@ -41,5 +41,7 @@
   services.fwupd.enable = true;
 
   programs.direnv.enable = true;
+
+  system.stateVersion = "25.05";
 
 }

@@ -37,7 +37,7 @@
     enable = true;
     dates = "daily";
     persistent = true;
-    flags = [ "--update-input" "nixpkgs" ] 
+    flags = [ "--update-input" "nixpkgs" ];
   };
 
 
