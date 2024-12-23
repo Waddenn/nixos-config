@@ -13,11 +13,15 @@
   outputs = inputs@{ nixpkgs, home-manager, ... }:
   {
     nixosConfigurations = {
-      asus-nixos = nixpkgs.lib.nixosSystem {
+      asus-nixos = let
+        username = "tom";
+        specialArgs = { inherit inputs username; };
+      in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = specialArgs;
         modules = [
           ./hosts/asus-nixos/configuration.nix
+          ./users/${username}/nixos.nix
         ];
       };
 
