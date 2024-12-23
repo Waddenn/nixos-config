@@ -3,8 +3,6 @@
 {
   imports = [
     ../../home-manager/programs/default.nix
-    ../../home-manager/programs/steam.nix
-    ../../home-manager/programs/firefox.nix
     ../../home-manager/desktop/gnome/extensions.nix
     ../../home-manager/desktop/gnome/keyboard-shortcuts.nix
     ../../home-manager/desktop/gnome/interface.nix
