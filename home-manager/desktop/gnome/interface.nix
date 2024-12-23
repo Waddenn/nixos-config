@@ -3,6 +3,11 @@
 {
 
   dconf.settings = {
+
+    "org/gnome/desktop/background" = {
+        "picture-uri" = "../../../wallpapers/makima.png";
+    };
+
     "org/gnome/shell" = {
       favorite-apps = [
         "firefox.desktop"
