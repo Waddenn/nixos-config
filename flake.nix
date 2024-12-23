@@ -21,13 +21,13 @@
         system = "x86_64-linux";
         specialArgs = specialArgs;
         modules = [
-          ./hosts/${hostname}/configuration.nix
-          ./hosts/${hostname}/${username}/configuration.nix
+          ./hosts/${hostname}/shared/configuration.nix
+          "./hosts/${hostname}/users/${hostname}.nix"
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.${username} = import ./home-manager/desktop/gnome/${username}/home.nix;
+            home-manager.users.${username} = import "./home-manager/users/${username}.nix";
           }
                   ];
       };
