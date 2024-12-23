@@ -9,19 +9,17 @@
     ../../modules/base/system-configuration.nix
     ../../modules/base/zram.nix
 
-    ../../modules/desktop/desktop-environments/gnome.nix
+    ../../modules/desktop/desktop-environments/gnome/gnome.nix
 
-    ../../modules/desktop/bluetooth.nix
+    ../../modules/desktop/default.nix
     ../../modules/desktop/gaming.nix
-    ../../modules/desktop/pipewire.nix
-    ../../modules/desktop/printing.nix
 
     inputs.home-manager.nixosModules.home-manager
   ];
 
   networking.hostName = lib.mkForce "asus-nixos";
 
-  users.users.tom = {
+  users.users.${username} = {
     isNormalUser = true;
     description  = "Tom";
     extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" ];
@@ -35,7 +33,7 @@
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users.tom = import ./home.nix;
+  home-manager.users.${username} = import ./home.nix;
 
   services.flatpak.enable = true;
   services.fwupd.enable = true;

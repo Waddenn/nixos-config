@@ -1,18 +1,20 @@
 { config, pkgs, ... }:
 {
-  ############################################
-  # PipeWire (audio)
-  ############################################
+  hardware.bluetooth.enable = true;
+  security.rtkit.enable = true;
+
   services.pipewire = {
     enable = true;
 
-    # On active le support ALSA & Pulse
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
   };
 
-  # Désactiver Pulseaudio "classique"
   hardware.pulseaudio.enable = false;
+
+  services.printing.enable = true;
+
+  # services.printing.drivers = [ pkgs.hplip ];
 
 }
