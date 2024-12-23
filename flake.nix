@@ -22,12 +22,12 @@
         specialArgs = specialArgs;
         modules = [
           ./hosts/${hostname}/shared/configuration.nix
-          "./hosts/${hostname}/users/${hostname}.nix"
+          ./hosts/${hostname}/users/tom.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.${username} = import "./home-manager/users/${username}.nix";
+            home-manager.users.${username} = import ./home-manager/users/tom.nix;
           }
                   ];
       };
