@@ -3,9 +3,9 @@
 {
   imports = [
     ../../home-manager/programs/default.nix
-    ../../home-manager/gnome/extensions.nix
-    ../../home-manager/gnome/keyboard-shortcuts.nix
-    ../../home-manager/gnome/interface.nix
+    ../../home-manager/desktop/gnome/extensions.nix
+    ../../home-manager/desktop/gnome/keyboard-shortcuts.nix
+    ../../home-manager/desktop/gnome/interface.nix
   ];
 
   home.username = "tom";
