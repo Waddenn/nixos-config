@@ -5,7 +5,8 @@
   dconf.settings = {
 
     "org/gnome/desktop/background" = {
-        "picture-uri" = "../../../wallpapers/makima.png";
+        "picture-uri" = "file:///etc/nixos/wallpapers/makima.png";
+        "picture-uri-dark" = "file:///etc/nixos/wallpapers/makima.png";
     };
 
     "org/gnome/shell" = {
