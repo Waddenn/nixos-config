@@ -2,7 +2,6 @@
 
 {
   imports = [
-    ../../modules/common/gaming.nix
     ../../modules/services/flatpak.nix
     ../../modules/services/printing.nix
     ../../modules/services/pipewire.nix
