@@ -1,10 +1,12 @@
-{ config, lib, pkgs, inputs, username, ... }:
+{ config, lib, pkgs, username, ... }:
 
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    ../../modules/services/tailscale.nix
+    ../../modules/common/gaming.nix
     ../../modules/services/flatpak.nix
+    ../../modules/services/printing.nix
+    ../../modules/services/pipewire.nix
+    ../../modules/services/tailscale.nix
   ];
 
   users.users.${username} = {

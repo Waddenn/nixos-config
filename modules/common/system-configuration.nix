@@ -41,7 +41,7 @@
   };
 
   zramSwap.enable = true;
-  networkmanager.enable = true;
+  networking.networkmanager.enable = true;
 
   time.timeZone = "Europe/Paris";
 
