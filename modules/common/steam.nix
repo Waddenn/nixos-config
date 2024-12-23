@@ -9,6 +9,4 @@
     localNetworkGameTransfers.openFirewall = true;
   };
 
-  environment.systemPackages = with pkgs; [
-  ];
 }
