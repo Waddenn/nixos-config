@@ -2,6 +2,8 @@
 
 {
   imports = [
+    ../../modules/commmon/steam.nix
+    ../../modules/commmon/firefox.nix
     ../../modules/services/flatpak.nix
     ../../modules/services/printing.nix
     ../../modules/services/pipewire.nix
