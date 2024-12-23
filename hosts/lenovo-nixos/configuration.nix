@@ -2,10 +2,9 @@
 
 {
   imports = [
-    ./hardware-configuration.nix
   ];
 
-  networking.hostName = "asus-nixos";
+  networking.hostName = "lenovo-nixos";
 
   system.stateVersion = "25.05";
 

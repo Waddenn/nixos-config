@@ -15,27 +15,27 @@
     nixosConfigurations = {
       asus-nixos = let
         username = "tom";
+        hostname = "asus-nixos";
         specialArgs = { inherit inputs username; };
       in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = specialArgs;
         modules = [
-          ./hosts/asus-nixos/configuration.nix
-          ./users/${username}/configuration.nix
+          ./hosts/${hostname}/configuration.nix
+          ./hosts/${hostname}/${username}/configuration.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.${username} = import ./users/${username}/home.nix;
+            home-manager.users.${username} = import ./home-manager/desktop/gnome/${username}/home.nix;
           }
                   ];
       };
 
-      # # Second hôte
-      # macbook-nixos = nixpkgs.lib.nixosSystem {
-      #   system = "x86_64-darwin"; # ou x86_64-linux si c’est un Linux 
+      # vm = nixpkgs.lib.nixosSystem {
+      #   system = "x86_64-linux"; 
       #   modules = [
-      #     ./hosts/macbook-nixos/configuration.nix
+      #     ./hosts/vm/configuration.nix
       #   ];
       # };
     };

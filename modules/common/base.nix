@@ -41,6 +41,10 @@
   };
 
   zramSwap.enable = true;
+  security.rtkit.enable = true;
+  hardware.bluetooth.enable = true;
+
+
   networking.networkmanager.enable = true;
 
   time.timeZone = "Europe/Paris";
