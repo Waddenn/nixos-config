@@ -1,13 +1,13 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, username, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
     
-    ../../modules/base/localization.nix
-    ../../modules/base/networking.nix
-    ../../modules/base/system-configuration.nix
-    ../../modules/base/zram.nix
+    ../../modules/common/localization.nix
+    ../../modules/common/networking.nix
+    ../../modules/common/system-configuration.nix
+    ../../modules/common/zram.nix
 
     ../../modules/desktop/desktop-environments/gnome/gnome.nix
 
@@ -19,21 +19,11 @@
 
   networking.hostName = lib.mkForce "asus-nixos";
 
-  users.users.${username} = {
-    isNormalUser = true;
-    description  = "Tom";
-    extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" ];
-  };
-
   services.tailscale = {
     enable = true;
     openFirewall = true;
     useRoutingFeatures = "client";
   };
-
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  home-manager.users.${username} = import ./home.nix;
 
   services.flatpak.enable = true;
   services.fwupd.enable = true;
