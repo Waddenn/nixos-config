@@ -8,7 +8,6 @@
 
     ../../modules/desktop/gnome/base.nix
 
-    inputs.home-manager.nixosModules.home-manager
   ];
 
   networking.hostName = "asus-nixos";

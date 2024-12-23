@@ -2,6 +2,8 @@
 
 {
 
+  dconf.settings = {
+    "org/gnome/shell" = {
       disable-user-extensions = false;
       remember-mount-password = true;
       enabled-extensions = [
@@ -14,8 +16,8 @@
         "search-light@icedman.github.com"
         "blur-my-shell@aunetx"
       ]; 
+    };
 
-  dconf.settings = {
     "org/gnome/shell/extensions/system-monitor" = {
       show-cpu = true;
       show-download = false;

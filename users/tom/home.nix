@@ -2,11 +2,10 @@
 
 {
   imports = [
-    ../../modules/common/gaming.nix
     ../../home-manager/programs/default.nix
-    ../../gnome/extensions.nix
-    ../../gnome/keyboard-shortcuts.nix
-    ../../gnome/interface.nix
+    ../../home-manager/gnome/extensions.nix
+    ../../home-manager/gnome/keyboard-shortcuts.nix
+    ../../home-manager/gnome/interface.nix
   ];
 
   home.username = "tom";
