@@ -1,7 +1,8 @@
-{ config, lib, pkgs, username, ... }:
+{ config, lib, ... }:
 
 {
   imports = [
+    ./hardware-configuration.nix
     ../../modules/common/steam.nix
     ../../modules/common/firefox.nix
     ../../modules/common/base.nix
@@ -13,19 +14,8 @@
     ../../modules/services/fwupd.nix
   ];
 
-  users.users.${username} = {
-    isNormalUser = true;
-    description  = "Tom";
-    extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" ];
-  };
+  networking.hostName = "asus-nixos";
 
-  programs.git = {
-    enable = true;
-    userName  = "waddenn";
-    userEmail = "waddenn.github@gmail.com";
-    extraConfig = {
-      init.defaultBranch = "main";
-    };
-  };
+  system.stateVersion = "25.05";
 
 }
