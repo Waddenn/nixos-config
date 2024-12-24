@@ -2,8 +2,7 @@
 
 {
   imports = [
-    ./hardware-configuration.nix
-    ../../../modules/templates/laptop.nix
+
   ];
 
   networking.hostName = ${hostname};
