@@ -1,20 +1,20 @@
-{ config, lib, pkgs, hostname, ... }:
+{ config, lib, pkgs, ... }:
 
 {
 
   imports = [
-    ../../../modules/common/steam.nix
-    ../../../modules/common/firefox.nix
-    ../../../modules/common/base.nix
-    ../../../modules/common/direnv.nix
-    ../../../modules/common/systemd-boot.nix
-    ../../../modules/common/zramswap.nix
-    ../../../modules/desktop/gnome/base.nix
-    ../../../modules/services/flatpak.nix
-    ../../../modules/services/printing.nix
-    ../../../modules/services/pipewire.nix
-    ../../../modules/services/tailscale.nix
-    ../../../modules/services/fwupd.nix
+    ../common/steam.nix
+    ../common/firefox.nix
+    ../common/base.nix
+    ../common/direnv.nix
+    ../common/systemd-boot.nix
+    ../common/zramswap.nix
+    ../desktop/gnome/base.nix
+    ../services/flatpak.nix
+    ../services/printing.nix
+    ../services/pipewire.nix
+    ../services/tailscale.nix
+    ../services/fwupd.nix
   ];
 
 }
