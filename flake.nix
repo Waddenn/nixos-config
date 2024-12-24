@@ -23,7 +23,7 @@
         modules = 
         [
           ./hosts/${hostname}/hardware-configuration.nix
-          ./hosts/${hostname}/users/tom.nix
+          ./users/${username}/default.nix
           ./modules/templates/laptop.nix
           home-manager.nixosModules.home-manager
           {
