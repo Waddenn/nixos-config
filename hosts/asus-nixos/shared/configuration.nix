@@ -1,4 +1,4 @@
-{ config, lib, pkgs, hostname, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -6,9 +6,7 @@
     ../../../modules/templates/laptop.nix
   ];
 
-  networking.hostName = ${hostname};
 
-  system.stateVersion = "25.05";
 
 
 }
