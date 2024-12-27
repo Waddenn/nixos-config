@@ -29,9 +29,9 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.${username} = import ./home-manager/users/tom.nix;
+            home-manager.users.${username} = import ./home-manager/${username}/home.nix;
 
-            networking.hostName = "asus-nixos";
+            networking.hostName = hostname;
 
             system.stateVersion = "25.05";
           }
