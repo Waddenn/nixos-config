@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./programs/default.nix
+    ./packages/default.nix
     ./desktopManager/gnome/dconf-settings/background.nix
     ./desktopManager/gnome/dconf-settings/extensions.nix
     ./desktopManager/gnome/dconf-settings/favorite-apps.nix
