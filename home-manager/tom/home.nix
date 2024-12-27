@@ -2,10 +2,10 @@
 
 {
   imports = [
-    ../shared/programs/default.nix
-    ../shared/desktop/gnome/extensions.nix
-    ../shared/desktop/gnome/keyboard-shortcuts.nix
-    ../shared/desktop/gnome/interface.nix
+    ./programs/default.nix
+    ./desktop/gnome/extensions.nix
+    ./desktop/gnome/keyboard-shortcuts.nix
+    ./desktop/gnome/interface.nix
   ];
 
   home.username = "tom";
