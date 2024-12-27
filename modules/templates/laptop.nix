@@ -20,7 +20,7 @@
     ../common/time/timeZone.nix
     ../common/zramSwap/zramswap.nix
 
-    ../common/hardware/bluetooth.nix
+    ../hardware/bluetooth.nix
 
     ../desktop/gnome/base.nix
 
