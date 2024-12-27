@@ -22,13 +22,17 @@
 
     ../hardware/bluetooth.nix
 
-    ../desktop/gnome/base.nix
+    ../environment/gnome/excludePackages.nix
+    ../environment/systemPackages/gnomeExtensions.nix
 
     ../services/flatpak.nix
     ../services/printing.nix
     ../services/pipewire.nix
     ../services/tailscale.nix
     ../services/fwupd.nix
+    ../services/xserver-xkb.nix
+    ../services/gnome.nix
+    ../services/gdm.nix
 
   ];
 
