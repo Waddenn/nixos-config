@@ -3,9 +3,11 @@
 {
   imports = [
     ./programs/default.nix
-    ./desktop/gnome/extensions.nix
-    ./desktop/gnome/keyboard-shortcuts.nix
-    ./desktop/gnome/interface.nix
+    ./desktopManager/gnome/dconf-settings/background.nix
+    ./desktopManager/gnome/dconf-settings/extensions.nix
+    ./desktopManager/gnome/dconf-settings/favorite-apps.nix
+    ./desktopManager/gnome/dconf-settings/interface.nix
+    ./desktopManager/gnome/dconf-settings/keybindings.nix
   ];
 
   home.username = "tom";
