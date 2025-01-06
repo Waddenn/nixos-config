@@ -12,7 +12,7 @@
     ../nixpkgs/config.nix
     ../time/timeZone.nix
     ../services/ssh.nix
-    ../boot-loader/grub.nix
+    ../boot/loader/grub.nix
   ];
 
 }
