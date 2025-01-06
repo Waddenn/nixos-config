@@ -3,9 +3,15 @@
 {
 
   imports = [
-    ../common/base.nix
+    ../boot-loader/grub.nix
     ../common/zramswap.nix
     ../services/tailscale.nix
+    ../console/keyMap.nix
+    ../i18n/i18n.nix
+    ../networking/networkmanager.nix
+    ../nix/settings.nix
+    ../nixpkgs/config.nix
+    ../time/timeZone.nix
   ];
 
 }
