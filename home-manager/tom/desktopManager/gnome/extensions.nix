@@ -15,6 +15,7 @@
         "Battery-Health-Charging@maniacx.github.com"
         "search-light@icedman.github.com"
         "blur-my-shell@aunetx"
+        "Bluetooth-Battery-Meter@maniacx.github.com"
       ]; 
     };
 
