@@ -32,7 +32,6 @@
             home-manager.users.${username} = import ./home-manager/${username}/home.nix;
 
             networking.hostName = hostname;
-
             system.stateVersion = "25.05";
           }
         ];
@@ -48,6 +47,7 @@
         modules = 
         [
           ./hosts/${hostname}/hardware-configuration.nix
+          ./hosts/${hostname}/packages.nix
           ./users/${username}/default.nix
           ./modules/templates/server.nix
           {
