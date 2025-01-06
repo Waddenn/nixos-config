@@ -47,7 +47,6 @@
         modules = 
         [
           ./hosts/${hostname}/hardware-configuration.nix
-          ./hosts/${hostname}/packages.nix
           ./users/${username}/default.nix
           ./modules/templates/server.nix
           {
