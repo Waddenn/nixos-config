@@ -3,7 +3,6 @@
 {
 
   imports = [
-    ../boot-loader/grub.nix
     ../zramSwap/zramswap.nix
     ../services/tailscale.nix
     ../console/keyMap.nix
@@ -13,6 +12,7 @@
     ../nixpkgs/config.nix
     ../time/timeZone.nix
     ../services/ssh.nix
+    ../boot-loader/grub.nix
   ];
 
 }
