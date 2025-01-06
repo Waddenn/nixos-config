@@ -12,6 +12,7 @@
     ../nix/settings.nix
     ../nixpkgs/config.nix
     ../time/timeZone.nix
+    ../services/ssh.nix
   ];
 
 }
