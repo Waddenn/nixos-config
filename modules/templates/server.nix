@@ -4,7 +4,7 @@
 
   imports = [
     ../boot-loader/grub.nix
-    ../common/zramswap.nix
+    ../zramSwap/zramswap.nix
     ../services/tailscale.nix
     ../console/keyMap.nix
     ../i18n/i18n.nix
