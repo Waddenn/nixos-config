@@ -10,7 +10,7 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, home-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
   {
     nixosConfigurations = {
       asus-nixos = let
