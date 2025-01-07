@@ -23,8 +23,8 @@
         modules = 
         [
           ./hosts/${hostname}/hardware-configuration.nix
+          ./hosts/${hostname}/configuration.nix
           ./users/${username}/default.nix
-          ./modules/templates/laptop.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
