@@ -38,7 +38,7 @@
       };
 
       vm-test = let
-        username = "nixos";
+        username = "tom";
         hostname = "vm-test";
         specialArgs = { inherit inputs username; };
       in nixpkgs.lib.nixosSystem {
