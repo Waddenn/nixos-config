@@ -12,6 +12,7 @@
     ../nixpkgs/config.nix
     ../time/timeZone.nix
     ../services/openssh.nix
+    ../services/docker.nix
     ../boot/loader/grub.nix
   ];
 
