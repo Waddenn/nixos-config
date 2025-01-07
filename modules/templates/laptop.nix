@@ -33,8 +33,6 @@
     ../services/xserver-xkb.nix
     ../services/gnome.nix
     ../services/gdm.nix
-    ../services/laptop.nix
-
 
   ];
 
