@@ -47,8 +47,8 @@
         modules = 
         [
           ./hosts/${hostname}/hardware-configuration.nix
+          ./hosts/${hostname}/configuration.nix
           ./users/${username}/default.nix
-          ./modules/templates/server.nix
           {
             networking.hostName = hostname;
             system.stateVersion = "25.05";
