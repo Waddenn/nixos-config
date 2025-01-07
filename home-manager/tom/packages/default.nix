@@ -23,7 +23,6 @@
     libreoffice
     fastfetch
     vim
-    vmware-workstation
     # pdfarranger
     # librewolf
     # upscayl

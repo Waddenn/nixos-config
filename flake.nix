@@ -33,8 +33,6 @@
 
             networking.hostName = hostname;
             system.stateVersion = "25.05";
-            virtualisation.vmware.guest.enable = false;
-            virtualisation.vmware.host.enable = false;
           }
         ];
       };
