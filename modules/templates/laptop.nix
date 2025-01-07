@@ -5,7 +5,6 @@
   imports = [
 
     ../boot/loader/systemd-boot.nix
-    ../boot/kernel.nix
     ../console/keyMap.nix
     ../i18n/i18n.nix
     ../networking/firewall.nix
