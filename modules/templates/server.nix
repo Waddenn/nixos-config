@@ -11,7 +11,7 @@
     ../nix/settings.nix
     ../nixpkgs/config.nix
     ../time/timeZone.nix
-    ../services/ssh.nix
+    ../services/openssh.nix
     ../boot/loader/grub.nix
   ];
 
