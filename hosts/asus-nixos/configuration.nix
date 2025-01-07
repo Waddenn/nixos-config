@@ -52,9 +52,12 @@
     ../../modules/services/gnome.nix
     ../../modules/services/gdm.nix
 
+    ../../modules/flatpak/plex.nix
+
   ];
 
   environment.systemPackages = with pkgs; [
   ];
+
 
 }
