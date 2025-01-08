@@ -7,6 +7,7 @@
     ../../modules/system/autoUpgrade.nix
     ../../modules/services/openssh.nix
     ../../modules/nixpkgs/config.nix
+    ../../modules/nix/settings.nix
     ];
 
   nix.settings = { sandbox = false; };  
