@@ -15,4 +15,7 @@
     privileged = true;
   };
     
+  environment.systemPackages = with pkgs; [
+    git
+  ];
 }
