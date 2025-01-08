@@ -69,7 +69,6 @@
           ./hosts/${hostname}/configuration.nix
           ./users/${username}/default.nix
           {
-            networking.hostName = hostname;
             system.stateVersion = "25.05";
           }
         ];
