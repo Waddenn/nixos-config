@@ -4,8 +4,8 @@
 
   services.calibre-web= {
     enable = true;
+    openFirewall = true;
     options = {
-      calibreLibrary = "~/Downloads/ebook";
       enableBookUploading = true;
       enableBookConversion = true;
     };
