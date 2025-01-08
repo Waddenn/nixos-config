@@ -56,6 +56,24 @@
           }
         ];
       };
+
+      proxmox-lxc = let
+        username = "tom";
+        hostname = "proxmox-lxc";
+        specialArgs = { inherit inputs username; };
+      in nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = specialArgs;
+        modules = 
+        [
+          ./hosts/${hostname}/configuration.nix
+          ./users/${username}/default.nix
+          {
+            networking.hostName = hostname;
+            system.stateVersion = "25.05";
+          }
+        ];
+      };
     };
   };
 }
