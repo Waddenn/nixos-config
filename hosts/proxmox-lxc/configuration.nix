@@ -15,7 +15,5 @@
     manageNetwork = false;
     privileged = true;
   };
-  
-  system.stateVersion = "24.11";
-  
+    
 }
