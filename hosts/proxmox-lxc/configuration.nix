@@ -6,8 +6,7 @@
     (modulesPath + "/virtualisation/proxmox-lxc.nix") 
     ../../modules/system/autoUpgrade.nix
     ../../modules/services/openssh.nix
-
-
+    ../../modules/nixpkgs/config.nix
     ];
 
   nix.settings = { sandbox = false; };  
