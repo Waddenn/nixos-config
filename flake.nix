@@ -58,7 +58,7 @@
       };
 
       proxmox-lxc = let
-        username = "tom";
+        username = "docker";
         hostname = "proxmox-lxc";
         specialArgs = { inherit inputs username; };
       in nixpkgs.lib.nixosSystem {
