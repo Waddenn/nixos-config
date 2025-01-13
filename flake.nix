@@ -57,22 +57,21 @@
         ];
       };
 
-      proxmox-lxc = let
-        username = "docker";
-        hostname = "proxmox-lxc";
-        specialArgs = { inherit inputs username; };
+      uptime-kuma = let
+        username = "nixos";
       in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = specialArgs;
         modules = 
         [
-          ./hosts/${hostname}/configuration.nix
+          ./modules/templates/proxmox-lxc.nix
           ./users/${username}/default.nix
           {
             system.stateVersion = "25.05";
           }
         ];
       };
+      
     };
   };
 }
