@@ -57,6 +57,23 @@
         ];
       };
 
+
+      docker-sandbox = let
+        username = "nixos";
+        hostname = "docker-sandbox";
+      in nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = specialArgs;
+        modules = 
+        [
+          ./modules/templates/proxmox-lxc.nix
+          ./users/${username}/default.nix
+          {
+            system.stateVersion = "25.05";
+          }
+        ];
+      };
+
       uptime-kuma = let
         username = "nixos";
       in nixpkgs.lib.nixosSystem {
