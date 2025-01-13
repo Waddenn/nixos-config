@@ -1,7 +1,7 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
 
   services.printing.enable = true;
-  # services.printing.drivers = [ pkgs.hplip ];
+  services.printing.drivers = [ pkgs.hplip ];
 
 }
