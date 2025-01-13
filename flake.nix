@@ -84,6 +84,8 @@
         modules = 
         [
           ./modules/templates/proxmox-lxc.nix
+          ./modules/services/docker.nix
+          ./modules/services/docker/uptime-kuma.nix
           ./users/${username}/default.nix
           {
             system.stateVersion = "25.05";
