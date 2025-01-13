@@ -6,7 +6,6 @@
     containers = {
       mullvad-browser = {
         image = "lscr.io/linuxserver/mullvad-browser:latest";
-        containerName = "mullvad-browser";
         environment = {
           PUID = "1000";  
           PGID = "1000";  
