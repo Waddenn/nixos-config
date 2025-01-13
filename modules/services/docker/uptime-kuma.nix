@@ -6,4 +6,7 @@
     ports = [ "3001:3001" ];
     volumes = [ "/data/uptime-kuma:/app/data" ];
   };
+
+  networking.firewall.allowedTCPPorts = [ 3001 ];
+
 }
