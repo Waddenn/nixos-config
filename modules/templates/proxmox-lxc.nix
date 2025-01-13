@@ -7,7 +7,7 @@
     ../system/autoUpgrade.nix
     ../services/openssh.nix
     ../nixpkgs/config.nix
-    ../modules/nix/settings.nix
+    ../nix/settings.nix
     ];
 
 
