@@ -21,7 +21,6 @@
         environment = {
           TZ = "Europe/Paris"; 
         };
-        restartPolicy = "unless-stopped"; 
       };
     };
   };
