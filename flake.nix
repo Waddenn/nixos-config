@@ -38,43 +38,6 @@
         ];
       };
 
-      vm-test = let
-        username = "tom";
-        hostname = "vm-test";
-        specialArgs = { inherit inputs username; };
-      in nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = specialArgs;
-        modules = 
-        [
-          ./hosts/${hostname}/hardware-configuration.nix
-          ./hosts/${hostname}/configuration.nix
-          ./users/${username}/default.nix
-          {
-            networking.hostName = hostname;
-            system.stateVersion = "25.05";
-          }
-        ];
-      };
-
-
-      docker-sandbox = let
-        username = "nixos";
-        hostname = "docker-sandbox";
-        specialArgs = { inherit inputs username; };
-      in nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = specialArgs;
-        modules = 
-        [
-          ./modules/templates/proxmox-lxc.nix
-          ./users/${username}/default.nix
-          {
-            system.stateVersion = "25.05";
-          }
-        ];
-      };
-
       uptime-kuma = let
         username = "nixos";
         specialArgs = { inherit inputs username; };
@@ -85,6 +48,23 @@
         [
           ./modules/templates/proxmox-lxc.nix
           ./modules/services/docker/uptime-kuma.nix
+          ./users/${username}/default.nix
+          {
+            system.stateVersion = "25.05";
+          }
+        ];
+      };
+
+      adguardhome = let
+        username = "nixos";
+        specialArgs = { inherit inputs username; };
+      in nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = specialArgs;
+        modules = 
+        [
+          ./modules/templates/proxmox-lxc.nix
+          ./modules/services/docker/adguardhome.nix
           ./users/${username}/default.nix
           {
             system.stateVersion = "25.05";
