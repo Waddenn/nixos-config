@@ -44,7 +44,6 @@
         specialArgs = { inherit inputs username; };
       in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = specialArgs;
         modules = 
         [
           ./hosts/${hostname}/hardware-configuration.nix
@@ -63,7 +62,6 @@
         hostname = "docker-sandbox";
       in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = specialArgs;
         modules = 
         [
           ./modules/templates/proxmox-lxc.nix
@@ -78,7 +76,6 @@
         username = "nixos";
       in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = specialArgs;
         modules = 
         [
           ./modules/templates/proxmox-lxc.nix
