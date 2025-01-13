@@ -71,6 +71,23 @@
           }
         ];
       };
+
+      mullvad-browser = let
+        username = "nixos";
+        specialArgs = { inherit inputs username; };
+      in nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = specialArgs;
+        modules = 
+        [
+          ./modules/templates/proxmox-lxc.nix
+          ./modules/services/docker/mullvad-browser.nix
+          ./users/${username}/default.nix
+          {
+            system.stateVersion = "25.05";
+          }
+        ];
+      };
       
     };
   };
