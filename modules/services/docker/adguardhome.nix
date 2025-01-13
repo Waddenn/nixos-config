@@ -1,31 +1,33 @@
-{ config, pkgs, ... }:
-
 {
+  config, pkgs, ... }: {
+  
   virtualisation.oci-containers = {
-    backend = "docker"; 
+    backend = "docker";
     containers = {
       adguard-home = {
-        image = "adguard/adguardhome:latest"; 
-        ports = [ 
-          "3000:3000" 
-          "53:53"     
-          "53:53/udp" 
-          "80:80"     
-          "443:443"  
+        image = "adguard/adguardhome:latest";
+        ports = [
+          "53:53"           
+          "53:53/udp"     
+          "80:80"           
+          "443:443"         
+          "443:443/udp"     
+          "3000:3000"       
         ];
         volumes = [
-          "/data/adguard/config:/opt/adguardhome/conf" 
-          "/data/adguard/work:/opt/adguardhome/work"   
+          "/data/adguard/config:/opt/adguardhome/conf"
+          "/data/adguard/work:/opt/adguardhome/work"
         ];
-        environment = { 
+        environment = {
           TZ = "Europe/Paris"; 
         };
+        restartPolicy = "unless-stopped"; 
       };
     };
   };
 
   networking.firewall = {
-    allowedTCPPorts = [ 3000 53 80 443 ]; 
-    allowedUDPPorts = [ 53 ];             
+    allowedTCPPorts = [ 53 80 443 3000 ]; 
+    allowedUDPPorts = [ 53 443 ];        
   };
 }

@@ -8,6 +8,7 @@
         image = "louislam/uptime-kuma:latest"; 
         ports = [ "3001:3001" ];
         volumes = [ "/data/uptime-kuma:/app/data" ]; 
+        restartPolicy = "unless-stopped";
       };
     };
   };
