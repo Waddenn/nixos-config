@@ -27,6 +27,7 @@
     ../../modules/programs/direnv.nix
     ../../modules/programs/firefox.nix
     ../../modules/programs/steam.nix
+    ../../modules/programs/zsh.nix
 
     # Security
     ../../modules/security/rtkit.nix
