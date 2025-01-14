@@ -11,7 +11,6 @@
     whatip
     vscode
     mullvad-browser
-    ciscoPacketTracer8
     gnome-software
     resources
     dconf-editor
