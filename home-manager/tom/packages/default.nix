@@ -22,7 +22,7 @@
     parabolic
     libreoffice
     fastfetch
-    Errands
+    errands
     # pdfarranger
     # librewolf
     # upscayl
