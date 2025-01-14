@@ -16,7 +16,7 @@
     # Networking
     ../../modules/networking/firewall.nix
     ../../modules/networking/networkmanager.nix
-    ../../modules/services/tailscale.nix
+    ../../modules/services/tailscale-client.nix
 
     # Nix settings
     ../../modules/nix/gc.nix
