@@ -9,7 +9,7 @@
       syntaxHighlighting.enable = true;
       ohMyZsh = {
         enable = true;
-        theme = "robbyrussell";
+        theme = "agnoster";
         plugins = [
 	        "git"
           "kubectl"
