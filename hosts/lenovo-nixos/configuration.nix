@@ -39,6 +39,7 @@
 
     # Hardware
     ../../modules/hardware/bluetooth.nix
+    ../../modules/hardware/nvidia.nix
 
     # Environment
     ../../modules/environment/gnome/excludePackages.nix
