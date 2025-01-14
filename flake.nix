@@ -38,6 +38,31 @@
         ];
       };
 
+      lenovo-nixos = let
+        username = "tom";
+        hostname = "lenovo-nixos";
+        specialArgs = { inherit inputs username; };
+      in nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = specialArgs;
+        modules = 
+        [
+          ./hosts/${hostname}/hardware-configuration.nix
+          ./hosts/${hostname}/configuration.nix
+          ./users/${username}/default.nix
+          home-manager.nixosModules.home-manager
+          nix-flatpak.nixosModules.nix-flatpak
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.${username} = import ./home-manager/${username}/home.nix;
+
+            networking.hostName = hostname;
+            system.stateVersion = "25.05";
+          }
+        ];
+      };
+
       uptime-kuma = let
         username = "nixos";
         specialArgs = { inherit inputs username; };
