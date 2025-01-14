@@ -8,6 +8,6 @@
     extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" ];
   };
 
-  users.defaultUserShell = pkgs.zsh
+  users.defaultUserShell = pkgs.zsh;
   
 }
