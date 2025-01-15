@@ -127,10 +127,6 @@
           ./users/${username}/default.nix
           {
             system.stateVersion = "25.05";
-
-              environment.systemPackages = [
-                pkgs.ansible
-              ];
           }
         ];
       };
