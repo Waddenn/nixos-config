@@ -123,7 +123,8 @@
         specialArgs = specialArgs;
         modules = 
         [
-          ./modules/templates/proxmox-lxc.nix
+          ./hosts/proxmox-vm/configuration.nix
+          ./hosts/proxmox-vm/hardware-configuration.nix
           ./modules/services/k3s.nix
           ./users/${username}/default.nix
           {
