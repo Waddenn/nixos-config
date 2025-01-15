@@ -5,7 +5,7 @@
 
   imports = [
     ../../modules/zramSwap/zramswap.nix
-    ../../modules/services/tailscale.nix
+    ../../modules/services/tailscale-server.nix
     ../../modules/console/keyMap.nix
     ../../modules/i18n/i18n.nix
     ../../modules/networking/networkmanager.nix
