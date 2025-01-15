@@ -1,3 +1,4 @@
+
 { config, pkgs, ... }:
 
 {
@@ -63,4 +64,6 @@
     "org.fedoraproject.MediaWriter"
   ];
 
-}
+   networking.firewall.enable = true;
+   
+} 
