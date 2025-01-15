@@ -5,6 +5,7 @@
 
   imports = [
 
+    ../../modules/global.nix
     # Bootloader
     ../../modules/boot/loader/systemd-boot.nix
 
@@ -15,7 +16,7 @@
     ../../modules/i18n/i18n.nix
 
     # Networking
-    ../../modules/networking/firewall.nix
+
     ../../modules/networking/networkmanager.nix
     ../../modules/services/tailscale-client.nix
 
@@ -26,7 +27,6 @@
 
     # Programs
     ../../modules/programs/direnv.nix
-    ../../modules/programs/firefox.nix
     ../../modules/programs/steam.nix
     ../../modules/programs/zsh.nix
 
@@ -34,12 +34,8 @@
     ../../modules/security/rtkit.nix
 
     # System configuration
-    ../../modules/system/autoUpgrade.nix
     ../../modules/time/timeZone.nix
     ../../modules/zramSwap/zramswap.nix
-
-    # Hardware
-    ../../modules/hardware/bluetooth.nix
 
     # Environment
     ../../modules/environment/gnome/excludePackages.nix
@@ -64,6 +60,9 @@
     "org.fedoraproject.MediaWriter"
   ];
 
-   networking.firewall.enable = true;
-   
+  firewall.enable = true;
+  autoUpgrade.enable = true;
+  firefox.enable = true;
+  bluetooth.enable = true;
+
 } 

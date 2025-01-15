@@ -1,11 +1,11 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
   options = {
-    networking.firewall.enable = lib.mkEnableOption "Enable the firewall";
+    firewall.enable = lib.mkEnableOption "Enable the firewall";
   };
 
-  config = lib.mkIf config.networking.firewall.enable {
+  config = lib.mkIf config.firewall.enable {
     networking.firewall.enable = true;  
   };
 }
