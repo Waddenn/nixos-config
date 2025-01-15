@@ -15,6 +15,8 @@
     ../../modules/services/openssh.nix
     ../../modules/services/docker.nix
     ../../modules/boot/loader/grub.nix
+    ../../modules/programs/zsh.nix
+
   ];
 
   environment.systemPackages =  with pkgs; [
