@@ -1,17 +1,15 @@
-{ config, inputs, ... }:
+{ config, lib, inputs, ... }:
 
 {
+  options.autoUpgrade.enable = lib.mkEnableOption "Enable system auto-upgrade";
 
-  system.autoUpgrade = {
-    enable = true;
-    dates = "daily";
-    flake = inputs.self.outPath;
-    flags = [
-      "--update-input"
-      "nixpkgs"
-      "-L" 
-    ];
-    persistent = true;
+  config = lib.mkIf config.autoUpgrade.enable {
+    system.autoUpgrade = {
+      enable = true;
+      dates = "daily";
+      flake = inputs.self.outPath;
+      flags = [ "--update-input" "nixpkgs" "-L" ]; 
+      persistent = true; 
+    };
   };
-
 }
