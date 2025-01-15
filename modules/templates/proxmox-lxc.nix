@@ -8,6 +8,7 @@
     ../services/openssh.nix
     ../nixpkgs/config.nix
     ../nix/settings.nix
+    ../programs/zsh.nix
     ];
 
 

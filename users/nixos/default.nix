@@ -11,4 +11,6 @@
       ];
     };
     
+  users.defaultUserShell = pkgs.zsh;
+
 }
