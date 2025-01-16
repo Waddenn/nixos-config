@@ -1,7 +1,10 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
-  
+  options.gnomeExtensions.enable = lib.mkEnableOption "Enable gnomeExtensions";
+
+  config = lib.mkIf config.gnomeExtensions.enable {
+
   environment.systemPackages = with pkgs.gnomeExtensions; [
     hide-top-bar
     tailscale-qs
@@ -14,5 +17,5 @@
     blur-my-shell
   ];
 
-
+  };
 }

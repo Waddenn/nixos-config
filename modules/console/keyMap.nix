@@ -1,7 +1,9 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
+  options.keyMap.enable = lib.mkEnableOption "Enable keyMap";
 
-  console.keyMap = "fr";
-  
+  config = lib.mkIf config.keyMap.enable {
+    console.keyMap = "fr";
+  };
 }
