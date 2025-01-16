@@ -43,5 +43,8 @@
   xkb.enable = true;
   gnome.enable = true;
   gdm.enable = true;
+  docker.enable = false;
+  grafana.enable = false;
+  prometheus.enable = false;
 
 } 
