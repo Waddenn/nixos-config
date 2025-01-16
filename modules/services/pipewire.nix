@@ -1,6 +1,9 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
+  options.pipewire.enable = lib.mkEnableOption "Enable pipewire";
+
+  config = lib.mkIf config.pipewire.enable {
 
   services.pipewire = {
     enable = true;
@@ -11,5 +14,6 @@
   };
   
   services.pulseaudio.enable = false;
-  
+
+  };
 }
