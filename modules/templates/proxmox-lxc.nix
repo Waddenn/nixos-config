@@ -4,11 +4,7 @@
 
   imports = [ 
     (modulesPath + "/virtualisation/proxmox-lxc.nix") 
-    ../system/autoUpgrade.nix
-    ../services/openssh.nix
-    ../nixpkgs/config.nix
-    ../nix/settings.nix
-    ../programs/zsh.nix
+    ../global.nix
     ];
 
 
@@ -30,4 +26,10 @@
   environment.systemPackages = with pkgs; [
     git
   ];
+
+  autoUpgrade.enable = true;
+  openssh.enable = true;
+  allowUnfree.enable = true;
+  experimental-features.enable = true;
+  zsh.enable = true;
 }

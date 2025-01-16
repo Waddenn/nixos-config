@@ -1,6 +1,9 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
+  options.openssh.enable = lib.mkEnableOption "Enable openssh";
+
+  config = lib.mkIf config.openssh.enable {
 
   services.openssh = {
     enable = true;
@@ -9,9 +12,6 @@
     settings.PermitRootLogin = "no";
   };
 
+  };
 }
-
-
-
-  
 

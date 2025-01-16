@@ -30,7 +30,7 @@
   direnv.enable = true;
   steam.enable = true;
   zsh.enable = true;
-  rkit.enable = true;
+  rtkit.enable = true;
   timeZone.enable = true;
   zram.enable = true;
   gnome-excludePackages.enable = true;
@@ -43,5 +43,5 @@
   xkb.enable = true;
   gnome.enable = true;
   gdm.enable = true;
-  
+
 } 
