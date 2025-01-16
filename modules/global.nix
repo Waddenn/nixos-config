@@ -14,6 +14,7 @@
     ./i18n/i18n.nix
     ./networking/networkmanager.nix
     ./services/tailscale-client.nix
+    ./services/tailscale-server.nix
     ./nix/gc.nix
     ./nix/settings.nix
     ./nixpkgs/config.nix
@@ -33,7 +34,9 @@
     ./services/xserver-xkb.nix
     ./services/gnome.nix
     ./services/gdm.nix
-
+    ./hardware/nvidia.nix
+    ./services/openssh.nix
+    ./modules/services/docker.nix
   ];
 
 } 

@@ -105,12 +105,13 @@
         specialArgs = specialArgs;
         modules = 
         [
+          ./modules/global.nix
           ./modules/templates/proxmox-lxc.nix
-          ./modules/services/tailscale-server.nix
-          ./modules/services/docker.nix
           ./users/${username}/default.nix
           {
             system.stateVersion = "25.05";
+            tailscale-server.enable = true;
+            docker.enable = true;
           }
         ];
       };
@@ -124,24 +125,6 @@
         modules = 
         [
           ./modules/templates/proxmox-lxc.nix
-          ./users/${username}/default.nix
-          {
-            system.stateVersion = "25.05";
-          }
-        ];
-      };
-      
-      k3s = let
-        username = "nixos";
-        specialArgs = { inherit inputs username; };
-      in nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = specialArgs;
-        modules = 
-        [
-          ./hosts/proxmox-vm/configuration.nix
-          ./hosts/proxmox-vm/hardware-configuration.nix
-          ./modules/services/k3s.nix
           ./users/${username}/default.nix
           {
             system.stateVersion = "25.05";

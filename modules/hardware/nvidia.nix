@@ -1,5 +1,9 @@
 { config, lib, pkgs, ... }:
+
 {
+  options.nvidia.enable = lib.mkEnableOption "Enable nvidia";
+
+  config = lib.mkIf config.nvidia.enable {
 
   # Enable OpenGL
   hardware.graphics = {
@@ -40,5 +44,6 @@
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
- 
+
+  };
 }
