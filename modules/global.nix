@@ -36,7 +36,10 @@
     ./services/gdm.nix
     ./hardware/nvidia.nix
     ./services/openssh.nix
-    ./modules/services/docker.nix
+    ./services/docker.nix
+    ./services/grafana.nix
+    ./services/prometheus.nix
+
   ];
 
 } 

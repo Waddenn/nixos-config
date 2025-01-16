@@ -1,7 +1,11 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
-    
+  options = {
+    grafana.enable = lib.mkEnableOption "Enable grafana";
+  };
+
+  config = lib.mkIf config.grafana.enable {
   services.grafana = {
     enable = true;
     settings = {
@@ -11,5 +15,5 @@
   };
 
     networking.firewall.allowedTCPPorts = [ 3000 ];
-
+  };
 }
