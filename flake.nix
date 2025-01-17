@@ -63,6 +63,24 @@
         ];
       };
 
+      tailscale-subnet = let
+        username = "nixos";
+        specialArgs = { inherit inputs username; };
+      in nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = specialArgs;
+        modules = 
+        [
+          ./modules/global.nix
+          ./modules/templates/proxmox-lxc.nix
+          ./users/${username}/default.nix
+          {
+            system.stateVersion = "25.05";
+            tailscale-server.enable = true;
+          }
+        ];
+      };
+
       uptime-kuma = let
         username = "nixos";
         specialArgs = { inherit inputs username; };
