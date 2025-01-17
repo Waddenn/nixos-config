@@ -6,6 +6,7 @@
   imports = [
     ./boot/loader/systemd-boot.nix
     ./boot/loader/grub.nix
+    ./boot/kernel.nix
     ./hardware/bluetooth.nix
     ./networking/firewall.nix
     ./programs/firefox.nix
