@@ -46,7 +46,7 @@
   docker.enable = false;
   grafana.enable = false;
   prometheus.enable = false;
-  linuxPackages_latest.enable = true;
+  linuxPackages_latest.enable = false;
 
 
 } 
