@@ -29,7 +29,7 @@
   allowUnfree.enable = true;
   direnv.enable = true;
   steam.enable = true;
-  zsh.enable = true;
+  zsh.enable = false;
   rtkit.enable = true;
   timeZone.enable = true;
   zram.enable = true;

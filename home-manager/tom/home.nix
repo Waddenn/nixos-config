@@ -4,6 +4,7 @@
   imports = [
     ./packages/default.nix
     ./programs/git.nix
+    ./programs/zsh.nix
     ./desktopManager/gnome/background.nix
     ./desktopManager/gnome/extensions.nix
     ./desktopManager/gnome/favorite-apps.nix
@@ -18,5 +19,6 @@
   home.stateVersion = "24.05";
 
   programs.home-manager.enable = true;
+  
 
 }
