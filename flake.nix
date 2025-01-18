@@ -52,6 +52,13 @@
             }
           ];
         }); 
+        beszel = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            ./modules/global.nix
+            ./modules/templates/proxmox-lxc.nix
+            ./modules/virtualisation/oci-containers/beszel.nix
+          ];
+        }); 
         lxc-test = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
