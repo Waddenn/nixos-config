@@ -52,10 +52,13 @@
             }
           ];
         }); 
-        lxc = lib.nixosSystem (mkSystems.mkServerSystem {
+        lxc-test = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
             ./modules/templates/proxmox-lxc.nix
+            {
+              networking.firewall.enable = false;  
+            }
           ];
         }); 
       };
