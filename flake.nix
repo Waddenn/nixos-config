@@ -10,23 +10,21 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-flatpak, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, nix-flatpak, ... }:
     let
       lib = nixpkgs.lib;
-      mkSystems = import ./lib/mkSystems.nix { inherit nixpkgs home-manager nix-flatpak; };
+      mkSystems = import ./lib/mkSystems.nix { inherit inputs nixpkgs home-manager nix-flatpak; };
     in
     {
       nixosConfigurations = {
         asus-nixos =
           lib.nixosSystem (mkSystems.mkDesktopSystem {
             hostname = "asus-nixos";
-            username = "tom";
           });
 
         lenovo-nixos =
           lib.nixosSystem (mkSystems.mkDesktopSystem {
             hostname = "lenovo-nixos";
-            username = "tom";
           });
 
         tailscale-subnet =
@@ -37,7 +35,7 @@
               { tailscale-server.enable = true; }
             ];
           });
-                uptime-kuma = lib.nixosSystem (mkSystems.mkServerSystem {
+        uptime-kuma = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/templates/proxmox-lxc.nix
             ./modules/services/docker/uptime-kuma.nix
@@ -53,7 +51,7 @@
               docker.enable = true;
             }
           ];
-        });
+        }); 
       };
-    }
+    };
 }
