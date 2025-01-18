@@ -52,6 +52,12 @@
             }
           ];
         }); 
+        lxc = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            ./modules/global.nix
+            ./modules/templates/proxmox-lxc.nix
+          ];
+        }); 
       };
     };
 }
