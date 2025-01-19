@@ -41,7 +41,7 @@
         uptime-kuma = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/templates/proxmox-lxc.nix
-            ./modules/services/docker/uptime-kuma.nix
+            ./modules/virtualisation/oci-containers/uptime-kuma.nix
           ];
         });
 
