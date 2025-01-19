@@ -60,7 +60,7 @@
             ./modules/virtualisation/oci-containers/beszel.nix
           {
               tailscale-server.enable = true;
-            }
+          }
           ];
         }); 
         lxc-test = lib.nixosSystem (mkSystems.mkServerSystem {
