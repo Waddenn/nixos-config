@@ -33,11 +33,8 @@ in
       modules = modules ++ [
         ../users/nixos/default.nix
         ../modules/templates/proxmox-lxc.nix
-        inputs.sops-nix.nixosModules.sops
         {
           system.stateVersion = "25.05";
-          sops.defaultSopsFile = ../secrets/secrets.yaml;
-          sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
         }
         extraConfig
       ];

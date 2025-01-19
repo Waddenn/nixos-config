@@ -1,4 +1,4 @@
-{ config, modulesPath, pkgs, lib, inputs, ... }:
+{ config, modulesPath, pkgs, lib, ... }:
 
 {
 
@@ -25,7 +25,6 @@
 
   environment.systemPackages = with pkgs; [
     git
-    sops
     just
   ];
 
