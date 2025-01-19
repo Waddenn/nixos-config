@@ -29,6 +29,7 @@ in
       specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak; username = "nixos"; };
       modules = modules ++ [
         ../users/nixos/default.nix
+        ../modules/templates/proxmox-lxc.nix
         {
           system.stateVersion = "25.05";
         }
