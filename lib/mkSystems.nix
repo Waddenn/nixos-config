@@ -13,6 +13,7 @@ in
         ../users/${username}/default.nix
         home-manager.nixosModules.home-manager
         nix-flatpak.nixosModules.nix-flatpak
+        inputs.sops-nix.nixosModules.sops
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
@@ -30,6 +31,7 @@ in
       modules = modules ++ [
         ../users/nixos/default.nix
         ../modules/templates/proxmox-lxc.nix
+        inputs.sops-nix.nixosModules.sops
         {
           system.stateVersion = "25.05";
         }

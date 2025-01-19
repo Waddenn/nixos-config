@@ -5,7 +5,6 @@
   
   imports = [
     ../../modules/global.nix
-    inputs.sops-nix.nixosModules.sops
   ];
 
   sops.defaultSopsFile = ../../secrets/secrets.yaml;
