@@ -48,7 +48,6 @@
         searxng = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
-            ./modules/templates/proxmox-lxc.nix
             {
               tailscale-server.enable = true;
               docker.enable = true;
@@ -58,7 +57,6 @@
         beszel = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
-            ./modules/templates/proxmox-lxc.nix
             ./modules/virtualisation/oci-containers/beszel.nix
           {
               tailscale-server.enable = true;
@@ -68,7 +66,6 @@
         lxc-test = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
-            ./modules/templates/proxmox-lxc.nix
             {
               networking.firewall.enable = false;  
             }
