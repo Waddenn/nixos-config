@@ -2,8 +2,8 @@
 { ... }:
 
 {
-
   imports = [
+
     ./boot/loader/systemd-boot.nix
     ./boot/loader/grub.nix
     ./boot/kernel.nix
