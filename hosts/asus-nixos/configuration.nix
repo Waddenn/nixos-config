@@ -2,18 +2,15 @@
 { config, pkgs, inputs, ... }:
 
 {
-
+  
   imports = [
     ../../modules/global.nix
     inputs.sops-nix.nixosModules.sops
   ];
 
   sops.defaultSopsFile = ../../secrets/secrets.yaml;
-  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
   
-  sops.secrets.example-key = {};
-  sops.secrets."myservice/my_subdir/my_secret" = {};
-
   environment.systemPackages = with pkgs; [
     age
     sops
