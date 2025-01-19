@@ -10,6 +10,7 @@
   environment.systemPackages = with pkgs; [
     age
     sops
+    just
   ];
 
   services.flatpak.packages = [
