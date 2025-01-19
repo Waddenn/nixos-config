@@ -9,6 +9,6 @@ creation_rules:
     key_groups:
     - age:
       - *primary
-      - *beszel
-    - pgp:
       - *test
+    - pgp:
+      - *beszel
