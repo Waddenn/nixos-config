@@ -18,6 +18,8 @@ in
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${username} = import ../home-manager/${username}/home.nix;
+          sops.defaultSopsFile = ../secrets/secrets.yaml;
+          sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }
@@ -34,6 +36,7 @@ in
         inputs.sops-nix.nixosModules.sops
         {
           system.stateVersion = "25.05";
+          sops.age.sshKeyPaths = [ "/home/nixos/.ssh/id_ed25519" ];
         }
         extraConfig
       ];
