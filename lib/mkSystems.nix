@@ -37,7 +37,6 @@ in
         {
           system.stateVersion = "25.05";
           sops.defaultSopsFile = ../secrets/secrets.yaml;
-          sops.age.sshKeyPaths = [ "/home/nixos/.ssh/id_ed25519" ];
         }
         extraConfig
       ];
