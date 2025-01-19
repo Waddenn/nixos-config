@@ -12,5 +12,6 @@
     authKeyFile = "/run/secrets/tailscale/Server-secret";
   };
     sops.secrets."tailscale/Server-secret" = {};
+    sops.secrets."tailscale/Server-secret".owner = config.users.tailscale.name;
   };
 }
