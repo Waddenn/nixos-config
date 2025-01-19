@@ -6,7 +6,7 @@ in
   mkDesktopSystem = { hostname, username, ... }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak; username = "tom"; };
+      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak username; };
       modules = [
         ../hosts/${hostname}/hardware-configuration.nix
         ../hosts/${hostname}/configuration.nix

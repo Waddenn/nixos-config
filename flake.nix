@@ -8,9 +8,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    sops-nix.url = "github:Mic92/sops-nix";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, nix-flatpak, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, nix-flatpak, sops-nix, ... }:
     let
       lib = nixpkgs.lib;
       mkSystems = import ./lib/mkSystems.nix { inherit inputs nixpkgs home-manager nix-flatpak; };
@@ -20,11 +21,13 @@
         asus-nixos =
           lib.nixosSystem (mkSystems.mkDesktopSystem {
             hostname = "asus-nixos";
+            username = "tom";
           });
 
         lenovo-nixos =
           lib.nixosSystem (mkSystems.mkDesktopSystem {
             hostname = "lenovo-nixos";
+            username = "tom";
           });
 
         tailscale-subnet =
