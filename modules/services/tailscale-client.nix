@@ -12,7 +12,6 @@
     useRoutingFeatures = "client";
     authKeyFile = "/run/secrets/tailscale/Client-secret";
   };
-    sops.secrets."tailscale/Client-secret" = {};
 
   };
 }
