@@ -37,6 +37,7 @@ in
         {
           system.stateVersion = "25.05";
           sops.defaultSopsFile = ../secrets/secrets.yaml;
+          sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key.pub" ];
         }
         extraConfig
       ];
