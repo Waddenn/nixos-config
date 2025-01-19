@@ -25,6 +25,7 @@
 
   environment.systemPackages = with pkgs; [
     git
+    sops
   ];
 
   autoUpgrade.enable = true;
