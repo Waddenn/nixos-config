@@ -83,7 +83,7 @@
         adguardhome = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
-            ./modules/virtualisation/oci-containers/beszel.nix
+            ./modules/virtualisation/oci-containers/adguardhome.nix
           {
               tailscale-server.enable = true;
           }
