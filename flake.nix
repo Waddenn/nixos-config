@@ -86,6 +86,8 @@
             ./modules/virtualisation/oci-containers/adguardhome.nix
           {
               tailscale-server.enable = true;
+              systemd.services.systemd-resolved.enable = false;
+              networking.useHostResolvConf = true;
           }
           ];
         }); 
