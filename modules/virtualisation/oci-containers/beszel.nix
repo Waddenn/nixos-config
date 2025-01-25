@@ -13,7 +13,7 @@
   virtualisation.oci-containers.containers."beszel" = {
     image = "henrygd/beszel:latest";
     volumes = [
-      "/home/tom/Documents/beszel_data:/beszel_data:rw"
+      "/home/nixos/beszel_data:/beszel_data:rw"
     ];
     ports = [
       "8090:8090/tcp"

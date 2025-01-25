@@ -13,8 +13,8 @@
   virtualisation.oci-containers.containers."adguardhome" = {
     image = "adguard/adguardhome";
     volumes = [
-      "/home/tom/github/docker-compose-config/adguardhome/confdir:/opt/adguardhome/conf:rw"
-      "/home/tom/github/docker-compose-config/adguardhome/workdir:/opt/adguardhome/work:rw"
+      "/home/nixos/adguardhome/confdir:/opt/adguardhome/conf:rw"
+      "/home/nixos/adguardhome/workdir:/opt/adguardhome/work:rw"
     ];
     ports = [
       "53:53/tcp"
