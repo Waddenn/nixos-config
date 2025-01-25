@@ -88,10 +88,7 @@
               tailscale-server.enable = true;
               systemd.services.systemd-resolved.enable = false;
               networking.useHostResolvConf = lib.mkForce true;
-              networking.resolvconf = {
-                enable = true;
-                nameservers = [ "127.0.0.1" ]; 
-              };
+              networking.nameservers = [ "127.0.0.1" "1.1.1.1" "8.8.8.8" ];
           }
           ];
         }); 
