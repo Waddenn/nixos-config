@@ -38,6 +38,16 @@
               { tailscale-server.enable = true; }
             ];
           });
+
+        tailscale-exit-node =
+          lib.nixosSystem (mkSystems.mkServerSystem {
+            modules = [
+              ./modules/global.nix
+              ./modules/templates/proxmox-lxc.nix
+              { tailscale-server.enable = true; }
+            ];
+          });
+
         uptime-kuma = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/templates/proxmox-lxc.nix
@@ -61,14 +71,6 @@
           {
               tailscale-server.enable = true;
           }
-          ];
-        }); 
-        lxc-test = lib.nixosSystem (mkSystems.mkServerSystem {
-          modules = [
-            ./modules/global.nix
-            {
-              networking.firewall.enable = false;  
-            }
           ];
         }); 
       };
