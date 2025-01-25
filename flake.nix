@@ -35,7 +35,10 @@
             modules = [
               ./modules/global.nix
               ./modules/templates/proxmox-lxc.nix
-              { tailscale-server.enable = true; }
+              { 
+                tailscale-server.enable = true; 
+                ethtool.enable = true;
+              }
             ];
           });
 
@@ -44,7 +47,10 @@
             modules = [
               ./modules/global.nix
               ./modules/templates/proxmox-lxc.nix
-              { tailscale-server.enable = true; }
+              { 
+                tailscale-server.enable = true; 
+                ethtool.enable = true;
+              }
             ];
           });
 

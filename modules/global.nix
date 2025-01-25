@@ -27,6 +27,7 @@
     ./zramSwap/zramswap.nix
     ./environment/gnome/excludePackages.nix    
     ./environment/systemPackages/gnomeExtensions.nix
+    ./environment/systemPackages/ethtool.nix
     ./services/flatpak.nix
     ./services/printing.nix
     ./services/pipewire.nix
