@@ -9,6 +9,7 @@
     enable = true;
     openFirewall = true;
     useRoutingFeatures = "server";
+    extraUpFlags = [ "--ssh" ];
   };
   };
 }
