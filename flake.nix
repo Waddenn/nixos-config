@@ -122,6 +122,16 @@
           ];
         }); 
 
+        homeassistant = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            ./modules/global.nix
+            ./modules/virtualisation/oci-containers/homeassistant.nix
+          {
+              tailscale-server.enable = true;
+          }
+          ];
+        }); 
+
       };
     };
 }
