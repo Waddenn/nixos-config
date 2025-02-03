@@ -51,7 +51,7 @@
   virtualisation.oci-containers.containers."nextcloud" = {
     image = "lscr.io/linuxserver/nextcloud:latest";
     environmentFiles = [
-      "/home/tom/github/docker-compose-config/nextcloud/.env"
+      "/home/nixos/nextcloud/.env"
     ];
     volumes = [
       "/home/nixos/nextcloud/config/nextcloud:/config:rw"
