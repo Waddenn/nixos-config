@@ -101,6 +101,16 @@
           }
           ];
         }); 
+
+        terraform = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            ./modules/global.nix
+          {
+              tailscale-server.enable = true;
+          }
+          ];
+        }); 
+        
       };
     };
 }

@@ -13,7 +13,6 @@
     mullvad-browser
     resources
     dconf-editor
-    vesktop
     trayscale
     youtube-music
     showtime
