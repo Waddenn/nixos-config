@@ -105,6 +105,7 @@
         terraform = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
+            ./hosts/terraform/configuration.nix
           {
               tailscale-server.enable = true;
           }
