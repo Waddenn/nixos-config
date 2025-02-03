@@ -16,6 +16,7 @@
   services.flatpak.packages = [
     "tv.plex.PlexDesktop"
     "org.fedoraproject.MediaWriter"
+    "dev.vencord.Vesktop"
   ];
 
   firewall.enable = true;
