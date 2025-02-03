@@ -25,7 +25,8 @@
     ];
     log-driver = "journald";
     extraOptions = [
-      "--network=host"
+      "--network-alias=homeassistant"
+      "--network=homeassistant_default"
     ];
   };
   systemd.services."docker-homeassistant" = {
@@ -35,12 +36,33 @@
       RestartSec = lib.mkOverride 90 "100ms";
       RestartSteps = lib.mkOverride 90 9;
     };
+    after = [
+      "docker-network-homeassistant_default.service"
+    ];
+    requires = [
+      "docker-network-homeassistant_default.service"
+    ];
     partOf = [
       "docker-compose-homeassistant-root.target"
     ];
     wantedBy = [
       "docker-compose-homeassistant-root.target"
     ];
+  };
+
+  # Networks
+  systemd.services."docker-network-homeassistant_default" = {
+    path = [ pkgs.docker ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStop = "docker network rm -f homeassistant_default";
+    };
+    script = ''
+      docker network inspect homeassistant_default || docker network create homeassistant_default
+    '';
+    partOf = [ "docker-compose-homeassistant-root.target" ];
+    wantedBy = [ "docker-compose-homeassistant-root.target" ];
   };
 
   # Root service
