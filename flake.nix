@@ -112,6 +112,16 @@
           ];
         }); 
         
+        nextcloud = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            ./modules/global.nix
+            ./modules/virtualisation/oci-containers/nextcloud.nix
+          {
+              tailscale-server.enable = true;
+          }
+          ];
+        }); 
+
       };
     };
 }
