@@ -61,7 +61,7 @@
   
   boot.kernelParams = [
     "amdgpu.gpu_recovery=1"   
-    "amdgpu.dcdebugmask=0x210" #
+    "amdgpu.dcdebugmask=0x210" 
   ];
 
 } 

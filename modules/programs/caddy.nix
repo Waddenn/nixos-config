@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
-  options.direnv.enable = lib.mkEnableOption "Enable caddy";
+  options.caddy.enable = lib.mkEnableOption "Enable caddy";
 
-  config = lib.mkIf config.direnv.enable {
+  config = lib.mkIf config.caddy.enable {
 
   environment.systemPackages = with pkgs; [
     caddy
