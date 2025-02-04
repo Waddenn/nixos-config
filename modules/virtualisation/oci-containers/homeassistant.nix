@@ -25,7 +25,7 @@
     ];
     log-driver = "journald";
     extraOptions = [
-      "--device=/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_bac3096e933aef1193792b1455516304-if00-port0"
+      "--device=/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_bac3096e933aef1193792b1455516304-if00-port0:/dev/ttyUSB0"
       "--network-alias=homeassistant"
       "--network=homeassistant_default"
     ];
