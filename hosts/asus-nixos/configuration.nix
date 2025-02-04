@@ -53,4 +53,15 @@
   linuxPackages_latest.enable = false;
 
 
+  hardware.enableRedistributableFirmware = true;
+
+  boot.kernelModules = [ "amdgpu" ];
+
+  services.xserver.videoDrivers = [ "amdgpu" ];
+  
+  boot.kernelParams = [
+    "amdgpu.gpu_recovery=1"   
+    "amdgpu.dcdebugmask=0x210" #
+  ];
+
 } 
