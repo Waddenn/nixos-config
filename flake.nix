@@ -105,9 +105,9 @@
         terraform = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/global.nix
-            ./hosts/terraform/configuration.nix
           {
               tailscale-server.enable = true;
+              terraform.enable = true;
           }
           ];
         }); 
@@ -128,6 +128,16 @@
             ./modules/virtualisation/oci-containers/homeassistant.nix
           {
               tailscale-server.enable = true;
+          }
+          ];
+        }); 
+
+        caddy = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            ./modules/global.nix
+          {
+              tailscale-server.enable = true;
+              caddy.enable = true;
           }
           ];
         }); 
