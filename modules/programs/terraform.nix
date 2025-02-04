@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
-  options.direnv.enable = lib.mkEnableOption "Enable terraform";
+  options.terraform.enable = lib.mkEnableOption "Enable terraform";
 
-  config = lib.mkIf config.direnv.enable {
+  config = lib.mkIf config.terraform.enable {
 
   environment.systemPackages = with pkgs; [
     terraform
