@@ -23,7 +23,6 @@
     ./programs/steam.nix
     ./programs/zsh.nix
     ./programs/terraform.nix
-    ./programs/caddy.nix
     ./security/rtkit.nix
     ./time/timeZone.nix
     ./zramSwap/zramswap.nix
@@ -38,6 +37,7 @@
     ./services/xserver-xkb.nix
     ./services/gnome.nix
     ./services/gdm.nix
+    ./services/caddy.nix
     ./hardware/nvidia.nix
     ./services/openssh.nix
     ./services/docker.nix
