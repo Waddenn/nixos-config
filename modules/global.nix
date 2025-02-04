@@ -22,6 +22,8 @@
     ./programs/direnv.nix
     ./programs/steam.nix
     ./programs/zsh.nix
+    ./programs/terraform.nix
+    ./programs/caddy.nix
     ./security/rtkit.nix
     ./time/timeZone.nix
     ./zramSwap/zramswap.nix
