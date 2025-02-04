@@ -8,7 +8,7 @@
   services.caddy = {
     enable = true;
     virtualHosts."hexaflare.net".extraConfig = ''
-      reverse_proxy http://192.168.1.122:8080/
+      reverse_proxy http://192.168.1.122:8080
     '';
   };
 
