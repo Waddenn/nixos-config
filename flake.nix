@@ -35,7 +35,6 @@
             modules = [
               ./modules/templates/proxmox-lxc.nix
               { 
-                tailscale-server.enable = true; 
                 ethtool.enable = true;
               }
             ];
@@ -46,7 +45,6 @@
             modules = [
               ./modules/templates/proxmox-lxc.nix
               { 
-                tailscale-server.enable = true; 
                 ethtool.enable = true;
               }
             ];
@@ -59,20 +57,9 @@
           ];
         });
 
-        searxng = lib.nixosSystem (mkSystems.mkServerSystem {
-          modules = [
-            {
-              tailscale-server.enable = true;
-              docker.enable = true;
-            }
-          ];
-        }); 
         beszel = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/beszel.nix
-          {
-              tailscale-server.enable = true;
-          }
           ];
         }); 
 
@@ -80,7 +67,6 @@
           modules = [
             ./modules/virtualisation/oci-containers/adguardhome.nix
           {
-              tailscale-server.enable = true;
               systemd.services.systemd-resolved.enable = false;
               networking.nameservers = [ "127.0.0.1" "1.1.1.1" "8.8.8.8" ];
           }
@@ -90,16 +76,12 @@
         myspeed = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/myspeed.nix
-          {
-              tailscale-server.enable = true;
-          }
           ];
         }); 
 
         terraform = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
           {
-              tailscale-server.enable = true;
               terraform.enable = true;
           }
           ];
@@ -108,25 +90,18 @@
         nextcloud = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/nextcloud.nix
-          {
-              tailscale-server.enable = true;
-          }
           ];
         }); 
 
         homeassistant = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/homeassistant.nix
-          {
-              tailscale-server.enable = true;
-          }
           ];
         }); 
 
         caddy = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
           {
-              tailscale-server.enable = true;
               caddy.enable = true;
           }
           ];
@@ -135,16 +110,12 @@
         linkwarden = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/linkwarden.nix
-          {
-              tailscale-server.enable = true;
-          }
           ];
         }); 
 
         ansible = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
           {
-              tailscale-server.enable = true;
               ansible.enable = true;
           }
           ];
