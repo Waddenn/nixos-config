@@ -32,13 +32,13 @@ in
       system = "x86_64-linux";
       specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak; username = "nixos"; };
       modules = modules ++ [
+        ../modules/global.nix
         ../users/nixos/default.nix
-        ../modules/programs/python314.nix
         ../modules/templates/proxmox-lxc.nix
         ../modules/virtualisation/oci-containers/beszel-agent.nix
         {
           system.stateVersion = "25.05";
-          python314.enable = true;
+          python313.enable = true;
         }
         extraConfig
       ];
