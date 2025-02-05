@@ -108,7 +108,6 @@
           {
               tailscale-server.enable = true;
               terraform.enable = true;
-              beszel.enable = true;
           }
           ];
         }); 
@@ -147,6 +146,7 @@
           modules = [
             ./modules/global.nix
             ./modules/virtualisation/oci-containers/linkwarden.nix
+            ./modules/virtualisation/oci-containers/beszel-agent.nix
           {
               tailscale-server.enable = true;
           }
