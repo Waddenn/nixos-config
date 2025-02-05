@@ -21,7 +21,8 @@
     ];
     log-driver = "journald";
     extraOptions = [
-      "--network=host"
+      "--network-alias=beszel-agent"
+      "--network=beszel-agent_default"
     ];
   };
   systemd.services."docker-beszel-agent" = {
