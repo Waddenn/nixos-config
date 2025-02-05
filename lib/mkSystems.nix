@@ -38,7 +38,7 @@ in
         ../modules/virtualisation/oci-containers/beszel-agent.nix
         {
           system.stateVersion = "25.05";
-          python313.enable = true;
+          python3Minimal.enable = true;
         }
         extraConfig
       ];
