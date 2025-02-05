@@ -34,6 +34,7 @@ in
       modules = modules ++ [
         ../users/nixos/default.nix
         ../modules/templates/proxmox-lxc.nix
+        ../modules/virtualisation/oci-containers/beszel-agent.nix
         {
           system.stateVersion = "25.05";
         }
