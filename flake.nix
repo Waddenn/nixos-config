@@ -149,6 +149,7 @@
             ./modules/virtualisation/oci-containers/beszel-agent.nix
           {
               tailscale-server.enable = true;
+              networking.firewall.allowedTCPPorts = [ 45876 ];
           }
           ];
         }); 
