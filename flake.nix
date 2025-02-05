@@ -108,6 +108,7 @@
           {
               tailscale-server.enable = true;
               terraform.enable = true;
+              beszel.enable = true;
           }
           ];
         }); 

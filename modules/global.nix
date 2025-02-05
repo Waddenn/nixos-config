@@ -43,6 +43,7 @@
     ./services/docker.nix
     ./services/grafana.nix
     ./services/prometheus.nix
+    ./programs/beszel.nix
   ];
 
 } 
