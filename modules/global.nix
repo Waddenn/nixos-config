@@ -24,7 +24,7 @@
     ./programs/zsh.nix
     ./programs/terraform.nix
     ./programs/ansible.nix
-    ./programs/python314.nix
+    ./programs/python313.nix
     ./security/rtkit.nix
     ./time/timeZone.nix
     ./zramSwap/zramswap.nix
