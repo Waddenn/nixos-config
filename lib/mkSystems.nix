@@ -39,6 +39,7 @@ in
         {
           system.stateVersion = "25.05";
           python3Minimal.enable = true;
+          tailscale-server.enable = true; 
         }
         extraConfig
       ];
