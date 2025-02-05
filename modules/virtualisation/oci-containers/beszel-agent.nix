@@ -21,8 +21,7 @@
     ];
     log-driver = "journald";
     extraOptions = [
-      "--network-alias=beszel-agent"
-      "--network=beszel-agent_default"
+      "--network=host"
     ];
   };
   systemd.services."docker-beszel-agent" = {
@@ -32,33 +31,12 @@
       RestartSec = lib.mkOverride 90 "100ms";
       RestartSteps = lib.mkOverride 90 9;
     };
-    after = [
-      "docker-network-beszel-agent_default.service"
-    ];
-    requires = [
-      "docker-network-beszel-agent_default.service"
-    ];
     partOf = [
       "docker-compose-beszel-agent-root.target"
     ];
     wantedBy = [
       "docker-compose-beszel-agent-root.target"
     ];
-  };
-
-  # Networks
-  systemd.services."docker-network-beszel-agent_default" = {
-    path = [ pkgs.docker ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStop = "docker network rm -f beszel-agent_default";
-    };
-    script = ''
-      docker network inspect beszel-agent_default || docker network create beszel-agent_default
-    '';
-    partOf = [ "docker-compose-beszel-agent-root.target" ];
-    wantedBy = [ "docker-compose-beszel-agent-root.target" ];
   };
 
   # Root service
