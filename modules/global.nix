@@ -23,6 +23,7 @@
     ./programs/steam.nix
     ./programs/zsh.nix
     ./programs/terraform.nix
+    ./programs/ansible.nix
     ./security/rtkit.nix
     ./time/timeZone.nix
     ./zramSwap/zramswap.nix
