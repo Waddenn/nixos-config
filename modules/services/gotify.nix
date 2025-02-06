@@ -6,6 +6,8 @@
   config = lib.mkIf config.gotify.enable {
 
   services.gotify.enable = true;
+  networking.firewall.allowedTCPPorts = [ 80 ];
 
   };
+  
 }
