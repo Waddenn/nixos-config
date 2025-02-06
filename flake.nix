@@ -129,6 +129,13 @@
           ];
         }); 
 
+        calibre = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+          {
+              gotify.enable = true;
+          }
+          ];
+        }); 
       };
     };
 }
