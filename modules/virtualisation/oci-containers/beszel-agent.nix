@@ -49,6 +49,5 @@
     wantedBy = [ "multi-user.target" ];
   };
 
-  # Ouvrir le port 45876 dans le firewall
   networking.firewall.allowedTCPPorts = [ 45876 ];
 }
