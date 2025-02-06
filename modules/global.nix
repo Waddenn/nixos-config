@@ -45,6 +45,7 @@
     ./services/docker.nix
     ./services/grafana.nix
     ./services/prometheus.nix
+    ./services/gotify.nix
   ];
 
 } 
