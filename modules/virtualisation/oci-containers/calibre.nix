@@ -74,4 +74,7 @@
     };
     wantedBy = [ "multi-user.target" ];
   };
+  
+  networking.firewall.allowedTCPPorts = [ 8081 ];
+
 }
