@@ -131,9 +131,7 @@
 
         calibre = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
-          {
-              gotify.enable = true;
-          }
+            ./modules/virtualisation/oci-containers/calibre.nix
           ];
         }); 
       };
