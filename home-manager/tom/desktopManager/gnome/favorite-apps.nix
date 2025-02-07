@@ -6,9 +6,9 @@
 
     "org/gnome/shell" = {
       favorite-apps = [
-        "firefox.desktop"
+        "zen.desktop"
         "org.gnome.Console.desktop"
-        "vesktop.desktop"
+        "dev.vencord.Vesktop.desktop"
         "org.remmina.Remmina.desktop"
         "youtube-music.desktop"
       ];

@@ -11,6 +11,8 @@
     age
     sops
     just
+    inputs.zen-browser.packages."${system}".default 
+
   ];
 
   services.flatpak.packages = [
