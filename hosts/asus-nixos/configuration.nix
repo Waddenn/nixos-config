@@ -11,7 +11,6 @@
     age
     sops
     just
-    inputs.zen-browser.packages."${system}".default 
 
   ];
 
