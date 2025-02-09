@@ -12,9 +12,9 @@
         hash = "sha256-jCcSzenewQiW897GFHF9WAcVkGaS/oUu63crJu7AyyQ=";
       };
 
-      extraEnvironment = {
-        CF_API_TOKEN = "84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT"; 
-      };
+      serviceConfig.Environment = [
+        "CF_API_TOKEN=84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT"
+      ];
 
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
