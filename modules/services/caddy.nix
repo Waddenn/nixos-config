@@ -17,7 +17,7 @@
 
       virtualHosts."hexaflare.net" = {
         extraConfig = ''
-          reverse_proxy http://192.168.1.110:8081
+          reverse_proxy 192.168.1.110:8081
           tls {
               dns cloudflare {env.CF_API_TOKEN}
           }
