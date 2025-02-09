@@ -24,9 +24,9 @@
         '';
       };
 
-      systemd.services.caddy.environment = {
-  CF_API_TOKEN = "84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT";
-};
+    systemd.services.caddy.serviceConfig.Environment = [
+      "CF_API_TOKEN=84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT"
+    ];
 
     };
 
