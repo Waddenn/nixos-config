@@ -33,16 +33,14 @@
   };
 
   services.caddy.package = pkgs.caddy.overrideAttrs (old: {
-    buildInputs = (old.buildInputs or []) ++ [
-      pkgs.go
-    ];
-    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [
-      pkgs.xcaddy
-    ];
+    buildInputs = (old.buildInputs or []) ++ [ pkgs.go ];
+    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.xcaddy ];
     postInstall = (old.postInstall or "") + ''
+      export GOPROXY=https://proxy.golang.org,direct
       xcaddy build --with github.com/caddy-dns/cloudflare
     '';
   });
+
 
   };
 }
