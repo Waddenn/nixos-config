@@ -37,9 +37,12 @@
     nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.xcaddy ];
     postInstall = (old.postInstall or "") + ''
       export GOPROXY=https://proxy.golang.org,direct
+      export GOSUMDB=off
+      export GOFLAGS="-mod=mod"  
       xcaddy build --with github.com/caddy-dns/cloudflare
     '';
   });
+
 
 
   };
