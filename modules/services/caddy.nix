@@ -28,12 +28,9 @@
         systemd.services.caddy.environment = {
       CF_API_TOKEN = "84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT";
     };
-    {
-  boot.kernel.sysctl = {
+      boot.kernel.sysctl = {
     "net.core.rmem_max" = 7500000;
     "net.core.wmem_max" = 7500000;
   };
-}
-
   };
 }
