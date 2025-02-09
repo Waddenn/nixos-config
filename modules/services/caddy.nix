@@ -23,11 +23,7 @@
           }
         '';
       };
-
-  environment.variables = {
-    CF_API_TOKEN = "84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT"; 
-  };
-
+      
     };
 
   };
