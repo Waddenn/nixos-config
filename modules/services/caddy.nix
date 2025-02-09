@@ -15,7 +15,7 @@
         logDir = "/var/log/caddy";
         dataDir = "/var/lib/caddy";
 
-        virtualHosts."valheim.hexaflare.net" = {
+        virtualHosts."valheim.hexaflare.net:2456" = {
           extraConfig = ''
             reverse_proxy 192.168.1.32:2456
             tls {
