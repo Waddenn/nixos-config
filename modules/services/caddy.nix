@@ -12,10 +12,6 @@
         hash = "sha256-jCcSzenewQiW897GFHF9WAcVkGaS/oUu63crJu7AyyQ=";
       };
 
-      serviceConfig.Environment = [
-        "CF_API_TOKEN=84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT"
-      ];
-
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
 
@@ -27,6 +23,10 @@
           }
         '';
       };
+    };
+
+        systemd.services.caddy.environment = {
+      CF_API_TOKEN = "84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT";
     };
 
   };
