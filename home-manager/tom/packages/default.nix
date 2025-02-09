@@ -20,6 +20,7 @@
     libreoffice
     fastfetch
     errands
+    chromium
     # pdfarranger
     # librewolf
     # upscayl
