@@ -1,21 +1,29 @@
 { config, lib, pkgs, ... }:
 
 {
-  options.caddy.enable = lib.mkEnableOption "Enable caddy";
+  options.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
   config = lib.mkIf config.caddy.enable {
 
-  services.caddy = {
-    enable = true;  
-    logDir = "/var/log/caddy";  
-    dataDir = "/var/lib/caddy"; 
-    virtualHosts."hexaflare.net".extraConfig = ''
-    reverse_proxy http://192.168.1.110:8081
-    tls {
-        dns cloudflare {env.CF_API_TOKEN}  
-      }
-  '';
-  };
+    services.caddy = {
+      enable = true;
+      package = pkgs.caddy.withPlugins {
+        plugins = [ "github.com/caddy-dns/cloudflare@v0.0.0-20240703190432-89f16b99c18e" ];
+        hash = "sha256-JoujVXRXjKUam1Ej3/zKVvF0nX97dUizmISjy3M3Kr8=";
+      };
+
+      logDir = "/var/log/caddy";
+      dataDir = "/var/lib/caddy";
+
+      virtualHosts."hexaflare.net" = {
+        extraConfig = ''
+          reverse_proxy http://192.168.1.110:8081
+          tls {
+              dns cloudflare {env.CF_API_TOKEN}
+          }
+        '';
+      };
+    };
 
   };
 }
