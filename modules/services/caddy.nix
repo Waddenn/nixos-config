@@ -15,17 +15,19 @@
         logDir = "/var/log/caddy";
         dataDir = "/var/lib/caddy";
 
-        virtualHosts."calibre.hexaflare.net" = {
+        virtualHosts."nextcloud.hexaflare.net" = {
           extraConfig = ''
-            reverse_proxy 192.168.1.110:8081
-            tls internal
+            reverse_proxy 192.168.1.106
+            tls {
+                dns cloudflare {env.CF_API_TOKEN}
+            }
           '';
         };
-
+        
       };
 
-          systemd.services.caddy.environment = {
-        CF_API_TOKEN = "pnnLB5d5QErdTD-t5RS1PDrqYHlXvRlAisRvx1Fa";
+      systemd.services.caddy.environment = {
+        CF_API_TOKEN = config.sops.secrets.CF_API_TOKEN;
       };
 
       networking.firewall.allowedTCPPorts = [ 443 ];
