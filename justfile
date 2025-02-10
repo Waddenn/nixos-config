@@ -38,7 +38,7 @@ gc generations="5":
 supdate:
     sops updatekeys secrets/secrets.yaml
 
-sbuild:
+sgen:
     nix-shell -p ssh-to-age --run "ssh-to-age -i ~/.ssh/id_ed25519.pub"
 
 
