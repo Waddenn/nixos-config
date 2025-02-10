@@ -19,7 +19,7 @@
           extraConfig = ''
             reverse_proxy 192.168.1.106
             tls {
-                dns cloudflare $(cat ${config.sops.secrets.openai_api_key.path})
+                dns cloudflare $(cat ${config.sops.secrets.CF_API_TOKEN.path})
             }
           '';
         };
