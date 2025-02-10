@@ -19,15 +19,11 @@
           extraConfig = ''
             reverse_proxy 192.168.1.106
             tls {
-                dns cloudflare {env.CF_API_TOKEN}
+                dns cloudflare $(cat ${config.sops.secrets.openai_api_key.path})
             }
           '';
         };
         
-      };
-
-      systemd.services.caddy.environment = {
-        CF_API_TOKEN = config.sops.secrets."CF_API_TOKEN";
       };
 
       networking.firewall.allowedTCPPorts = [ 443 ];
