@@ -17,7 +17,7 @@
 
         virtualHosts."nextcloud.hexaflare.net" = {
           extraConfig = ''
-            reverse_proxy 192.168.1.106
+            reverse_proxy https://192.168.1.106
             tls {
                 dns cloudflare {env.CF_API_TOKEN}
             }
