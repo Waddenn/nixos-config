@@ -1,4 +1,4 @@
-{ inputs, nixpkgs, home-manager, nix-flatpak }:
+{ inputs, nixpkgs, home-manager, nix-flatpak, sops-nix }:
 let
   lib = nixpkgs.lib;
 in
@@ -6,7 +6,7 @@ in
   mkDesktopSystem = { hostname, username, ... }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak username; };
+      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak username sops-nix; };
       modules = [
         ../hosts/${hostname}/hardware-configuration.nix
         ../hosts/${hostname}/configuration.nix
@@ -20,7 +20,7 @@ in
           home-manager.users.${username} = import ../home-manager/${username}/home.nix;
           sops.defaultSopsFile = ../secrets/secrets.json;
           sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
-          sops.secrets.ssh_key = {};
+          sops.secrets.CF_API_TOKEN = {};
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }
