@@ -26,9 +26,7 @@
         
       };
 
-      systemd.services.caddy.environment = {
-        CF_API_TOKEN = "/run/secrets/CF_API_TOKEN";
-      };
+      systemd.services.caddy.environmentFile = "/run/secrets/CF_API_TOKEN";
 
       networking.firewall.allowedTCPPorts = [ 443 ];
     };
