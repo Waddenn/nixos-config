@@ -15,18 +15,17 @@
         logDir = "/var/log/caddy";
         dataDir = "/var/lib/caddy";
 
-        virtualHosts."valheim.hexaflare.net:2456" = {
+        virtualHosts."calibre.hexaflare.net" = {
           extraConfig = ''
-            reverse_proxy 192.168.1.32:2456
-            tls {
-                dns cloudflare {env.CF_API_TOKEN}
-            }
+            reverse_proxy 192.168.1.110:8081
+            tls internal
           '';
         };
+
       };
 
           systemd.services.caddy.environment = {
-        CF_API_TOKEN = "84TpuQ36remqPbzEyeGIAkMUZPW2AkobZoKuRglT";
+        CF_API_TOKEN = "pnnLB5d5QErdTD-t5RS1PDrqYHlXvRlAisRvx1Fa";
       };
 
       networking.firewall.allowedTCPPorts = [ 443 ];
