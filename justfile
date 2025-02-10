@@ -7,7 +7,7 @@ hostname := `hostname | cut -d "." -f 1`
 # Build the NixOS configuration without switching to it
 [linux]
 build target_host=hostname flags="":
-	nixos-rebuild build --flake .#{{target_host}} {{flags}}
+  nixos-rebuild build --flake .#{{target_host}} {{flags}}
 
 # Build the NixOS config with the --show-trace flag set
 [linux]
@@ -34,3 +34,11 @@ update:
 gc generations="5":
   nix-env --delete-generations {{generations}}
   nix-store --gc
+
+supdate:
+    sops updatekeys secrets/secrets.yaml
+
+sbuild:
+    nix-shell -p ssh-to-age --run "ssh-to-age -i ~/.ssh/id_ed25519.pub"
+
+
