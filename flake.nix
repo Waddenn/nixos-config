@@ -103,7 +103,7 @@
           modules = [
             inputs.sops-nix.nixosModules.sops
           {
-              sops.defaultSopsFile = ./secrets/secrets.json;
+              sops.defaultSopsFile = ./secrets/secrets.yaml;
               sops.age.sshKeyPaths = [ "/home/nixos/.ssh/id_ed25519" ];
               sops.secrets.CF_API_TOKEN = {};
               caddy.enable = true;
