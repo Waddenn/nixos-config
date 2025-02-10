@@ -20,7 +20,6 @@ in
           home-manager.users.${username} = import ../home-manager/${username}/home.nix;
           sops.defaultSopsFile = ../secrets/secrets.json;
           sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
-          sops.secrets.CF_API_TOKEN = {};
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }
