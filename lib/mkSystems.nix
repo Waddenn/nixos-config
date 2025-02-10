@@ -18,7 +18,7 @@ in
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${username} = import ../home-manager/${username}/home.nix;
-          sops.defaultSopsFile = ../secrets/secrets.yaml;
+          sops.defaultSopsFile = ../secrets/secrets.json;
           sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
           sops.secrets.ssh_key = {};
           networking.hostName = hostname;
