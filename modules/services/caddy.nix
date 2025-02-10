@@ -27,7 +27,7 @@
       };
 
       systemd.services.caddy.environment = {
-        CF_API_TOKEN = FEtkhJW0Ik9tVZPAvBSA2aBZV-Hd8527pBKm3S52;
+        CF_API_TOKEN = "FEtkhJW0Ik9tVZPAvBSA2aBZV-Hd8527pBKm3S52";
       };
 
       networking.firewall.allowedTCPPorts = [ 443 ];
