@@ -18,18 +18,22 @@
       virtualHosts."nextcloud.hexaflare.net" = {
         extraConfig = ''
           route {
-              # Redirige les requêtes d'authentification vers Authentik
-              reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+              reverse_proxy /outpost.goauthentik.io/* https://auth.hexaflare.net {
+                  transport http {
+                      tls
+                  }
+              }
 
-              # Authentification obligatoire via Authentik
-              forward_auth http://192.168.1.107:80 {
+              forward_auth https://auth.hexaflare.net {
                   uri /outpost.goauthentik.io/auth/caddy
                   copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
                   trusted_proxies private_ranges
+                  transport http {
+                      tls
+                  }
               }
 
-              # Reverse Proxy vers Nextcloud
-              reverse_proxy https://192.168.1.106:443 {
+*              reverse_proxy https://192.168.1.106:443 {
                   transport http {
                       tls_insecure_skip_verify
                   }
@@ -42,14 +46,21 @@
           }
         '';
       };
+
+      virtualHosts."auth.hexaflare.net" = {
+        extraConfig = ''
+          reverse_proxy http://192.168.1.107:80
+          tls {
+            dns cloudflare {env.CF_API_TOKEN}
+          }
+        '';
+      };
     };
 
-    # Ajout de l'API Token Cloudflare
     systemd.services.caddy.environment = {
       CF_API_TOKEN = "${config.sops.secrets.cf_api_token.path}";
     };
 
-    # Ouverture du port HTTPS
     networking.firewall.allowedTCPPorts = [ 443 ];
   };
 }
