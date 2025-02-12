@@ -49,8 +49,6 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = false;
-  grafana.enable = false;
-  prometheus.enable = false;
   linuxPackages_latest.enable = false;
 
 

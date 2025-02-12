@@ -7,7 +7,7 @@ hostname := `hostname | cut -d "." -f 1`
 # Build the NixOS configuration without switching to it
 [linux]
 build target_host=hostname flags="":
-  nixos-rebuild build --flake .#{{target_host}} {{flags}}
+  sudo nixos-rebuild build --flake .#{{target_host}} {{flags}}
 
 # Build the NixOS config with the --show-trace flag set
 [linux]
