@@ -138,6 +138,11 @@
             ./modules/virtualisation/oci-containers/calibre.nix
           ];
         }); 
+
+        authentik = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+          ];
+        }); 
       };
     };
 }
