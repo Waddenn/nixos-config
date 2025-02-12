@@ -39,6 +39,19 @@
         '';
       };
 
+      virtualHosts."auth.hexaflare.net" = {
+        extraConfig = ''
+          tls {
+              dns cloudflare {env.CF_API_TOKEN}
+          }
+
+          route {
+              reverse_proxy https://192.168.1.107:443 {
+               header_up Host {http.reverse_proxy.upstream.hostport}
+              }
+          }
+        '';
+      };
     };
 
     systemd.services.caddy.environment = {
