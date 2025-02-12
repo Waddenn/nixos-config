@@ -15,29 +15,29 @@
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
 
-      virtualHosts."nextcloud.hexaflare.net" = {
-        extraConfig = ''
-          tls {
-              dns cloudflare {env.CF_API_TOKEN}
-          }
+      # virtualHosts."nextcloud.hexaflare.net" = {
+      #   extraConfig = ''
+      #     tls {
+      #         dns cloudflare {env.CF_API_TOKEN}
+      #     }
 
-          route {
-              reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+      #     route {
+      #         reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
 
-              forward_auth http://192.168.1.107:80 {
-                  uri /outpost.goauthentik.io/auth/caddy
-                  copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
-                  trusted_proxies private_ranges
-              }
+      #         forward_auth http://192.168.1.107:80 {
+      #             uri /outpost.goauthentik.io/auth/caddy
+      #             copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
+      #             trusted_proxies private_ranges
+      #         }
 
-              reverse_proxy https://192.168.1.106:443 {
-                  transport http {
-                      tls_insecure_skip_verify
-                  }
-              }
-          }
-        '';
-      };
+      #         reverse_proxy https://192.168.1.106:443 {
+      #             transport http {
+      #                 tls_insecure_skip_verify
+      #             }
+      #         }
+      #     }
+      #   '';
+      # };
 
       virtualHosts."auth.hexaflare.net" = {
         extraConfig = ''
@@ -46,7 +46,10 @@
           }
 
           route {
-              reverse_proxy http://192.168.1.107:80 {
+              reverse_proxy https://192.168.1.107:443 {
+                  transport http {
+                      tls_insecure_skip_verify
+                  }
               }
           }
         '';
