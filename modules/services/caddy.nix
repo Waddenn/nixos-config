@@ -39,14 +39,14 @@
         '';
       };
 
-      virtualHosts."auth.hexaflare.net" = {
-        extraConfig = ''
-          route {
-              reverse_proxy https://192.168.1.107:443
-                  transport http {
-                      tls_insecure_skip_verify
-                  }              
-          }
+    virtualHosts."auth.hexaflare.net" = {
+      extraConfig = ''
+        route {
+            reverse_proxy https://192.168.1.107:443 {
+                transport http {
+                    tls_insecure_skip_verify
+                }              
+        }
 
           tls {
               dns cloudflare {env.CF_API_TOKEN}
