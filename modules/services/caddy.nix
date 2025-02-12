@@ -47,9 +47,7 @@
 
           route {
               reverse_proxy https://192.168.1.107:443 {
-                  transport http {
-                      tls_insecure_skip_verify
-                  }
+
               }
           }
         '';
