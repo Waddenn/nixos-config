@@ -50,6 +50,9 @@
       virtualHosts."auth.hexaflare.net" = {
         extraConfig = ''
           reverse_proxy http://192.168.1.107:80
+                transport http {
+                    tls_insecure_skip_verify
+                }
           tls {
             dns cloudflare {env.CF_API_TOKEN}
           }
