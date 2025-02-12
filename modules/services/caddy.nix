@@ -29,6 +29,8 @@
             reverse_proxy https://192.168.1.106:443 {
               transport http {
                 tls_insecure_skip_verify
+                server_name nextcloud.hexaflare.net
+
               }
             }
           }
