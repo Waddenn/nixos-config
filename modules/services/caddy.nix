@@ -27,6 +27,10 @@
           forward_auth https://auth.hexaflare.net {
               uri /outpost.goauthentik.io/auth/caddy
               copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
+              transport http {
+        tls
+        tls_insecure_skip_verify
+    }
           }
 
 
