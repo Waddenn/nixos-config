@@ -141,6 +141,9 @@
 
         authentik = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
+            {
+              networking.firewall.allowedUDPPorts = [ 443 9443 9000 ];
+            }
           ];
         }); 
       };
