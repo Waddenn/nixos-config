@@ -20,8 +20,8 @@
           tls {
               dns cloudflare {env.CF_API_TOKEN}
           }
-          route {
-              reverse_proxy /outpost.goauthentik.io/* auth.hexaflare.net
+
+              reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
               header_up Host {http.reverse_proxy.upstream.hostport}
               forward_auth auth.hexaflare.net {
                   uri /outpost.goauthentik.io/auth/caddy
