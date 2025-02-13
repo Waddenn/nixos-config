@@ -21,7 +21,7 @@
               dns cloudflare {env.CF_API_TOKEN}
           }
           route {
-              reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+              reverse_proxy /outpost.goauthentik.io/* auth.hexaflare.net
               forward_auth http://192.168.1.107:80 {
                   uri /outpost.goauthentik.io/auth/caddy
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version X-Forwarded-Host Authorization                  trusted_proxies private_ranges
