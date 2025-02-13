@@ -20,12 +20,6 @@
           tls {
               dns cloudflare {env.CF_API_TOKEN}
           }
-          handle_path /outpost.goauthentik.io/* {
-              forward_auth https://192.168.1.107:443 {
-                  uri /outpost.goauthentik.io/auth/caddy
-                  copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
-                  header_up Host {http.reverse_proxy.upstream.hostport}
-              }
               reverse_proxy https://192.168.1.107:443 {
                   transport http {
                       tls_insecure_skip_verify
