@@ -1,5 +1,3 @@
-{ config, lib, pkgs, ... }:
-
 {
   options.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
@@ -15,36 +13,31 @@
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
 
-    virtualHosts."auth.hexaflare.net" = {
-      extraConfig = ''
-        tls {
-          dns cloudflare {env.CF_API_TOKEN}
-        }
-
-        route {
-          # Redirige vers le serveur Authentik en HTTPS
-          reverse_proxy https://192.168.1.107:443 {
-            transport http {
-              tls_insecure_skip_verify
-            }
-            header_up Host {http.reverse_proxy.upstream.hostport}
+      virtualHosts."auth.hexaflare.net" = {
+        extraConfig = ''
+          tls {
+              dns cloudflare {env.CF_API_TOKEN}
           }
-
-          # Ajoute les en-têtes nécessaires pour Authentik
-          header_up X-Forwarded-Proto {scheme}
-          header_up X-Forwarded-For {remote}
-          header_up Host {host}
-          header_up Upgrade {http_upgrade}
-          header_up Connection {http_connection}
-        }
-      '';
-    };
+          handle_path /outpost.goauthentik.io/* {
+              forward_auth https://192.168.1.107:443 {
+                  uri /outpost.goauthentik.io/auth/caddy
+                  copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
+                  header_up Host {http.reverse_proxy.upstream.hostport}
+              }
+              reverse_proxy https://192.168.1.107:443 {
+                  transport http {
+                      tls_insecure_skip_verify
+                  }
+              }
+          }
+        '';
+      };
     };
 
     systemd.services.caddy.environment = {
       CF_API_TOKEN = "${config.sops.secrets.cf_api_token.path}";
     };
 
-    networking.firewall.allowedTCPPorts = [ 443 80 ];
+    networking.firewall.allowedTCPPorts = [ 80 443 ];
   };
 }
