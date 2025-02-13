@@ -22,7 +22,7 @@
           }
           route {
               reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
-              forward_auth http://192.168.1.107:80 {
+              forward_auth auth.hexaflare.net {
                   uri /outpost.goauthentik.io/auth/caddy
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version X-Forwarded-Host Authorization                  trusted_proxies private_ranges
               }
