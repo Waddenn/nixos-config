@@ -1,3 +1,5 @@
+{ config, lib, pkgs, ... }:
+
 {
   options.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
