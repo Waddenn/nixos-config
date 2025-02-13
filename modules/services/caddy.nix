@@ -15,26 +15,6 @@
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
 
-      # virtualHosts."nextcloud.hexaflare.net" = {
-      #   extraConfig = ''
-      #     tls {
-      #         dns cloudflare {env.CF_API_TOKEN}
-      #     }
-      #     route {
-      #         reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
-      #         forward_auth http://192.168.1.107:80 {
-      #             uri /outpost.goauthentik.io/auth/caddy
-      #             copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
-      #             trusted_proxies private_ranges
-      #         }
-      #         reverse_proxy https://192.168.1.106:443 {
-      #             transport http {
-      #                 tls_insecure_skip_verify
-      #             }
-      #         }
-      #     }
-      #   '';
-      # };
 
       virtualHosts."auth.hexaflare.net" = {
         extraConfig = ''
@@ -42,7 +22,10 @@
               dns cloudflare {env.CF_API_TOKEN}
           }
               reverse_proxy http://192.168.1.107:80 {
-              header_up Host {http.reverse_proxy.upstream.hostport}
+            copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+
+            # optional, in this config trust all private ranges, should probably be set to the outposts IP
+            trusted_proxies private_ranges
               }
         '';
       };
