@@ -39,14 +39,12 @@
         }
       '';
     };
+    };
 
-    # Variables d'environnement pour le DNS challenge
-    environment = {
+    systemd.services.caddy.environment = {
       CF_API_TOKEN = "${config.sops.secrets.cf_api_token.path}";
     };
-  };
 
-  # Ouvre les ports nécessaires sur le pare-feu
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+    networking.firewall.allowedTCPPorts = [ 443 80 ];
   };
 }
