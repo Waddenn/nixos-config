@@ -40,7 +40,11 @@
           tls {
               dns cloudflare {env.CF_API_TOKEN}
           }
-              reverse_proxy http://192.168.1.108:3000
+              reverse_proxy https://192.168.1.107:9443 {
+                  transport http {
+                      tls_insecure_skip_verify
+                  }
+              }
         '';
       };
     };
