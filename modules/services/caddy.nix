@@ -39,10 +39,8 @@
         extraConfig = ''
           tls {
               dns cloudflare {env.CF_API_TOKEN}
-              protocols tls1.3
-              resolvers 1.1.1.1
           }
-              reverse_proxy http://192.168.1.107:80
+              reverse_proxy http://192.168.1.108:3000
         '';
       };
     };
