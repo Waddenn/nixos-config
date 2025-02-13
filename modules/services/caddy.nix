@@ -48,4 +48,5 @@
 
   # Ouvre les ports nécessaires sur le pare-feu
   networking.firewall.allowedTCPPorts = [ 80 443 ];
+  };
 }
