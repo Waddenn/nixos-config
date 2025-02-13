@@ -45,7 +45,7 @@
               reverse_proxy http://192.168.1.107:80 
         '';
       };
-
+    }
 
     systemd.services.caddy.environment = {
       CF_API_TOKEN = "${config.sops.secrets.cf_api_token.path}";
