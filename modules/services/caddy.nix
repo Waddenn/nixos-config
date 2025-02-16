@@ -20,7 +20,7 @@
           tls {
             dns cloudflare {env.CF_API_TOKEN}
           }
-          reverse_proxy https://192.168.1.107:80 {
+          reverse_proxy http://192.168.1.107:80 {
           }
         '';
       };
