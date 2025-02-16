@@ -4,7 +4,10 @@
     options.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
     config = lib.mkIf config.caddy.enable {
-
+        sops.secrets.cf_api_token = {
+    format   = "dotenv";
+    sopsFile = ./cf_api_token.env.enc;    
+  };
       services.caddy = {
         enable = true;
         package = pkgs.caddy.withPlugins {
@@ -14,11 +17,7 @@
 
         logDir = "/var/log/caddy";
         dataDir = "/var/lib/caddy";
-
-      extraEnvironment = {
-        CF_API_TOKEN = builtins.readFile (sopsFile ./secrets/cf_api_token.sops);
-      };
-
+        settings.envFile = config.sops.secrets.cf_api_token.path;
         virtualHosts."test.hexaflare.net" = {
           extraConfig = ''
             tls {
@@ -30,7 +29,7 @@
         };
 
       };
-
+      
       networking.firewall.allowedTCPPorts = [ 443 80 ];
     };
   }
