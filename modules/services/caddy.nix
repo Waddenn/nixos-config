@@ -17,23 +17,21 @@
 
       virtualHosts."nextcloud.hexaflare.net" = {
         extraConfig = ''
-          tls {
-              dns cloudflare {env.CF_API_TOKEN}
-          }
-
           route {
               reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
-
-              forward_auth https://auth.hexaflare.net {
+              forward_auth http://192.168.1.107:80 {
                   uri /outpost.goauthentik.io/auth/caddy
                   copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
+                  trusted_proxies private_ranges
               }
-
               reverse_proxy https://192.168.1.106:443 {
                   transport http {
                       tls_insecure_skip_verify
                   }
               }
+          }
+          tls {
+              dns cloudflare {env.CF_API_TOKEN}
           }
         '';
       };
