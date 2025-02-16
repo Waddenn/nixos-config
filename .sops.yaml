@@ -2,7 +2,7 @@
 
 keys:
   - &primary age10yfuvwlr6su8u02sc9xmmvxj4aj59562dkxlpk0rl5kum8amw4zqaxrjpk 
-  - &caddy age16w0w0ecqcjcjuzr3lthp6kgr5whz46cjvetf48xlaxdxht7yja2sdtjlyv
+  - &caddy age1a36nptznjnsk4vgwc7ug9lpyzhz4uga7ye95rh38n2k0rpw9l9zsdf3vqr
 creation_rules:
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
