@@ -18,21 +18,15 @@
       virtualHosts."test.hexaflare.net" = {
         extraConfig = ''
           tls {
-            dns cloudflare {$CLOUDFLARE_API_TOKEN}
+            dns cloudflare {env.CLOUDFLARE_API_TOKEN}
           }
           reverse_proxy http://192.168.1.107:80 {
           }
         '';
       };
     };
-
-
-    systemd.services.caddy = {
-      serviceConfig = {
-        EnvironmentFile = config.sops.secrets.cloudflare_token.path;
-      };
-    };
-
+    
+    systemd.services.caddy.environmentFile = "/etc/caddy.env";
     networking.firewall.allowedTCPPorts = [ 443 80 ];
   };
 }

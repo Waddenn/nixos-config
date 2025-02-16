@@ -105,7 +105,6 @@
           {
               sops.defaultSopsFile = ./secrets/secrets.yaml;
               sops.age.sshKeyPaths = [ "/home/nixos/.ssh/id_ed25519" ];
-              sops.secrets.cloudflare_token = { };
               caddy.enable = true;
           }
           ];
