@@ -6,7 +6,7 @@
     config = lib.mkIf config.caddy.enable {
         sops.secrets.cf_api_token = {
     format   = "dotenv";
-    sopsFile = ./cf_api_token.env.enc;    
+    sopsFile = ../../secrets/cf_api_token.env.enc;    
   };
       services.caddy = {
         enable = true;
