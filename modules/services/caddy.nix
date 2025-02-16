@@ -22,6 +22,15 @@
         
       virtualHosts."nextcloud.hexaflare.net" = {
         extraConfig = ''
+                header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    X-XSS-Protection "1; mode=block"
+    Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none';"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+}
           route {
             reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
 
