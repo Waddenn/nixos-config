@@ -18,7 +18,9 @@
       virtualHosts."nextcloud.hexaflare.net" = {
         extraConfig = ''
           route {
-            reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+            reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80 {
+                header_up Host {upstream_hostport}
+            }
 
             forward_auth http://192.168.1.107:80 {
                 uri /outpost.goauthentik.io/auth/caddy
