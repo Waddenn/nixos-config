@@ -29,8 +29,7 @@
 
     networking.firewall.allowedTCPPorts = [ 443 80 ];
 
-    systemd.services.caddy.environment = {
-      CLOUDFLARE_API_KEY = "$CLOUDFLARE_API_KEY";
-    };
+    systemd.services.caddy.serviceConfig.EnvironmentFile = "/etc/environment";
+
   };
 }
