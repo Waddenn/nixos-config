@@ -15,7 +15,7 @@
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
 
-      virtualHosts."nextcloud.hexaflare.net" = {
+      virtualHosts."myspeed.hexaflare.net" = {
         extraConfig = ''
           tls {
             dns cloudflare "-qoARK09qmONJelipAH-oeO7r2k0H3VsFZNRJ0rO"
