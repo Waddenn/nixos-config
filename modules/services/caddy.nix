@@ -1,75 +1,70 @@
-  { config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-  {
-    options.caddy.enable = lib.mkEnableOption "Enable Caddy";
+let
+  securityHeaders = ''
+    header {
+      Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+      X-Frame-Options "DENY"
+      X-Content-Type-Options "nosniff"
+      X-XSS-Protection "1; mode=block"
+      Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none';"
+      Referrer-Policy "strict-origin-when-cross-origin"
+      Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    }
+  '';
 
-    config = lib.mkIf config.caddy.enable {
-        sops.secrets.cf_api_token = {
-    format   = "dotenv";
-    sopsFile = ../../secrets/cf_api_token.env.enc;    
-  };
-      services.caddy = {
-        enable = true;
-        package = pkgs.caddy.withPlugins {
-          plugins = [ "github.com/caddy-dns/cloudflare@v0.0.0-20240703190432-89f16b99c18e" ];
-          hash = "sha256-JVkUkDKdat4aALJHQCq1zorJivVCdyBT+7UhqTvaFLw=";
-        };
+in {
+  options.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
-        logDir = "/var/log/caddy";
-        dataDir = "/var/lib/caddy";
-        environmentFile  = config.sops.secrets.cf_api_token.path;
+  config = lib.mkIf config.caddy.enable {
+    sops.secrets.cf_api_token = {
+      format = "dotenv";
+      sopsFile = ../../secrets/cf_api_token.env.enc;
+    };
 
-        
-      virtualHosts."nextcloud.hexaflare.net" = {
-        extraConfig = ''
-                header {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    X-Frame-Options "DENY"
-    X-Content-Type-Options "nosniff"
-    X-XSS-Protection "1; mode=block"
-    Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none';"
-    Referrer-Policy "strict-origin-when-cross-origin"
-    Permissions-Policy "geolocation=(), microphone=(), camera=()"
-}
-          route {
-            reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+    services.caddy = {
+      enable = true;
+      package = pkgs.caddy.withPlugins {
+        plugins = [ "github.com/caddy-dns/cloudflare@v0.0.0-20240703190432-89f16b99c18e" ];
+        hash = "sha256-JVkUkDKdat4aALJHQCq1zorJivVCdyBT+7UhqTvaFLw=";
+      };
 
-            forward_auth http://192.168.1.107:80 {
+      logDir = "/var/log/caddy";
+      dataDir = "/var/lib/caddy";
+      environmentFile = config.sops.secrets.cf_api_token.path;
+
+      virtualHosts = {
+        "nextcloud.hexaflare.net" = {
+          extraConfig = securityHeaders + ''
+            route {
+              reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+
+              forward_auth http://192.168.1.107:80 {
                 uri /outpost.goauthentik.io/auth/caddy
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
-            }
+              }
 
-            reverse_proxy https://192.168.1.106:443 {
+              reverse_proxy https://192.168.1.106:443 {
                 transport http {
-                    tls_insecure_skip_verify
+                  tls_insecure_skip_verify
                 }
+              }
             }
-          }
 
-          tls {
+            tls {
               dns cloudflare {env.CF_API_TOKEN}
-          }
-        '';
-      };
+            }
+          '';
+        };
 
-      virtualHosts."auth.hexaflare.net" = {
-        extraConfig = ''
-        header {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    X-Frame-Options "DENY"
-    X-Content-Type-Options "nosniff"
-    X-XSS-Protection "1; mode=block"
-    Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none';"
-    Referrer-Policy "strict-origin-when-cross-origin"
-    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        "auth.hexaflare.net" = {
+          extraConfig = securityHeaders + ''
+            reverse_proxy http://192.168.1.107:80
+          '';
+        };
+      };
+    };
+
+    networking.firewall.allowedTCPPorts = [ 443 80 ];
+  };
 }
-
-          reverse_proxy http://192.168.1.107:80
-        '';
-      };
-    };
-      
-      networking.firewall.allowedTCPPorts = [ 443 80 ];
-    };
-  }
-
