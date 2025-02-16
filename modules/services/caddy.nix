@@ -21,7 +21,11 @@
               reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
               forward_auth http://192.168.1.107:80 {
                   uri /outpost.goauthentik.io/auth/caddy
-                  copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
+                  header X-Authentik-Username {http.request.header.X-Authentik-Username}
+                  header X-Authentik-Groups {http.request.header.X-Authentik-Groups}
+                  header X-Authentik-Email {http.request.header.X-Authentik-Email}
+                  header X-Authentik-Uid {http.request.header.X-Authentik-Uid}
+                  header X-Authentik-Jwt {http.request.header.X-Authentik-Jwt}
                   trusted_proxies private_ranges
               }
               reverse_proxy https://192.168.1.106:443 {
