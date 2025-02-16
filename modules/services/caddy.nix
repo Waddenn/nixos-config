@@ -9,6 +9,7 @@ let
       X-Frame-Options "DENY"
       X-Content-Type-Options "nosniff"
       X-XSS-Protection "1; mode=block"
+      Content-Security-Policy "default-src 'self'; object-src 'none'; frame-ancestors 'none';"
       Referrer-Policy "strict-origin-when-cross-origin"
       Permissions-Policy "geolocation=(), microphone=(), camera=()"
     }
