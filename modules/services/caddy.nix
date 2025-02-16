@@ -47,6 +47,7 @@
       virtualHosts."auth.hexaflare.net" = {
         extraConfig = ''
           reverse_proxy http://192.168.1.107:80
+          header_up Host nextcloud.hexaflare.net
         '';
       };
     };
