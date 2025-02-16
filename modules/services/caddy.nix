@@ -25,8 +25,9 @@
         '';
       };
     };
-    
-    systemd.services.caddy.environmentFile = "/etc/caddy.env";
+
+    systemd.services.caddy.serviceConfig.EnvironmentFile = "/etc/caddy.env";
+
     networking.firewall.allowedTCPPorts = [ 443 80 ];
   };
 }
