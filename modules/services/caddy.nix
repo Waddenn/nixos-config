@@ -23,9 +23,9 @@
       virtualHosts."nextcloud.hexaflare.net" = {
         extraConfig = ''
           route {
-            reverse_proxy /outpost.goauthentik.io/* auth.hexaflare.net
+            reverse_proxy /outpost.goauthentik.io/* https://auth.hexaflare.net
 
-            forward_auth auth.hexaflare.net {
+            forward_auth https://auth.hexaflare.net {
                 uri /outpost.goauthentik.io/auth/caddy
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
                 trusted_proxies private_ranges
@@ -47,7 +47,6 @@
       virtualHosts."auth.hexaflare.net" = {
         extraConfig = ''
           reverse_proxy http://192.168.1.107:80
-          header_up Host nextcloud.hexaflare.net
         '';
       };
     };
