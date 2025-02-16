@@ -17,7 +17,7 @@
 
         logDir = "/var/log/caddy";
         dataDir = "/var/lib/caddy";
-        settings.envFile = config.sops.secrets.cf_api_token.path;
+        systemd.environmentFiles = [ config.sops.secrets.cf_api_token.path ];
         virtualHosts."test.hexaflare.net" = {
           extraConfig = ''
             tls {
