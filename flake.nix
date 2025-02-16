@@ -146,6 +146,11 @@
             }
           ];
         }); 
+
+        cloudflared = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+          ];
+        })
       };
     };
 }
