@@ -17,15 +17,15 @@
 
       virtualHosts."nextcloud.hexaflare.net" = {
         extraConfig = ''
-          reverse_proxy https://192.168.1.106:443
-          transport http {
+          reverse_proxy https://192.168.1.106:443 {
             tls_insecure_skip_verify
           }
           tls {
-              dns cloudflare {env.CF_API_TOKEN}
+            dns cloudflare {env.CF_API_TOKEN}
           }
         '';
       };
+
     };
 
     systemd.services.caddy.environment = {
