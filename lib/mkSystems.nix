@@ -22,6 +22,7 @@ in
           sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
           networking.hostName = hostname;
           system.stateVersion = "25.05";
+
         }
       ];
     };
