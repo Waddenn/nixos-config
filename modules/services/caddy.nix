@@ -19,13 +19,22 @@
         extraConfig = ''
           tls {
               dns cloudflare {env.CF_API_TOKEN}
-            }
+          }
 
-           reverse_proxy https://192.168.1.106:443 {
-               transport http {
-                   tls_insecure_skip_verify
-               }
-           }
+          route {
+              reverse_proxy /outpost.goauthentik.io/* http://192.168.1.107:80
+
+          forward_auth https://auth.hexaflare.net {
+              uri /outpost.goauthentik.io/auth/caddy
+              copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Uid X-Authentik-Jwt
+          }
+
+
+              reverse_proxy https://192.168.1.106:443 {
+                  transport http {
+                      tls_insecure_skip_verify
+                  }
+              }
           }
         '';
       };
@@ -36,6 +45,6 @@
       CF_API_TOKEN = "${config.sops.secrets.cf_api_token.path}";
     };
 
-    networking.firewall.allowedTCPPorts = [ 443 80 ];
+    networking.firewall.allowedTCPPorts = [ 443 ];
   };
 }
