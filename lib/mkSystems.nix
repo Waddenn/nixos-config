@@ -1,4 +1,4 @@
-{ inputs, nixpkgs, home-manager, nix-flatpak }:
+{ inputs, nixpkgs, home-manager, nix-flatpak, sops-nix }:
 let
   lib = nixpkgs.lib;
 in
