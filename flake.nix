@@ -101,7 +101,6 @@
 
         caddy = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
-            inputs.sops-nix.nixosModules.sops
           {
               sops.defaultSopsFile = ./secrets/secrets.yaml;
               sops.age.sshKeyPaths = [ "/home/nixos/.ssh/id_ed25519" ];
