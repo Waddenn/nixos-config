@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, sops-nix, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   securityHeaders = ''

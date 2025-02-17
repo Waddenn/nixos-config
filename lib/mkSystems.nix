@@ -30,7 +30,7 @@ in
   mkServerSystem = { modules, extraConfig ? {} }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak; username = "nixos"; };
+      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak nix-sops; username = "nixos"; };
       modules = modules ++ [
         ../modules/global.nix
         ../users/nixos/default.nix
