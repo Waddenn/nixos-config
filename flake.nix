@@ -90,6 +90,10 @@
         nextcloud = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/nextcloud.nix
+            {
+              virtualisation.oci-containers.containers."mariadb".extraOptions = [ "--pull=newer" ];
+              virtualisation.oci-containers.containers."nextcloud".extraOptions = [ "--pull=newer" ];
+            }
           ];
         }); 
 
