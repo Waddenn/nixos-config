@@ -18,6 +18,8 @@
     "tv.plex.PlexDesktop"
     "org.fedoraproject.MediaWriter"
     "dev.vencord.Vesktop"
+    "com.github.taiko2k.avvie"
+    "com.boxy_svg.BoxySVG"
   ];
 
   firewall.enable = true;
