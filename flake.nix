@@ -60,6 +60,9 @@
         beszel = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/beszel.nix
+            {
+              virtualisation.oci-containers.containers."beszel".extraOptions = [ "--pull=always" ];
+            }
           ];
         }); 
 
@@ -76,6 +79,9 @@
         myspeed = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/myspeed.nix
+            {
+              virtualisation.oci-containers.containers."MySpeed".extraOptions = [ "--pull=always" ];
+            }
           ];
         }); 
 
@@ -116,6 +122,9 @@
         linkwarden = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/linkwarden.nix
+            {
+              virtualisation.oci-containers.containers."linkwarden-linkwarden".extraOptions = [ "--pull=always" ];
+            }
           ];
         }); 
 
@@ -138,13 +147,16 @@
         calibre = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             ./modules/virtualisation/oci-containers/calibre.nix
+            {
+              virtualisation.oci-containers.containers."calibre".extraOptions = [ "--pull=always" ];
+            }
           ];
         }); 
 
         authentik = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             {
-              networking.firewall.allowedUDPPorts = [ 443 9443 9000 80 ];
+              networking.firewall.allowedUDPPorts = [ 443 80 ];
             }
           ];
         }); 
