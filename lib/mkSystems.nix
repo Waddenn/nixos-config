@@ -36,6 +36,7 @@ in
         ../users/nixos/default.nix
         ../modules/templates/proxmox-lxc.nix
         ../modules/virtualisation/oci-containers/beszel-agent.nix
+        inputs.sops-nix.nixosModules.sops
         {
           system.stateVersion = "25.05";
           python3Minimal.enable = true;
