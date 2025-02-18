@@ -47,6 +47,7 @@
     ./services/prometheus.nix
     ./services/gotify.nix
     ./services/gitea.nix
+    ./services/vaultwarden.nix
   ];
 
 } 
