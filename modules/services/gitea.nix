@@ -1,0 +1,41 @@
+{ config, lib, pkgs, ... }:
+
+{
+  options.fprintd.enable = lib.mkEnableOption "Enable fprintd";
+
+  config = lib.mkIf config.fprintd.enable {
+
+{
+
+  services.gitea = {
+    enable = true; 
+    package = pkgs.gitea;
+
+    user = "gitea";
+    group = "gitea";
+
+    dataDir = "/var/lib/gitea";
+
+    database = {
+      type = "sqlite3";
+      path = "${config.services.gitea.dataDir}/gitea.db";
+    };
+
+    domain  = "gitea.example.org";
+    rootUrl = "https://gitea.example.org";
+
+    # configureReverseProxy = true; 
+
+    # extraConfig = {
+    #   security = {
+    #     PASSWORD_COMPLEXITY = "off";
+    #   };
+    #   # etc.
+    # };
+  };
+
+  networking.firewall.allowedTCPPorts = [ 3000 ];
+
+    }
+  };
+}
