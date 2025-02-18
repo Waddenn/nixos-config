@@ -57,7 +57,7 @@ in {
             }
           '';
         };
-        "gitea" = {
+        "gitea.hexaflare.net" = {
           extraConfig = securityHeaders + ''
             reverse_proxy http://192.168.20.112:3000
           '';
