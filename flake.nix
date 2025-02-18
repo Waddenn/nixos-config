@@ -176,7 +176,15 @@
             }
           ];
         });
-        
+
+        gitea = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              gitea.enable = true;
+            }
+          ];
+        });
+
       };
     };
 }

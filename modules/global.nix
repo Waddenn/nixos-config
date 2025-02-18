@@ -46,6 +46,7 @@
     ./services/grafana.nix
     ./services/prometheus.nix
     ./services/gotify.nix
+    ./services/gitea.nix
   ];
 
 } 
