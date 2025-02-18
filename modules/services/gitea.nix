@@ -1,11 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
-  options.fprintd.enable = lib.mkEnableOption "Enable fprintd";
+  options.gitea.enable = lib.mkEnableOption "Enable gitea";
 
-  config = lib.mkIf config.fprintd.enable {
-
-{
+config = lib.mkIf config.gitea.enable {
 
   services.gitea = {
     enable = true; 
