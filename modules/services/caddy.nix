@@ -57,7 +57,11 @@ in {
             }
           '';
         };
-
+        "linkwarden.hexaflare.net" = {
+          extraConfig = securityHeaders + ''
+            reverse_proxy http://192.168.20.108:3000
+          '';
+        };
         "auth.hexaflare.net" = {
           extraConfig = securityHeaders + ''
             reverse_proxy http://192.168.20.107:80
@@ -66,6 +70,6 @@ in {
       };
     };
 
-    networking.firewall.allowedTCPPorts = [ 443 80 ];
+    networking.firewall.allowedTCPPorts = [ 443 ];
   };
 }
