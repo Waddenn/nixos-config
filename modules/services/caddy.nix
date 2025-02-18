@@ -26,7 +26,7 @@ in {
     services.caddy = {
       enable = true;
       package = pkgs.caddy.withPlugins {
-        plugins = [ "github.com/caddy-dns/cloudflare@v0.0.0-20240703190432-89f16b99c18e" ];
+        plugins = [ "github.com/caddy-dns/cloudflare@v0.0.0-40240703190432-89f16b99c18e" ];
         hash = "sha256-JVkUkDKdat4aALJHQCq1zorJivVCdyBT+7UhqTvaFLw=";
       };
 
@@ -38,14 +38,14 @@ in {
         "nextcloud.hexaflare.net" = {
           extraConfig = securityHeaders + ''
             route {
-              reverse_proxy /outpost.goauthentik.io/* http://192.168.20.107:80
+              reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
 
-              forward_auth http://192.168.20.107:80 {
+              forward_auth http://192.168.40.107:80 {
                 uri /outpost.goauthentik.io/auth/caddy
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
               }
 
-              reverse_proxy https://192.168.20.106:443 {
+              reverse_proxy https://192.168.40.106:443 {
                 transport http {
                   tls_insecure_skip_verify
                 }
@@ -60,14 +60,14 @@ in {
         "gitea.hexaflare.net" = {
           extraConfig = securityHeaders + ''
             route {
-              reverse_proxy /outpost.goauthentik.io/* http://192.168.20.107:80
+              reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
 
-              forward_auth http://192.168.20.107:80 {
+              forward_auth http://192.168.40.107:80 {
                 uri /outpost.goauthentik.io/auth/caddy
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
               }
 
-              reverse_proxy http://192.168.20.112:3000
+              reverse_proxy http://192.168.40.112:3000
             }
 
             tls {
@@ -77,12 +77,12 @@ in {
         };
         "linkwarden.hexaflare.net" = {
           extraConfig = securityHeaders + ''
-            reverse_proxy http://192.168.20.108:3000
+            reverse_proxy http://192.168.40.108:3000
           '';
         };
         "auth.hexaflare.net" = {
           extraConfig = securityHeaders + ''
-            reverse_proxy http://192.168.20.107:80
+            reverse_proxy http://192.168.40.107:80
           '';
         };
       };
