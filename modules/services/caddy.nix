@@ -58,7 +58,7 @@ in {
           '';
         };
         "linkwarden.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
+          extraConfig = ''
             reverse_proxy http://192.168.20.108:3000
           '';
         };
