@@ -19,8 +19,12 @@
       path = "${config.services.gitea.stateDir}/gitea.db";
     };
 
-    domain  = "gitea.example.org";
-    rootUrl = "https://gitea.example.org";
+    settings = {
+      server = {
+        DOMAIN = "gitea.hexaflare.net";
+        ROOT_URL = "https://gitea.hexaflare.net";
+      };
+    };
 
     # configureReverseProxy = true; 
 
