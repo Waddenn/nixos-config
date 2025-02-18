@@ -59,7 +59,20 @@ in {
         };
         "gitea.hexaflare.net" = {
           extraConfig = securityHeaders + ''
-            reverse_proxy http://192.168.20.112:3000
+            route {
+              reverse_proxy /outpost.goauthentik.io/* http://192.168.20.107:80
+
+              forward_auth http://192.168.20.107:80 {
+                uri /outpost.goauthentik.io/auth/caddy
+                copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+              }
+
+              reverse_proxy https://192.168.20.112:3000
+            }
+
+            tls {
+              dns cloudflare {env.CF_API_TOKEN}
+            }
           '';
         };
         "linkwarden.hexaflare.net" = {
