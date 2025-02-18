@@ -185,6 +185,14 @@
           ];
         });
 
+        vaultwarden = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              vaultwarden.enable = true;
+            }
+          ];
+        });
+
       };
     };
 }
