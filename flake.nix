@@ -161,10 +161,22 @@
           ];
         }); 
 
-        cloudflared = lib.nixosSystem (mkSystems.mkServerSystem {
+        grafana = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
+            {
+              grafana.enable = true;
+            }
           ];
         });
+
+        prometheus = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              prometheus.enable = true;
+            }
+          ];
+        });
+        
       };
     };
 }
