@@ -16,7 +16,7 @@
 
     database = {
       type = "sqlite3";
-      path = "${config.services.gitea.dataDir}/gitea.db";
+      path = "${config.services.gitea.stateDir}/gitea.db";
     };
 
     domain  = "gitea.example.org";
