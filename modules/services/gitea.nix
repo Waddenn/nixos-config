@@ -12,7 +12,7 @@
     user = "gitea";
     group = "gitea";
 
-    dataDir = "/var/lib/gitea";
+    stateDir = "/var/lib/gitea";
 
     database = {
       type = "sqlite3";
