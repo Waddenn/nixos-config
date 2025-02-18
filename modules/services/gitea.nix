@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
-  options.gitea.enable = lib.mkEnableOption "Enable gitea";
+  options.gitea.enable = lib.mkEnableOption "Enable gitea"; 
 
-config = lib.mkIf config.gitea.enable {
+  config = lib.mkIf config.gitea.enable {
 
   services.gitea = {
     enable = true; 
@@ -34,6 +34,5 @@ config = lib.mkIf config.gitea.enable {
 
   networking.firewall.allowedTCPPorts = [ 3000 ];
 
-    }
   };
 }
