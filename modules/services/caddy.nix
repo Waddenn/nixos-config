@@ -67,7 +67,7 @@ in {
                 copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
               }
 
-              reverse_proxy https://192.168.20.112:3000
+              reverse_proxy http://192.168.20.112:3000
             }
 
             tls {
