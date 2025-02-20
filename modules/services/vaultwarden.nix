@@ -19,7 +19,7 @@
         "vaultwarden.local" = {
           extraConfig = ''
             reverse_proxy http://127.0.0.1:8222
-            tls internal  # Utilise un certificat auto-signé de Caddy
+            tls internal  
           '';
         };
       };
