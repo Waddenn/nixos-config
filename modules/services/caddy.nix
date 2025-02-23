@@ -42,7 +42,6 @@ in {
                   tls_insecure_skip_verify
                 }
               }
-            }
 
             tls {
               dns cloudflare {env.CF_API_TOKEN}
