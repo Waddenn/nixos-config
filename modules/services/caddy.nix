@@ -80,6 +80,11 @@ in {
             reverse_proxy http://192.168.40.108:3000
           '';
         };
+        "bitwarden.hexaflare.net" = {
+          extraConfig = securityHeaders + ''
+            reverse_proxy http://192.168.30.113:8222
+          '';
+        };
         "auth.hexaflare.net" = {
           extraConfig = securityHeaders + ''
             reverse_proxy http://192.168.40.107:80
