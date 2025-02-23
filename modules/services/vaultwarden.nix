@@ -12,7 +12,6 @@
         ROCKET_PORT = "8222"; 
         SIGNUPS_ALLOWED = false;
         DOMAIN = "https://bitwarden.hexaflare.net";
-        EXPERIMENTAL_CLIENT_FEATURE_FLAGS=extension-refresh;
       };
     };
 
