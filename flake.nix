@@ -189,7 +189,7 @@
           modules = [
             {
               vaultwarden.enable = true;
-              networking.firewall.allowedTCPPorts = [ 8222 ];
+              networking.firewall.allowedTCPPorts = [ 443 8222 ];
             }
           ];
         });
