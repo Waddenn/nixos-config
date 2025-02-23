@@ -11,7 +11,6 @@
         ROCKET_ADDRESS = "0.0.0.0";  
         ROCKET_PORT = "8222"; 
         SIGNUPS_ALLOWED = false;
-        DOMAIN = "https://vaultwarden.salamnder-scala.ts.net";
       };
     };
 
