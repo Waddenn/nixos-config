@@ -194,6 +194,15 @@
           ];
         });
 
+        paperless = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              paperless.enable = true;
+              networking.firewall.allowedTCPPorts = [ 8000 ];
+            }
+          ];
+        });
+
       };
     };
 }

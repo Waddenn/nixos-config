@@ -48,6 +48,7 @@
     ./services/gotify.nix
     ./services/gitea.nix
     ./services/vaultwarden.nix
+    ./services/paperless.nix
   ];
 
 } 
