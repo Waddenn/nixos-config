@@ -41,6 +41,7 @@ in
           system.stateVersion = "25.05";
           python3Minimal.enable = true;
           tailscale-server.enable = true; 
+          virtualisation.oci-containers.containers."beszel-agent".extraOptions = [ "--pull=always" ];
         }
         extraConfig
       ];
