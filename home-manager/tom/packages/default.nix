@@ -21,6 +21,7 @@
     fastfetch
     errands
     chromium
+    miru
     # pdfarranger
     # librewolf
     # upscayl
