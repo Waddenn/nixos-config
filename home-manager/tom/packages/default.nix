@@ -20,8 +20,8 @@
     libreoffice
     fastfetch
     errands
-    chromium
     miru
+    brave
     # pdfarranger
     # librewolf
     # upscayl

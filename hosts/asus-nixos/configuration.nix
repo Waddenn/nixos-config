@@ -24,7 +24,7 @@
 
   firewall.enable = true;
   autoUpgrade.enable = true;
-  firefox.enable = true;
+  firefox.enable = false;
   bluetooth.enable = true;
   systemd-boot.enable = true;
   keyMap.enable = true;
@@ -51,7 +51,7 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = false;
-  linuxPackages_latest.enable = false;
+  linuxPackages_latest.enable = true;
 
 
   hardware.enableRedistributableFirmware = true;
@@ -59,14 +59,7 @@
   boot.kernelModules = [ "amdgpu" ];
 
   services.xserver.videoDrivers = [ "amdgpu" ];
-  
-  boot.kernelParams = [
-    "amdgpu.gpu_recovery=1"            
-    "amdgpu.dcdebugmask=0x210"        
-    "amdgpu.mes=0"                    
-    "amdgpu.sdma_phase_quantum=4,4,4,4,4,4,4,4"
-    "amdgpu.lockup_timeout=5000"       
-    "amdgpu.vm_update_mode=0"          
-  ];
+
+
 
 } 
