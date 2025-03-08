@@ -19,7 +19,6 @@
     "dev.vencord.Vesktop"
     "com.github.taiko2k.avvie"
     "com.boxy_svg.BoxySVG"
-    "app.zen_browser.zen"
   ];
 
   firewall.enable = true;
@@ -60,6 +59,9 @@
 
   services.xserver.videoDrivers = [ "amdgpu" ];
 
-
+  boot.kernelParams = [
+    "amdgpu.gpu_recovery=1"   
+    "amdgpu.dcdebugmask=0x210" 
+  ];
 
 } 
