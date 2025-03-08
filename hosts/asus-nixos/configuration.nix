@@ -11,7 +11,6 @@
     age
     sops
     just
-
   ];
 
   services.flatpak.packages = [
@@ -20,6 +19,7 @@
     "dev.vencord.Vesktop"
     "com.github.taiko2k.avvie"
     "com.boxy_svg.BoxySVG"
+    "app.zen_browser.zen"
   ];
 
   firewall.enable = true;
@@ -61,8 +61,12 @@
   services.xserver.videoDrivers = [ "amdgpu" ];
   
   boot.kernelParams = [
-    "amdgpu.gpu_recovery=1"   
-    "amdgpu.dcdebugmask=0x210" 
+    "amdgpu.gpu_recovery=1"            
+    "amdgpu.dcdebugmask=0x210"        
+    "amdgpu.mes=0"                    
+    "amdgpu.sdma_phase_quantum=4,4,4,4,4,4,4,4"
+    "amdgpu.lockup_timeout=5000"       
+    "amdgpu.vm_update_mode=0"          
   ];
 
 } 
