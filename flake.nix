@@ -211,11 +211,12 @@
             }
           ];
         });
-        
+
         immich = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             {
               immich.enable = true;
+              networking.firewall.allowedTCPPorts = [ 2283 ];
             }
           ];
         });
