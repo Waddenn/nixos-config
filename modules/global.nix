@@ -49,6 +49,7 @@
     ./services/gitea.nix
     ./services/vaultwarden.nix
     ./services/paperless.nix
+    ./services/gitlab.nix
   ];
 
 } 
