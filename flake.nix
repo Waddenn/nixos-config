@@ -207,6 +207,7 @@
           modules = [
             {
               gitlab.enable = true;
+              networking.firewall.allowedTCPPorts = [ 443 ];
             }
           ];
         });
