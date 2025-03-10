@@ -5,7 +5,11 @@
 
   config = lib.mkIf config.gitlab.enable {
 
-  
+  security.acme = {
+    acceptTerms = true;  
+    defaults.email = "tom@patelas.com"; 
+  };
+
   services.nginx = {
     enable = true;
     recommendedGzipSettings = true;
@@ -28,6 +32,7 @@
     port = 443;
     user = "git";
     group = "git";
+    databaseUsername = "git";  
     smtp = {
       enable = true;
       address = "localhost";
@@ -39,6 +44,7 @@
       otpFile = "/var/keys/gitlab/otp";
       jwsFile = "/var/keys/gitlab/jws";
     };
+
     extraConfig = {
       gitlab = {
         email_from = "gitlab-no-reply@example.com";
@@ -50,4 +56,6 @@
   };
 
   };
+
+  
 }
