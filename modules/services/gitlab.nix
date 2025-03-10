@@ -41,21 +41,24 @@
     systemd.services.generate-gitlab-secrets = {
       description = "Generate GitLab secret files if they are missing";
       wantedBy = [ "multi-user.target" ];
-      # Assurer la génération *avant* que GitLab ne lise ces secrets
       before = [ "gitlab.service" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = ''
+
+        # On appelle bash explicitement pour exécuter la commande 'for ... done'
+        ExecStart = "${config.system.build.binsh}/bin/sh -c '' 
           for file in db_password root_password db secret otp jws; do
-            if [ ! -s "/var/keys/gitlab/$file" ]; then
-              openssl rand -base64 32 > "/var/keys/gitlab/$file"
-              chown git:git "/var/keys/gitlab/$file"
-              chmod 600 "/var/keys/gitlab/$file"
+            if [ ! -s \"/var/keys/gitlab/$file\" ]; then
+              echo \"Generating secret for $file...\"
+              openssl rand -base64 32 > \"/var/keys/gitlab/$file\"
+              chown git:git \"/var/keys/gitlab/$file\"
+              chmod 600 \"/var/keys/gitlab/$file\"
             fi
           done
-        '';
+        ''";
       };
     };
+
 
     # --- GitLab service configuration ---
     services.gitlab = {
