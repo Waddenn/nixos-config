@@ -203,6 +203,14 @@
           ];
         });
 
+        gitlab = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              gitlab.enable = true;
+            }
+          ];
+        });
+
       };
     };
 }

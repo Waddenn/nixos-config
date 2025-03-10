@@ -50,7 +50,7 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = false;
-  linuxPackages_latest.enable = true;
+  linuxPackages_latest.enable = false;
 
 
   hardware.enableRedistributableFirmware = true;
