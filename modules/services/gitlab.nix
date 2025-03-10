@@ -5,17 +5,20 @@
 
   config = lib.mkIf config.gitlab.enable {
 
+    # --- ACME (Let's Encrypt) configuration ---
     security.acme = {
       acceptTerms = true;  
       defaults.email = "tom@patelas.com"; 
     };
 
+    # --- Nginx configuration for GitLab ---
     services.nginx = {
       enable = true;
       recommendedGzipSettings = true;
       recommendedOptimisation = true;
       recommendedProxySettings = true;
       recommendedTlsSettings = true;
+
       virtualHosts."git.hexaflare.net" = {
         enableACME = true;
         forceSSL = true;
@@ -23,6 +26,7 @@
       };
     };
 
+    # --- Create /var/keys/gitlab/* with correct perms ---
     systemd.tmpfiles.rules = [
       "d /var/keys/gitlab 0700 git git -"
       "f /var/keys/gitlab/db_password 0600 git git -"
@@ -33,10 +37,12 @@
       "f /var/keys/gitlab/jws 0600 git git -"
     ];
 
+    # --- Generate secrets automatically if they don't exist ---
     systemd.services.generate-gitlab-secrets = {
       description = "Generate GitLab secret files if they are missing";
-      after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
+      # Assurer la génération *avant* que GitLab ne lise ces secrets
+      before = [ "gitlab.service" ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = ''
@@ -51,9 +57,11 @@
       };
     };
 
+    # --- GitLab service configuration ---
     services.gitlab = {
       enable = true;
-      databasePasswordFile = "/var/keys/gitlab/db_password";
+      # Fichiers secrets déclarés pour GitLab
+      databasePasswordFile  = "/var/keys/gitlab/db_password";
       initialRootPasswordFile = "/var/keys/gitlab/root_password";
       https = true;
       host = "git.hexaflare.net";
@@ -67,17 +75,17 @@
         port = 25;
       };
       secrets = {
-        dbFile = "/var/keys/gitlab/db";
-        secretFile = "/var/keys/gitlab/secret";
-        otpFile = "/var/keys/gitlab/otp";
-        jwsFile = "/var/keys/gitlab/jws";
+        dbFile      = "/var/keys/gitlab/db";
+        secretFile  = "/var/keys/gitlab/secret";
+        otpFile     = "/var/keys/gitlab/otp";
+        jwsFile     = "/var/keys/gitlab/jws";
       };
 
       extraConfig = {
         gitlab = {
-          email_from = "gitlab-no-reply@example.com";
-          email_display_name = "Example GitLab";
-          email_reply_to = "gitlab-no-reply@example.com";
+          email_from              = "gitlab-no-reply@example.com";
+          email_display_name      = "Example GitLab";
+          email_reply_to          = "gitlab-no-reply@example.com";
           default_projects_features = { builds = false; };
         };
       };
