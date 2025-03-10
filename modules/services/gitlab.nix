@@ -1,9 +1,9 @@
 { config, lib, ... }:
 
 {
-  options.gitLab.enable = lib.mkEnableOption "Enable gitLab";
+  options.gitlab.enable = lib.mkEnableOption "Enable gitlab";
 
-  config = lib.mkIf config.gitLab.enable {
+  config = lib.mkIf config.gitlab.enable {
 
   
   services.nginx = {
