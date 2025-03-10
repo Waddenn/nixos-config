@@ -1,3 +1,18 @@
+# sudo mkdir -p /var/keys/gitlab
+# sudo chmod 700 /var/keys/gitlab
+# sudo chown git:git /var/keys/gitlab
+
+# for file in db_password root_password db secret otp jws; do
+#     if [ ! -s "/var/keys/gitlab/$file" ]; then
+#         echo "Generating secret for $file..."
+#         openssl rand -base64 32 | sudo tee "/var/keys/gitlab/$file" > /dev/null
+#         sudo chown git:git "/var/keys/gitlab/$file"
+#         sudo chmod 600 "/var/keys/gitlab/$file"
+#     else
+#         echo "File /var/keys/gitlab/$file already exists, skipping..."
+#     fi
+# done
+
 { config, lib, ... }:
 
 {
