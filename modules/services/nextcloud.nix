@@ -11,13 +11,12 @@
 
   services.nextcloud = {
     enable = true;
-    hostName = "nextcloud.tld";
+    hostName = "192.168.1.116";
     database.createLocally = true;
     config = {
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
     };
-    settings.trusted_domains = [ "192.168.1.116" ];
 
   };
 
