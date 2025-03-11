@@ -16,10 +16,14 @@
     config = {
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
-      maintenance_window_start = "1";
     };
-    settings.trusted_proxies = [ "192.168.40.105" ];
-    settings.trusted_domains = [ "192.168.40.116" ];
+
+    settings = {
+      maintenanceWindowStart = 1;  
+      trusted_proxies = [ "192.168.40.105" ];
+      trusted_domains = [ "192.168.40.116" ];
+    };
+
     phpOptions = {
         "opcache.interned_strings_buffer" = "16"; 
     };
