@@ -19,7 +19,7 @@
     };
 
     settings = {
-      maintenanceWindowStart = 1;  
+      maintenance_window_start = 1;  
       trusted_proxies = [ "192.168.40.105" ];
       trusted_domains = [ "192.168.40.116" ];
     };
