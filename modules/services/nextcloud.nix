@@ -26,11 +26,6 @@
       overwriteprotocol = "https";
       trusted_proxies = [ "192.168.40.105" ];
       trusted_domains = [ "192.168.40.116" ];
-      redis = {
-        port = 0;
-        dbindex = 0;
-        timeout = 1.5;
-      };
     };
 
     phpOptions = {
