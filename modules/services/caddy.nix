@@ -37,7 +37,9 @@ in {
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
           extraConfig = securityHeaders + ''
-              reverse_proxy http://192.168.40.116:443
+              reverse_proxy http://192.168.40.116:80 {
+              }
+
             tls {
               dns cloudflare {env.CF_API_TOKEN}
             }
