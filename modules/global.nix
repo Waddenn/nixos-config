@@ -51,6 +51,7 @@
     ./services/paperless.nix
     ./services/gitlab.nix
     ./services/immich.nix
+    ./services/nextcloud.nix
   ];
 
 } 

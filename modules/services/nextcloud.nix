@@ -1,15 +1,25 @@
-{ config, pkgs, ... }:
+# openssl rand -base64 32 | sudo tee /var/lib/nextcloud/admin-pass > /dev/null
+# sudo chmod 600 /var/lib/nextcloud/admin-pass
+# sudo chown nextcloud:nextcloud /var/lib/nextcloud/admin-pass
+
+{ config, lib, pkgs, ... }:
 
 {
-  
-  environment.etc."nextcloud-admin-pass".text = "kzjenvkzjen12";
+  options.nextcloud.enable = lib.mkEnableOption "Enable nextcloud"; 
+
+  config = lib.mkIf config.nextcloud.enable {
+
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud28;
-    hostName = "localhost";
-    config.adminpassFile = "/etc/nextcloud-admin-pass";
-    config.dbtype = "sqlite";
+    hostName = "nextcloud.tld";
+    database.createLocally = true;
+    config = {
+      dbtype = "pgsql";
+      adminpassFile = "/var/lib/nextcloud/admin-pass";
+    };
   };
 
-}
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
+  };
+}

@@ -219,6 +219,14 @@
             }
           ];
         });
+
+        nextcloud-pgsql = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              nextcloud.enable = true;
+            }
+          ];
+        });
       };
     };
 }
