@@ -17,6 +17,7 @@
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
     };
+    settings.trusted_proxies= [ "192.168.40.105" ];
     phpOptions = {
         "opcache.interned_strings_buffer" = "16"; 
     };
