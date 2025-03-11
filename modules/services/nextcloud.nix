@@ -19,6 +19,13 @@
     };
     settings.trusted_proxies = [ "192.168.40.105" ];
     settings.trusted_domains = [ "192.168.40.116" ];
+    settings = {
+      "overwriteprotocol" = "https";
+      "hsts.enabled" = true;
+      "hsts.max-age" = 31536000;
+      "hsts.includeSubDomains" = true;
+      "hsts.preload" = true;
+    };
     phpOptions = {
         "opcache.interned_strings_buffer" = "16"; 
     };
