@@ -17,6 +17,8 @@
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
     };
+    settings.trusted_domains = [ "192.168.1.116" ];
+
   };
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
