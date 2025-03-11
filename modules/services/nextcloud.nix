@@ -13,6 +13,7 @@
     enable = true;
     hostName = "nextcloud.hexaflare.net";
     database.createLocally = true;
+    configureRedis = true;
     config = {
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
@@ -25,6 +26,12 @@
       overwriteprotocol = "https";
       trusted_proxies = [ "192.168.40.105" ];
       trusted_domains = [ "192.168.40.116" ];
+      redis = {
+        host = "/run/redis/redis.sock";
+        port = 0;
+        dbindex = 0;
+        timeout = 1.5;
+      };
     };
 
     phpOptions = {
