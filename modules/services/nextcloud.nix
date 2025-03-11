@@ -11,7 +11,7 @@
 
   services.nextcloud = {
     enable = true;
-    hostName = "192.168.1.116";
+    hostName = "nextcloud.hexaflare.net";
     database.createLocally = true;
     config = {
       dbtype = "pgsql";

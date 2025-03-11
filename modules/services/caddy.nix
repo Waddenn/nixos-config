@@ -37,7 +37,7 @@ in {
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
           extraConfig = securityHeaders + ''
-              reverse_proxy https://192.168.40.106:443 {
+              reverse_proxy https://192.168.40.116:443 {
                 transport http {
                   tls_insecure_skip_verify
                 }
