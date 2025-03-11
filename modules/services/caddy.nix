@@ -38,6 +38,7 @@ in {
         "nextcloud.hexaflare.net" = {
           extraConfig = securityHeaders + ''
               reverse_proxy http://192.168.40.116:80 {
+                header_up X-Forwarded-Proto "https"
               }
 
             tls {
