@@ -16,6 +16,7 @@
     config = {
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
+      maintenance_window_start_time = "03:00";
     };
     settings.trusted_proxies = [ "192.168.40.105" ];
     settings.trusted_domains = [ "192.168.40.116" ];
