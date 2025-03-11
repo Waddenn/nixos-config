@@ -17,6 +17,9 @@
       dbtype = "pgsql";
       adminpassFile = "/var/lib/nextcloud/admin-pass";
     };
+    phpOptions = {
+        "opcache.interned_strings_buffer" = "16"; 
+    };
 
   };
 
