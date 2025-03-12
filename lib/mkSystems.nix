@@ -50,7 +50,7 @@ in
   mkProxmoxSystem = { hostname, username, ... }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs username; };
+      specialArgs = { inherit inputs nixpkgs username sops-nix; };
       modules = [
         ../hosts/proxmox-vm/hardware-configuration.nix
         ../hosts/proxmox-vm/configuration.nix
