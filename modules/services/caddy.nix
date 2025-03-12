@@ -78,6 +78,11 @@ in {
             reverse_proxy http://192.168.40.107:80
           '';
         };
+        "homeassistant.hexaflare.net" = {
+          extraConfig = securityHeaders + ''
+            reverse_proxy http://homeassistant:8123
+          '';
+      };
       };
     };
 
