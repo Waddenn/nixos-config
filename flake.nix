@@ -227,6 +227,14 @@
             }
           ];
         });
+
+        kubernetes = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              kubernetes.enable = true;
+            }
+          ];
+        });
       };
     };
 }

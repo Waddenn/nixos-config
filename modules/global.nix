@@ -52,6 +52,7 @@
     ./services/gitlab.nix
     ./services/immich.nix
     ./services/nextcloud.nix
+    ./services/kubernetes.nix
   ];
 
 } 
