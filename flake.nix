@@ -228,13 +228,11 @@
           ];
         });
 
-        kubernetes = lib.nixosSystem (mkSystems.mkServerSystem {
-          modules = [
-            {
-              kubernetes.enable = true;
-            }
-          ];
-        });
+        kubernetes =
+          lib.nixosSystem (mkSystems.mkProxmoxSystem {
+            hostname = "kubernetes";
+            username = "nixos";
+          });
       };
     };
 }

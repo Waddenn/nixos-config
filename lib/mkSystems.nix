@@ -46,4 +46,21 @@ in
         extraConfig
       ];
     };
+
+  mkProxmoxSystem = { hostname, username, ... }:
+    {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs nixpkgs username; };
+      modules = [
+        ../hosts/proxmox-vm/hardware-configuration.nix
+        ../hosts/proxmox-vm/configuration.nix
+        ../users/${username}/default.nix
+        {
+          networking.hostName = hostname;
+          system.stateVersion = "25.05";
+
+        }
+      ];
+    };
+    
 }
