@@ -4,20 +4,20 @@
 {
 
   imports = [
-    ../../modules/zramSwap/zramswap.nix
-    ../../modules/services/tailscale-server.nix
-    ../../modules/console/keyMap.nix
-    ../../modules/i18n/i18n.nix
-    ../../modules/networking/networkmanager.nix
-    ../../modules/nix/settings.nix
-    ../../modules/nixpkgs/config.nix
-    ../../modules/time/timeZone.nix
-    ../../modules/services/openssh.nix
-    ../../modules/services/docker.nix
-    ../../modules/boot/loader/grub.nix
-    ../../modules/programs/zsh.nix
-
+    ../../modules/global.nix
   ];
+
+  openssh.enable = true;
+  docker.enable = true;
+  boot.loader.grub.enable = true;
+  console.keyMap.enable = true;
+  i18n.enable = true;
+  networking.networkmanager.enable = true;
+  nix.settings.enable = true;
+  nixpkgs.config.enable = true;
+  time.timeZone.enable = true;
+  programs.zsh.enable = true;
+
 
   environment.systemPackages =  with pkgs; [
     git
