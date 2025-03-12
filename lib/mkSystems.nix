@@ -55,6 +55,7 @@ in
         ../hosts/proxmox-vm/hardware-configuration.nix
         ../hosts/proxmox-vm/configuration.nix
         ../users/${username}/default.nix
+        inputs.sops-nix.nixosModules.sops
         {
           networking.hostName = hostname;
           system.stateVersion = "25.05";
