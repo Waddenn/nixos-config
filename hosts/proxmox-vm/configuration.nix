@@ -9,14 +9,15 @@
 
   openssh.enable = true;
   docker.enable = true;
-  boot.loader.grub.enable = true;
-  console.keyMap.enable = true;
+  grub.enable = true;
+  keyMap.enable = true;
   i18n.enable = true;
-  networking.networkmanager.enable = true;
-  nix.settings.enable = true;
-  nixpkgs.config.enable = true;
-  time.timeZone.enable = true;
-  programs.zsh.enable = true;
+  networkmanager.enable = true;
+  experimental-features.enable = true;
+  allowUnfree.enable = true;
+  timeZone.enable = true;
+  tailscale-server.enable = true;
+
 
 
   environment.systemPackages =  with pkgs; [
