@@ -37,7 +37,7 @@ in {
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
           extraConfig = securityHeaders + ''
-              reverse_proxy http://192.168.40.116:80 {
+              reverse_proxy https://nextcloud-pgsql.salamander-scala.ts.net/ {
                 header_up X-Forwarded-Proto "https"
               }
 
