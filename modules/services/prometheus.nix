@@ -20,7 +20,7 @@ in
           {
             job_name = "node";
             static_configs = [{
-              targets = [ "caddy:9090" ];
+              targets = [ "caddy:9000" ];
             }];
           }
         ];
