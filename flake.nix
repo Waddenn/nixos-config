@@ -172,7 +172,7 @@
         prometheus = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
             {
-              prometheus.enable = true;
+              prometheus.enableServer = true;
             }
           ];
         });
