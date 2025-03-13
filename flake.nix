@@ -173,7 +173,6 @@
           modules = [
             {
               prometheus.enableServer = true;
-              prometheus.enableClient = true;
             }
           ];
         });
