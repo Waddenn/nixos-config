@@ -1,28 +1,41 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
+let
+  cfg = config.prometheus;
+in
 {
   options = {
-    prometheus.enable = lib.mkEnableOption "Enable prometheus";
+    prometheus = {
+      enableServer = lib.mkEnableOption "Enable Prometheus server";
+      enableClient = lib.mkEnableOption "Enable Prometheus node_exporter";
+    };
   };
 
-  config = lib.mkIf config.prometheus.enable {
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enableServer {
+      services.prometheus = {
+        enable = true;
+        globalConfig.scrape_interval = "10s";
+        scrapeConfigs = [
+          {
+            job_name = "node";
+            static_configs = [{
+              targets = [ "localhost:${toString config.services.prometheus.exporters.node.port}" ];
+            }];
+          }
+        ];
+      };
+      networking.firewall.allowedTCPPorts = [ 9090 ];
+    })
 
-  # https://wiki.nixos.org/wiki/Prometheus
-  # https://nixos.org/manual/nixos/stable/#module-services-prometheus-exporters-configuration
-  # https://github.com/NixOS/nixpkgs/blob/nixos-24.05/nixos/modules/services/monitoring/prometheus/default.nix
-  services.prometheus = {
-    enable = true;
-    globalConfig.scrape_interval = "10s"; 
-    scrapeConfigs = [
-    {
-      job_name = "node";
-      static_configs = [{
-        targets = [ "localhost:${toString config.services.prometheus.exporters.node.port}" ];
-      }];
-    }
-    ];
-  };
-
-  networking.firewall.allowedTCPPorts = [ 9090 9100 ];
-  };
+    (lib.mkIf cfg.enableClient {
+      services.prometheus.exporters.node = {
+        enable = true;
+        port = 9000;
+        enabledCollectors = [ "systemd" ];
+        extraFlags = [ "--collector.ethtool" "--collector.softirqs" "--collector.tcpstat" "--collector.wifi" ];
+      };
+      networking.firewall.allowedTCPPorts = [ 9000 ];
+    })
+  ];
 }
