@@ -55,15 +55,13 @@
   linuxPackages.enableZen = true;   
 
 
-  hardware.enableRedistributableFirmware = true;
-
-  boot.kernelModules = [ "amdgpu" ];
-
   services.xserver.videoDrivers = [ "amdgpu" ];
 
   boot.kernelParams = [
-    "amdgpu.gpu_recovery=1"   
-    "amdgpu.dcdebugmask=0x210" 
+  "amd_pstate_epp=active"
+  "amdgpu.sg_display=0"
+  "amd_iommu=off"
+  "amdgpu.abmlevel=0"
   ];
 
 } 
