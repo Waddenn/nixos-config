@@ -19,6 +19,8 @@
     "dev.vencord.Vesktop"
     "com.github.taiko2k.avvie"
     "com.boxy_svg.BoxySVG"
+    "app.zen_browser.zen"
+
   ];
 
   firewall.enable = true;
