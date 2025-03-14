@@ -53,6 +53,7 @@
     ./services/immich.nix
     ./services/nextcloud.nix
     ./services/kubernetes.nix
+    ./services/onlyoffice.nix
   ];
 
 } 
