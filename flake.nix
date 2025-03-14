@@ -234,6 +234,15 @@
             hostname = "kubernetes";
             username = "nixos";
           });
+
+        onlyoffice = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+            {
+              onlyoffice.enable = true;
+            }
+          ];
+        });
+
       };
     };
 }
