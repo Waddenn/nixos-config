@@ -9,7 +9,7 @@
     enable = true;
     hostname = "localhost";
   };
-
+  networking.firewall.allowedTCPPorts = [ 8000 ];
   };
 }
 
