@@ -32,14 +32,18 @@
         "opcache.interned_strings_buffer" = "16"; 
     };
 
-    extraAppsEnable = true; 
-    extraApps = with pkgs.nextcloudApps; [
+    appstoreEnable = true;
+
+    extraAppsEnable = true;
+    extraApps = with config.services.nextcloud.package.packages.apps; {
+      inherit
         calendar
         contacts
-        notes 
+        notes
         onlyoffice
         tasks
-    ];
+        ;
+    };
 
   };
 
