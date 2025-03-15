@@ -25,12 +25,21 @@
       maintenance_window_start = 1;  
       overwriteprotocol = "https";
       trusted_proxies = [ "192.168.40.105" ];
-      trusted_domains = [ "192.168.40.116" "nextcloud-pgsql.salamander-scala.ts.net"];
+      trusted_domains = [ "192.168.40.116"];
     };
 
     phpOptions = {
         "opcache.interned_strings_buffer" = "16"; 
     };
+
+    extraAppsEnable = true; 
+    extraApps = with pkgs.nextcloudApps; [
+        calendar
+        contacts
+        notes 
+        onlyoffice
+        tasks
+    ];
 
   };
 
