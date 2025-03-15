@@ -19,8 +19,6 @@
     "dev.vencord.Vesktop"
     "com.github.taiko2k.avvie"
     "com.boxy_svg.BoxySVG"
-    "app.zen_browser.zen"
-
   ];
 
   firewall.enable = true;
@@ -52,14 +50,14 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = false;
-  linuxPackages.enableZen = true;   
+  linuxPackages.enableTesting = true;   
 
 
-  services.xserver.videoDrivers = [ "amdgpu" ];
+  # services.xserver.videoDrivers = [ "amdgpu" ];
 
   boot.kernelParams = [
+  "amdgpu.dcdebugmask=0x10"
   "amd_pstate_epp=active"
-  "amdgpu.sg_display=0"
   "amd_iommu=off"
   "amdgpu.abmlevel=0"
   ];
