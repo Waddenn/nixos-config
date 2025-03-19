@@ -7,6 +7,8 @@
     ../../modules/global.nix
   ];
 
+
+
   openssh.enable = true;
   docker.enable = true;
   grub.enable = true;
@@ -19,7 +21,7 @@
   tailscale-server.enable = true;
   zsh.enable = true;
 
-
+  security.sudo.wheelNeedsPassword = false;
 
   environment.systemPackages =  with pkgs; [
     git
