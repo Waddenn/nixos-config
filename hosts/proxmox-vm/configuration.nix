@@ -10,7 +10,7 @@
 
 
   openssh.enable = true;
-  docker.enable = true;
+  docker.enable = false;
   grub.enable = true;
   keyMap.enable = true;
   i18n.enable = true;
@@ -20,7 +20,7 @@
   timeZone.enable = true;
   tailscale-server.enable = true;
   zsh.enable = true;
-  kubernetes.enable = false;
+  kubernetes.enable = true;
 
   security.sudo.wheelNeedsPassword = false;
 
