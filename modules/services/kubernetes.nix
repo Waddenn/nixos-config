@@ -7,11 +7,7 @@
 
     services.kubernetes.roles = [ "master" "node" ];
     services.kubernetes.masterAddress = "localhost";
-    services.etcd.enable = true;
 
-    services.etcd.extraArgs = [
-    "--auth-token=simple"
-    ];
   };
 }
 
