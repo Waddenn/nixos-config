@@ -20,6 +20,7 @@
   timeZone.enable = true;
   tailscale-server.enable = true;
   zsh.enable = true;
+  kubernetes.enable = true;
 
   security.sudo.wheelNeedsPassword = false;
 
