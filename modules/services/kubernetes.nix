@@ -8,6 +8,10 @@
     services.kubernetes.roles = [ "master" "node" ];
     services.kubernetes.masterAddress = "localhost";
 
+    services.etcd = {
+  initialClusterToken = "etcd-cluster-1";
+};
+
   };
 }
 
