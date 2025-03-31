@@ -55,11 +55,11 @@
 
   # services.xserver.videoDrivers = [ "amdgpu" ];
 
-  boot.kernelParams = [
-  "amdgpu.dcdebugmask=0x10"
-  "amd_pstate_epp=active"
-  "amd_iommu=off"
-  "amdgpu.abmlevel=0"
-  ];
+  # boot.kernelParams = [
+  # "amdgpu.dcdebugmask=0x10"
+  # "amd_pstate_epp=active"
+  # "amd_iommu=off"
+  # "amdgpu.abmlevel=0"
+  # ];
 
 } 

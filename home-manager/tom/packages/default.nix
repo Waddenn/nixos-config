@@ -19,11 +19,12 @@
     parabolic
     libreoffice
     fastfetch
-    errands
+    # errands
+    librewolf
     miru
     brave
+    foliate
     # pdfarranger
-    # librewolf
     # upscayl
   ];
 
