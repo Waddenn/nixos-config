@@ -20,7 +20,6 @@
     libreoffice
     fastfetch
     # errands
-    librewolf
     miru
     brave
     foliate

@@ -11,7 +11,7 @@
     age
     sops
     just
-    radeontop
+    mesa
   ];
 
   services.flatpak.packages = [
@@ -22,9 +22,8 @@
     "com.boxy_svg.BoxySVG"
   ];
 
-  firewall.enable = true;
   autoUpgrade.enable = true;
-  firefox.enable = false;
+  firefox.enable = true;
   bluetooth.enable = true;
   systemd-boot.enable = true;
   keyMap.enable = true;
@@ -51,18 +50,4 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = true;
-  linuxPackages.enableZen = false;   
-  linuxPackages.enable6_6 = true;
-
-  hardware.cpu.amd.updateMicrocode = true;
-  services.xserver.videoDrivers = [ "amdgpu" ];
-  boot.kernelParams = 
-  [ 
-    "amdgpu.dcdebugmask=0x10"
-    "radeon.cik_support=0" 
-    "amdgpu.cik_support=1"
-    "amdgpu.tmz=0"
-    ];
-
-
 } 
