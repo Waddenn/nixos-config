@@ -9,6 +9,7 @@ in
       enableLatest = lib.mkEnableOption "Enable linuxPackages_latest";
       enableZen = lib.mkEnableOption "Enable linuxPackages_zen";
       enableTesting = lib.mkEnableOption "Enable linuxPackages_testing";
+      enable6_6 = lib.mkEnableOption "Enable linuxPackages_6_6";
     };
   };
 
@@ -23,6 +24,10 @@ in
 
     (lib.mkIf cfg.enableTesting {
       boot.kernelPackages = pkgs.linuxPackages_testing;
+    })
+
+    (lib.mkIf cfg.enable6_6 {
+      boot.kernelPackages = pkgs.linuxPackages_6_6;
     })
   ];
 }
