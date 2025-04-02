@@ -11,6 +11,7 @@
     age
     sops
     just
+    radeontop
   ];
 
   services.flatpak.packages = [
@@ -49,17 +50,19 @@
   xkb.enable = true;
   gnome.enable = true;
   gdm.enable = true;
-  docker.enable = false;
-  linuxPackages.enableTesting = true;   
+  docker.enable = true;
+  linuxPackages.enableZen = false;   
+  linuxPackages.enable6_6 = true;
 
+  hardware.cpu.amd.updateMicrocode = true;
+  services.xserver.videoDrivers = [ "amdgpu" ];
+  boot.kernelParams = 
+  [ 
+    "amdgpu.dcdebugmask=0x10"
+    "radeon.cik_support=0" 
+    "amdgpu.cik_support=1"
+    "amdgpu.tmz=0"
+    ];
 
-  # services.xserver.videoDrivers = [ "amdgpu" ];
-
-  # boot.kernelParams = [
-  # "amdgpu.dcdebugmask=0x10"
-  # "amd_pstate_epp=active"
-  # "amd_iommu=off"
-  # "amdgpu.abmlevel=0"
-  # ];
 
 } 
