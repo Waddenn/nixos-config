@@ -5,7 +5,7 @@
   users.users.tom = {
     isNormalUser = true;
     description  = "Tom";
-    extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" ];
+    extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" "docker"];
     initialPassword = "password"; 
   };
 
