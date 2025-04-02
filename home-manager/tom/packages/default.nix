@@ -24,6 +24,8 @@
     miru
     brave
     foliate
+    distrobox
+    boxbuddy
     # pdfarranger
     # upscayl
   ];
