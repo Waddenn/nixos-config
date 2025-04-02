@@ -6,6 +6,12 @@
   };
 
   config = lib.mkIf config.firefox.enable {
-    programs.firefox.enable = true;  
+  programs.firefox = {
+    enable = true;
+    preferences = {
+      "browser.preferences.defaultPerformanceSettings.enabled" = false;
+      "layers.acceleration.disabled" = true;
+    };
+  };
   };
 }
