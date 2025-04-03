@@ -23,7 +23,6 @@
   ];
 
   autoUpgrade.enable = true;
-  firefox.enable = true;
   bluetooth.enable = true;
   systemd-boot.enable = true;
   keyMap.enable = true;
