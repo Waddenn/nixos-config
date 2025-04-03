@@ -19,14 +19,11 @@
     parabolic
     libreoffice
     fastfetch
-    # errands
     miru
     brave
     foliate
     distrobox
     boxbuddy
-    # pdfarranger
-    # upscayl
   ];
 
 }
