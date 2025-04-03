@@ -6,7 +6,7 @@
 
     "org/gnome/shell" = {
       favorite-apps = [
-        "brave-browser.desktop"
+        "firefox.desktop"
         "org.gnome.Console.desktop"
         "dev.vencord.Vesktop.desktop"
         "org.remmina.Remmina.desktop"
