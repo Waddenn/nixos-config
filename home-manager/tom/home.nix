@@ -4,6 +4,7 @@
   imports = [
     ./home/packages.nix
     ./programs/git.nix
+    ./programs/firefox.nix
     ./desktopManager/gnome/background.nix
     ./desktopManager/gnome/extensions.nix
     ./desktopManager/gnome/favorite-apps.nix
