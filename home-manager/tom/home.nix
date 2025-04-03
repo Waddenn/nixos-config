@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./packages/default.nix
+    ./home/packages.nix
     ./programs/git.nix
     ./desktopManager/gnome/background.nix
     ./desktopManager/gnome/extensions.nix

@@ -2,12 +2,12 @@
 
 {
     programs.git = {
-    enable = true;
-    userName  = "waddenn";
-    userEmail = "waddenn.github@gmail.com";
-    extraConfig = {
-      init.defaultBranch = "main";
-    };
+      enable = true;
+      userName  = "waddenn";
+      userEmail = "waddenn.github@gmail.com";
+      extraConfig = {
+        init.defaultBranch = "main";
+      };
   };
 
 }
