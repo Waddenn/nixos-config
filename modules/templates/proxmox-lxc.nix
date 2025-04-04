@@ -28,9 +28,11 @@
     just
   ];
 
-  autoUpgrade.enable = true;
+  autoUpgrade.enable = false;
   openssh.enable = true;
   allowUnfree.enable = true;
   experimental-features.enable = true;
   zsh.enable = true;
+  nix.gc.enable = true;
+
 }
