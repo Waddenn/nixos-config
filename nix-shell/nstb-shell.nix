@@ -21,5 +21,13 @@ pkgs.mkShell {
     whatweb
     wpscan
     netdiscover
+    seclists
+    burpsuite
+    gophish
   ];
+  
+    shellHook = ''
+    export SECLISTS_DIR=$(nix eval --raw nixpkgs#seclists)/share/wordlists/seclists
+    echo "[+] SecLists is available at: $SECLISTS_DIR"
+  '';
 }

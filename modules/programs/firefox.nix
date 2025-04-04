@@ -9,7 +9,7 @@
   programs.firefox = {
     enable = true;
     preferences = {
-      "browser.preferences.defaultPerformanceSettings.enabled" = false;
+      "browser.preferences.defaultPerformanceSettings.enabled" = true;
       "layers.acceleration.disabled" = true;
       "dom.security.https_only_mode" = true;
       "sidebar.verticalTabs" = true;
