@@ -33,6 +33,6 @@
   allowUnfree.enable = true;
   experimental-features.enable = true;
   zsh.enable = true;
-  nix.gc.enable = true;
+  gc.enable = true;
 
 }
