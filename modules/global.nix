@@ -54,6 +54,7 @@
     ./services/nextcloud.nix
     ./services/kubernetes.nix
     ./services/onlyoffice.nix
+    ./services/hyprland.nix
   ];
 
 } 
