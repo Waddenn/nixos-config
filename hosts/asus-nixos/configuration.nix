@@ -5,6 +5,7 @@
   
   imports = [
     ../../modules/global.nix
+    ../../users/hypr/default.nix
   ];
   
   environment.systemPackages = with pkgs; [
@@ -50,4 +51,7 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = true;
+  hyprland.enable = true;
+
+  linuxPackages.enable6_6 = true;
 } 
