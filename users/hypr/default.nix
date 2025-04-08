@@ -2,9 +2,9 @@
 
 {
 
-  users.users.tom = {
+  users.users.hypr = {
     isNormalUser = true;
-    description  = "Tom";
+    description  = "hypr";
     extraGroups  = [ "networkmanager" "wheel" "lp" "scanner" "docker" "video" "audio" ];
     initialPassword = "password"; 
   };
