@@ -14,7 +14,7 @@
   outputs = inputs@{ self, nixpkgs, home-manager, nix-flatpak, sops-nix, ... }:
     let
       lib = nixpkgs.lib;
-      mkSystems = import ./lib/mkSystems.nix { inherit inputs nixpkgs home-manager nix-flatpak sops-nix; };
+      mkSystems = import ./lib/mkSystems.nix { inherit inputs nixpkgs home-manager; };
     in
     {
       nixosConfigurations = {
