@@ -1,4 +1,4 @@
-{ inputs, nixpkgs, home-manager, nix-flatpak, sops-nix }:
+{ inputs, nixpkgs, home-manager }:
 let
   lib = nixpkgs.lib;
 in
@@ -6,13 +6,13 @@ in
   mkDesktopSystem = { hostname, username, ... }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak username sops-nix; };
+      specialArgs = { inherit inputs nixpkgs home-manager username; };
       modules = [
         ../hosts/${hostname}/hardware-configuration.nix
         ../hosts/${hostname}/configuration.nix
         ../users/${username}/default.nix
         home-manager.nixosModules.home-manager
-        nix-flatpak.nixosModules.nix-flatpak
+        inputs.nix-flatpak.nixosModules.nix-flatpak
         inputs.sops-nix.nixosModules.sops
         {
           home-manager.useGlobalPkgs = true;
@@ -30,7 +30,7 @@ in
   mkServerSystem = { modules, extraConfig ? {} }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs home-manager nix-flatpak sops-nix; username = "nixos"; };
+      specialArgs = { inherit inputs nixpkgs home-manager; username = "nixos"; };
       modules = modules ++ [
         ../modules/global.nix
         ../users/nixos/default.nix
@@ -50,7 +50,7 @@ in
   mkProxmoxSystem = { hostname, username, ... }:
     {
       system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs username sops-nix; };
+      specialArgs = { inherit inputs nixpkgs username; };
       modules = [
         ../hosts/proxmox-vm/hardware-configuration.nix
         ../hosts/proxmox-vm/configuration.nix
