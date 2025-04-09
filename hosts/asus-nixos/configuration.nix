@@ -52,6 +52,5 @@
   gdm.enable = true;
   docker.enable = true;
   hyprland.enable = true;
-
-  linuxPackages.enable6_6 = true;
+  hardware.cpu.amd.updateMicrocode = true;
 } 
