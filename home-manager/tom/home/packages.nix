@@ -24,6 +24,7 @@
     foliate
     distrobox
     boxbuddy
+    nix-search-cli
   ];
 
 }
