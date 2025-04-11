@@ -10,7 +10,7 @@
     enable = true;
     preferences = {
       "browser.preferences.defaultPerformanceSettings.enabled" = true;
-      "layers.acceleration.disabled" = true;
+      "layers.acceleration.disabled" = false;
       "dom.security.https_only_mode" = true;
       "sidebar.verticalTabs" = true;
       "signon.rememberSignons" = false;

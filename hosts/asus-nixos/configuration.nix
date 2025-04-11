@@ -24,7 +24,7 @@
   ];
 
   autoUpgrade.enable = true;
-  firefox.enable = true;
+  firefox.enable = false;
   bluetooth.enable = true;
   systemd-boot.enable = true;
   keyMap.enable = true;
@@ -53,4 +53,9 @@
   docker.enable = true;
   hyprland.enable = true;
   hardware.cpu.amd.updateMicrocode = true;
+  linuxPackages.enableTesting = true;
+
+  boot.kernelParams = [
+  "amdgpu.dcdebugmask=0x10"
+];
 } 
