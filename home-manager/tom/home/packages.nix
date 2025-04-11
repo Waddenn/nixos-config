@@ -16,7 +16,6 @@
     trayscale
     youtube-music
     showtime
-    parabolic
     libreoffice
     fastfetch
     miru
@@ -25,6 +24,7 @@
     distrobox
     boxbuddy
     nix-search-cli
+    nix-output-monitor
   ];
 
 }
