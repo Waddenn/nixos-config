@@ -55,7 +55,7 @@
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = true;
 
-  boot.kernelParams = [
-  "amdgpu.dcdebugmask=0x10"
-];
+#   boot.kernelParams = [
+#   "amdgpu.dcdebugmask=0x10"
+# ];
 } 
