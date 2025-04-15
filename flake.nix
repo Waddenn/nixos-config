@@ -243,6 +243,11 @@
           ];
         });
 
+        bourse-dashboard = lib.nixosSystem (mkSystems.mkServerSystem {
+          modules = [
+          ];
+        });
+
       };
     };
 }
