@@ -83,6 +83,11 @@ in {
             reverse_proxy http://homeassistant:8123
           '';
       };
+      "bourse.hexaflare.net" = {
+          extraConfig = securityHeaders + ''
+            reverse_proxy http://bourse-dashboard:5000
+          '';
+      }
       };
     };
 
