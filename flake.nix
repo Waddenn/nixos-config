@@ -247,6 +247,7 @@
           modules = [
             {
                 networking.firewall.allowedTCPPorts = [ 5000 ];
+                programs.tmux.enable = true;
             }
           ];
         });
