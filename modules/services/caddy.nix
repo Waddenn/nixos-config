@@ -87,7 +87,7 @@ in {
           extraConfig = securityHeaders + ''
             reverse_proxy http://bourse-dashboard:5000
           '';
-      }
+      };
       };
     };
 
