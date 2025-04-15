@@ -245,6 +245,9 @@
 
         bourse-dashboard = lib.nixosSystem (mkSystems.mkServerSystem {
           modules = [
+            {
+                networking.firewall.allowedTCPPorts = [ 5000 ];
+            }
           ];
         });
 
