@@ -53,7 +53,7 @@
   docker.enable = true;
   hyprland.enable = true;
   hardware.cpu.amd.updateMicrocode = true;
-  linuxPackages.enableTesting = true;
+  linuxPackages.enableTesting = false;
 
 #   boot.kernelParams = [
 #   "amdgpu.dcdebugmask=0x10"
