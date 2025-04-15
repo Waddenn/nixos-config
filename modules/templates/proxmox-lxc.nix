@@ -34,6 +34,6 @@
   experimental-features.enable = true;
   zsh.enable = true;
   gc.enable = true;
-  time.timeZone = "Europe/paris"
+  time.timeZone = "Europe/paris";
 
 }
