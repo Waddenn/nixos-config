@@ -3,7 +3,7 @@ let
   lib = nixpkgs.lib;
 in
 {
-  mkDesktopSystem = { hostname, username, ... }:
+  mkDesktopSystem = { hostname, username }:
     {
       system = "x86_64-linux";
       specialArgs = { inherit inputs nixpkgs home-manager username; };
@@ -22,32 +22,12 @@ in
           sops.age.sshKeyPaths = [ "/home/tom/.ssh/id_ed25519" ];
           networking.hostName = hostname;
           system.stateVersion = "25.05";
-
         }
       ];
     };
 
-  mkServerSystem = { modules, extraConfig ? {} }:
-    {
-      system = "x86_64-linux";
-      specialArgs = { inherit inputs nixpkgs home-manager; username = "nixos"; };
-      modules = modules ++ [
-        ../modules/global.nix
-        ../users/nixos/default.nix
-        ../modules/templates/proxmox-lxc.nix
-        ../modules/virtualisation/oci-containers/beszel-agent.nix
-        inputs.sops-nix.nixosModules.sops
-        {
-          system.stateVersion = "25.05";
-          python3Minimal.enable = true;
-          tailscale-server.enable = true; 
-          virtualisation.oci-containers.containers."beszel-agent".extraOptions = [ "--pull=always" ];
-        }
-        extraConfig
-      ];
-    };
-
-  mkProxmoxSystem = { hostname, username, ... }:
+  # mkServerSystem n'est plus utilisé directement, factorisé dans flake.nix
+  mkProxmoxSystem = { hostname, username }:
     {
       system = "x86_64-linux";
       specialArgs = { inherit inputs nixpkgs username; };
@@ -59,9 +39,7 @@ in
         {
           networking.hostName = hostname;
           system.stateVersion = "25.05";
-
         }
       ];
     };
-    
 }
