@@ -16,12 +16,11 @@
       lib = nixpkgs.lib;
       mkSystems = import ./lib/mkSystems.nix { inherit inputs nixpkgs home-manager; };
 
-      # Factorisation des modules communs serveurs
       commonServerModules = [
-        ../modules/global.nix
-        ../users/nixos/default.nix
-        ../modules/templates/proxmox-lxc.nix
-        ../modules/virtualisation/oci-containers/beszel-agent.nix
+        ./modules/global.nix
+        ./users/nixos/default.nix
+        ./modules/templates/proxmox-lxc.nix
+        ./modules/virtualisation/oci-containers/beszel-agent.nix
         inputs.sops-nix.nixosModules.sops
         { system.stateVersion = "25.05"; }
       ];
