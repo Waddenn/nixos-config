@@ -164,21 +164,18 @@
         vaultwarden = mkServer "vaultwarden" [
           {
             vaultwarden.enable = true;
-            networking.firewall.allowedTCPPorts = [ 443 8222 ];
           }
         ];
 
         paperless = mkServer "paperless" [
           {
             paperless.enable = true;
-            networking.firewall.allowedTCPPorts = [ 8000 ];
           }
         ];
 
         gitlab = mkServer "gitlab" [
           {
             gitlab.enable = true;
-            networking.firewall.allowedTCPPorts = [ 443 ];
           }
         ];
 
