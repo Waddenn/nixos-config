@@ -38,35 +38,40 @@
           ];
         };
 
-      commonServerModules = [
-        ./modules/global.nix
-        ./users/nixos/default.nix
-        ./modules/templates/proxmox-lxc.nix
-        ./modules/virtualisation/oci-containers/beszel-agent.nix
-        inputs.sops-nix.nixosModules.sops
+      mkServerSystem = { hostname, extraModules ? [] }:
         {
-          system.stateVersion = "25.05";
-          python3Minimal.enable = true;
-          tailscale-server.enable = true;
-          virtualisation.oci-containers.containers."beszel-agent".extraOptions = [ "--pull=always" ];
-        }
-      ];
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs nixpkgs home-manager; username = "nixos"; };
+          modules =
+            [
+              ./modules/global.nix
+              ./users/nixos/default.nix
+              ./modules/templates/proxmox-lxc.nix
+              ./modules/virtualisation/oci-containers/beszel-agent.nix
+              inputs.sops-nix.nixosModules.sops
+              {
+                networking.hostName = hostname;
+                system.stateVersion = "25.05";
+                python3Minimal.enable = true;
+                tailscale-server.enable = true;
+                virtualisation.oci-containers.containers."beszel-agent".extraOptions = [ "--pull=always" ];
+              }
+            ] ++ extraModules;
+        };
 
       mkDesktop = name: username:
         lib.nixosSystem (mkDesktopSystem { hostname = name; username = username; });
 
       mkServer = name: extraModules:
-        lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs nixpkgs home-manager; username = "nixos"; };
-          modules = commonServerModules ++ extraModules;
-        };
+        lib.nixosSystem (mkServerSystem { hostname = name; extraModules = extraModules; });
 
     in {
       nixosConfigurations = {
+        # === Desktops ===
         asus-nixos = mkDesktop "asus-nixos" "tom";
         lenovo-nixos = mkDesktop "lenovo-nixos" "tom";
 
+        # === Serveurs ===
         tailscale-subnet = mkServer "tailscale-subnet" [
           { ethtool.enable = true; }
         ];
@@ -197,6 +202,11 @@
             programs.tmux.enable = true;
           }
         ];
+      };
+
+      checks.x86_64-linux.default = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [];
       };
     };
 }
