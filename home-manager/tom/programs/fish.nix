@@ -20,7 +20,7 @@
 
     interactiveShellInit = ''
       set -U fish_user_paths $HOME/.local/bin $fish_user_paths
-      fish_config theme choose "Dracula"
+      fish_config theme choose "Tomorrow Night Bright"
     '';
 
     plugins = [
