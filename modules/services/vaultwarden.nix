@@ -15,5 +15,7 @@
       };
     };
 
+  networking.firewall.allowedTCPPorts = [ 443 8222 ];
+
   };
 }

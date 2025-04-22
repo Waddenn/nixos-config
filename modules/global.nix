@@ -22,6 +22,7 @@
     ./programs/direnv.nix
     ./programs/steam.nix
     ./programs/zsh.nix
+    ./programs/fish.nix
     ./programs/terraform.nix
     ./programs/ansible.nix
     ./programs/python3Minimal.nix

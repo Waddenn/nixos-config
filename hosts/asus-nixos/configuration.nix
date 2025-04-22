@@ -5,7 +5,6 @@
   
   imports = [
     ../../modules/global.nix
-    ../../users/hypr/default.nix
   ];
   
   environment.systemPackages = with pkgs; [
@@ -37,6 +36,7 @@
   direnv.enable = true;
   steam.enable = true;
   zsh.enable = true;
+  fish.enable = true;
   rtkit.enable = true;
   timeZone.enable = true;
   zram.enable = true;
