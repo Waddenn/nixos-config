@@ -26,7 +26,6 @@ in
       ];
     };
 
-  # mkServerSystem n'est plus utilisé directement, factorisé dans flake.nix
   mkProxmoxSystem = { hostname, username }:
     {
       system = "x86_64-linux";
