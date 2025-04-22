@@ -22,7 +22,12 @@
         ./modules/templates/proxmox-lxc.nix
         ./modules/virtualisation/oci-containers/beszel-agent.nix
         inputs.sops-nix.nixosModules.sops
-        { system.stateVersion = "25.05"; }
+        {
+          system.stateVersion = "25.05";
+          python3Minimal.enable = true;
+          tailscale-server.enable = true;
+          virtualisation.oci-containers.containers."beszel-agent".extraOptions = [ "--pull=always" ];
+        }
       ];
 
       mkDesktop = name: username:
