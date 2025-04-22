@@ -38,22 +38,6 @@
           ];
         };
 
-      mkProxmoxSystem = { hostname, username }:
-        {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs nixpkgs username; };
-          modules = [
-            ./hosts/proxmox-vm/hardware-configuration.nix
-            ./hosts/proxmox-vm/configuration.nix
-            ./users/${username}/default.nix
-            inputs.sops-nix.nixosModules.sops
-            {
-              networking.hostName = hostname;
-              system.stateVersion = "25.05";
-            }
-          ];
-        };
-
       commonServerModules = [
         ./modules/global.nix
         ./users/nixos/default.nix
@@ -201,10 +185,7 @@
           { nextcloud.enable = true; }
         ];
 
-        kubernetes = lib.nixosSystem (mkProxmoxSystem {
-          hostname = "kubernetes";
-          username = "nixos";
-        });
+        kubernetes = mkServer "kubernetes" [];
 
         onlyoffice = mkServer "onlyoffice" [
           { onlyoffice.enable = true; }
