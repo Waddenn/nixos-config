@@ -6,6 +6,7 @@
   config = lib.mkIf config.gatus.enable {
     services.gatus = {
       enable = true;
+      openFirewall = true;
       settings = {
         endpoints = [
           {
@@ -25,7 +26,6 @@
           }
         ];
       };
-      services.gatus.openFirewall = true;
     };
   };
 }
