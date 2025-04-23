@@ -25,6 +25,7 @@
     boxbuddy
     nix-search-cli
     nix-output-monitor
+    discord
   ];
 
 }
