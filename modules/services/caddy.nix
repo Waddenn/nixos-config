@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   securityHeaders = ''
     header {
       Server "Secure-Proxy"
@@ -13,7 +16,6 @@ let
       Permissions-Policy "geolocation=(), microphone=(), camera=()"
     }
   '';
-
 in {
   options.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
@@ -26,7 +28,7 @@ in {
     services.caddy = {
       enable = true;
       package = pkgs.caddy.withPlugins {
-        plugins = [ "github.com/caddy-dns/cloudflare@v0.2.1" ];
+        plugins = ["github.com/caddy-dns/cloudflare@v0.2.1"];
         hash = "sha256-saKJatiBZ4775IV2C5JLOmZ4BwHKFtRZan94aS5pO90=";
       };
 
@@ -36,61 +38,75 @@ in {
 
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-              reverse_proxy http://192.168.40.116:80 {
-              }
+          extraConfig =
+            securityHeaders
+            + ''
+                reverse_proxy http://192.168.40.116:80 {
+                }
 
-            tls {
-              dns cloudflare {env.CF_API_TOKEN}
-            }
-          '';
+              tls {
+                dns cloudflare {env.CF_API_TOKEN}
+              }
+            '';
         };
         "gitea.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-            route {
-              reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
+          extraConfig =
+            securityHeaders
+            + ''
+              route {
+                reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
 
-              forward_auth http://192.168.40.107:80 {
-                uri /outpost.goauthentik.io/auth/caddy
-                copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+                forward_auth http://192.168.40.107:80 {
+                  uri /outpost.goauthentik.io/auth/caddy
+                  copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+                }
+
+                reverse_proxy http://192.168.40.112:3000
               }
 
-              reverse_proxy http://192.168.40.112:3000
-            }
-
-            tls {
-              dns cloudflare {env.CF_API_TOKEN}
-            }
-          '';
+              tls {
+                dns cloudflare {env.CF_API_TOKEN}
+              }
+            '';
         };
         "linkwarden.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-            reverse_proxy http://192.168.40.108:3000
-          '';
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://192.168.40.108:3000
+            '';
         };
         "bitwarden.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-            reverse_proxy http://192.168.30.113:8222
-          '';
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://192.168.30.113:8222
+            '';
         };
         "auth.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-            reverse_proxy http://192.168.40.107:80
-          '';
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://192.168.40.107:80
+            '';
         };
         "homeassistant.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-            reverse_proxy http://homeassistant:8123
-          '';
-      };
-      "bourse.hexaflare.net" = {
-          extraConfig = securityHeaders + ''
-            reverse_proxy http://bourse-dashboard:5000
-          '';
-      };
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://homeassistant:8123
+            '';
+        };
+        "bourse.hexaflare.net" = {
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://bourse-dashboard:5000
+            '';
+        };
       };
     };
 
-    networking.firewall.allowedTCPPorts = [ 443 ];
+    networking.firewall.allowedTCPPorts = [443];
   };
 }

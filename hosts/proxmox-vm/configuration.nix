@@ -1,13 +1,11 @@
-
-{ config, pkgs, ... }:
-
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ../../modules/global.nix
   ];
-
-
 
   openssh.enable = true;
   docker.enable = false;
@@ -24,9 +22,8 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages =  with pkgs; [
+  environment.systemPackages = with pkgs; [
     git
     just
   ];
-
 }

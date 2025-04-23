@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.prometheus;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.prometheus;
+in {
   options = {
     prometheus = {
       enableServer = lib.mkEnableOption "Enable Prometheus server";
@@ -19,23 +21,25 @@ in
         scrapeConfigs = [
           {
             job_name = "node";
-            static_configs = [{
-              targets = [ "caddy:9000" ];
-            }];
+            static_configs = [
+              {
+                targets = ["caddy:9000"];
+              }
+            ];
           }
         ];
       };
-      networking.firewall.allowedTCPPorts = [ 9090 ];
+      networking.firewall.allowedTCPPorts = [9090];
     })
 
     (lib.mkIf cfg.enableClient {
       services.prometheus.exporters.node = {
         enable = true;
         port = 9000;
-        enabledCollectors = [ "systemd" ];
-        extraFlags = [ "--collector.ethtool" "--collector.softirqs" "--collector.tcpstat" "--collector.wifi" ];
+        enabledCollectors = ["systemd"];
+        extraFlags = ["--collector.ethtool" "--collector.softirqs" "--collector.tcpstat" "--collector.wifi"];
       };
-      networking.firewall.allowedTCPPorts = [ 9000 ];
+      networking.firewall.allowedTCPPorts = [9000];
     })
   ];
 }

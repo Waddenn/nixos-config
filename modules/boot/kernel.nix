@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.linuxPackages;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.linuxPackages;
+in {
   options = {
     linuxPackages = {
       enableLatest = lib.mkEnableOption "Enable linuxPackages_latest";

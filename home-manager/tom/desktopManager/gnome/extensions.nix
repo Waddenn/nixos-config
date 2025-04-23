@@ -1,7 +1,8 @@
-{ config, pkgs, ... }:
-
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   dconf.settings = {
     "org/gnome/shell" = {
       disable-user-extensions = false;
@@ -16,7 +17,7 @@
         "search-light@icedman.github.com"
         "blur-my-shell@aunetx"
         "Bluetooth-Battery-Meter@maniacx.github.com"
-      ]; 
+      ];
     };
 
     "org/gnome/shell/extensions/system-monitor" = {
@@ -35,5 +36,4 @@
       show-system-indicator = false;
     };
   };
-
 }

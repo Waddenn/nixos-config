@@ -1,18 +1,16 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   options.kubernetes.enable = lib.mkEnableOption "Enable kubernetes";
 
   config = lib.mkIf config.kubernetes.enable {
-
-    services.kubernetes.roles = [ "master" "node" ];
+    services.kubernetes.roles = ["master" "node"];
     services.kubernetes.masterAddress = "localhost";
 
     services.etcd = {
-  initialClusterToken = "etcd-cluster-1";
-};
-
+      initialClusterToken = "etcd-cluster-1";
+    };
   };
 }
-
-

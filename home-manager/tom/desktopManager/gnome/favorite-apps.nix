@@ -1,9 +1,9 @@
-{ config, pkgs, ... }:
-
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   dconf.settings = {
-
     "org/gnome/shell" = {
       favorite-apps = [
         "brave-browser.desktop"
@@ -12,9 +12,6 @@
         "org.remmina.Remmina.desktop"
         "youtube-music.desktop"
       ];
-
     };
-
   };
-
 }

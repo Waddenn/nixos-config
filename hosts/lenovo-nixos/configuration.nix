@@ -1,7 +1,8 @@
-{ config, pkgs, ... }:
-
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ../../modules/global.nix
   ];
@@ -43,5 +44,4 @@
   xkb.enable = true;
   gnome.enable = true;
   gdm.enable = true;
-
 }

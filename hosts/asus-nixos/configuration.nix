@@ -1,12 +1,12 @@
-
-{ config, pkgs, ... }:
-
 {
-  
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ../../modules/global.nix
   ];
-  
+
   environment.systemPackages = with pkgs; [
     age
     sops
@@ -53,5 +53,4 @@
   hyprland.enable = false;
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
-
-} 
+}

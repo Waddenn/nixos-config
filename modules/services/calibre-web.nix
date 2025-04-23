@@ -1,8 +1,5 @@
-{ config, ... }:
-
-{
-
-  services.calibre-web= {
+{config, ...}: {
+  services.calibre-web = {
     enable = true;
     openFirewall = true;
     options = {
@@ -10,5 +7,4 @@
       enableBookConversion = true;
     };
   };
-  
 }

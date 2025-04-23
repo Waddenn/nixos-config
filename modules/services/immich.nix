@@ -1,6 +1,8 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   options = {
     immich.enable = lib.mkEnableOption "Enable immich";
   };

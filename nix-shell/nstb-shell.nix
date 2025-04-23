@@ -1,5 +1,4 @@
-{ pkgs ? import <nixpkgs> {} }:
-
+{pkgs ? import <nixpkgs> {}}:
 pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     aircrack-ng
@@ -25,8 +24,8 @@ pkgs.mkShell {
     burpsuite
     gophish
   ];
-  
-    shellHook = ''
+
+  shellHook = ''
     export SECLISTS_DIR=$(nix eval --raw nixpkgs#seclists)/share/wordlists/seclists
     echo "[+] SecLists is available at: $SECLISTS_DIR"
   '';
