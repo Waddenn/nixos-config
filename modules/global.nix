@@ -56,6 +56,7 @@
     ./services/kubernetes.nix
     ./services/onlyoffice.nix
     ./services/hyprland.nix
+    ./services/gatus.nix
   ];
 
 } 

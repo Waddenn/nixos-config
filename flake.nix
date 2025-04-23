@@ -199,11 +199,9 @@
             programs.tmux.enable = true;
           }
         ];
-      };
-
-      checks.x86_64-linux.default = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [];
+        gatus = mkServer "gatus" [
+          { gatus.enable = true; }
+        ];
       };
     };
 }
