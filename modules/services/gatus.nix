@@ -20,8 +20,28 @@
             conditions = [ "[STATUS] == 200" ];
           }
           {
-            name = "proxmox";
-            url = "http://192.168.1.1:8006";
+            name = "auth";
+            url = "https://auth.hexaflare.net";
+            conditions = [ "[STATUS] == 200" ];
+          }
+          {
+            name = "bourse";
+            url = "https://bourse.hexaflare.net";
+            conditions = [ "[STATUS] == 200" ];
+          }
+          {
+            name = "gitea";
+            url = "https://gitea.hexaflare.net";
+            conditions = [ "[STATUS] == 200" ];
+          }
+          {
+            name = "homeassistant";
+            url = "https://homeassistant.hexaflare.net";
+            conditions = [ "[STATUS] == 200" ];
+          }
+          {
+            name = "linkwarden";
+            url = "https://linkwarden.hexaflare.net";
             conditions = [ "[STATUS] == 200" ];
           }
         ];
