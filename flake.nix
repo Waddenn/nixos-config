@@ -13,6 +13,10 @@
       url = "github:kamadorueda/alejandra/4.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    colmena = {
+      url = "github:zhaofengli/colmena";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -22,6 +26,7 @@
     nix-flatpak,
     sops-nix,
     alejandra,
+    colmena,
     ...
   }: let
     lib = nixpkgs.lib;
@@ -229,6 +234,28 @@
       gatus = mkServer "gatus" [
         {gatus.enable = true;}
       ];
+    };
+
+    colmena = {
+      meta = {
+        nixpkgs = import nixpkgs {
+          system = "x86_64-linux";
+          overlays = [];
+        };
+      };
+
+      # Exemple pour un serveur
+      uptime-kuma = {name, ...}: {
+        imports = [self.nixosConfigurations.uptime-kuma.config];
+        deployment.targetHost = "uptime-kuma.local";
+        deployment.targetUser = "root";
+      };
+
+      grafana = {name, ...}: {
+        imports = [self.nixosConfigurations.grafana.config];
+        deployment.targetHost = "100.94.128.84";
+        deployment.targetUser = "nixos";
+      };
     };
   };
 }
