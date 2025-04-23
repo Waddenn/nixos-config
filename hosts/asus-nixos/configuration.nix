@@ -1,5 +1,5 @@
 
-{ config, pkgs, inputs, sops-nix, ... }:
+{ config, pkgs, ... }:
 
 {
   
@@ -50,11 +50,8 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = true;
-  hyprland.enable = true;
+  hyprland.enable = false;
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
 
-#   boot.kernelParams = [
-#   "amdgpu.dcdebugmask=0x10"
-# ];
 } 
