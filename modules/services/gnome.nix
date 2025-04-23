@@ -1,16 +1,15 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   options.gnome.enable = lib.mkEnableOption "Enable gnome";
 
   config = lib.mkIf config.gnome.enable {
+    services.xserver = {
+      enable = true;
 
-  services.xserver = {
-    enable = true;
-
-    desktopManager.gnome.enable = true;
-
-  };
-
+      desktopManager.gnome.enable = true;
+    };
   };
 }

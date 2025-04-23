@@ -1,9 +1,5 @@
-
-{ ... }:
-
-{
+{...}: {
   imports = [
-
     ./boot/loader/systemd-boot.nix
     ./boot/loader/grub.nix
     ./boot/kernel.nix
@@ -29,7 +25,7 @@
     ./security/rtkit.nix
     ./time/timeZone.nix
     ./zramSwap/zramswap.nix
-    ./environment/gnome/excludePackages.nix    
+    ./environment/gnome/excludePackages.nix
     ./environment/systemPackages/gnomeExtensions.nix
     ./environment/systemPackages/ethtool.nix
     ./services/flatpak.nix
@@ -58,5 +54,4 @@
     ./services/hyprland.nix
     ./services/gatus.nix
   ];
-
-} 
+}

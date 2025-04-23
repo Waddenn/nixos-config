@@ -1,14 +1,13 @@
-{ pkgs ? import <nixpkgs> {} }:
-
+{pkgs ? import <nixpkgs> {}}:
 pkgs.mkShell {
   name = "nixos-dashboard-dev";
 
   buildInputs = [
-    pkgs.nodejs_20       
-    pkgs.pnpm            
+    pkgs.nodejs_20
+    pkgs.pnpm
     pkgs.git
-    pkgs.nix            
-    pkgs.sudo           
+    pkgs.nix
+    pkgs.sudo
   ];
 
   shellHook = ''

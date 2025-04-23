@@ -1,10 +1,6 @@
-{ config, ... }:
-
-{
-
+{config, ...}: {
   users.users.docker = {
     isNormalUser = true;
-    extraGroups = [ "docker" ];
+    extraGroups = ["docker"];
   };
-
 }

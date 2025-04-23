@@ -1,12 +1,14 @@
-{ config, modulesPath, pkgs, lib, ... }:
-
 {
-
-  imports = [ 
-    (modulesPath + "/virtualisation/proxmox-lxc.nix") 
+  config,
+  modulesPath,
+  pkgs,
+  lib,
+  ...
+}: {
+  imports = [
+    (modulesPath + "/virtualisation/proxmox-lxc.nix")
     ../global.nix
-    ];
-
+  ];
 
   boot.isContainer = true;
   systemd.suppressedSystemUnits = [
@@ -15,12 +17,12 @@
     "sys-fs-fuse-connections.mount"
   ];
 
-  nix.settings = { sandbox = false; };  
+  nix.settings = {sandbox = false;};
   proxmoxLXC = {
     manageNetwork = false;
     privileged = true;
   };
-    
+
   security.sudo.wheelNeedsPassword = false;
 
   environment.systemPackages = with pkgs; [
@@ -35,5 +37,4 @@
   zsh.enable = true;
   gc.enable = true;
   time.timeZone = "Europe/Paris";
-
 }

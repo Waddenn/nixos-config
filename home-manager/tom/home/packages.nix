@@ -1,8 +1,9 @@
-{ config, pkgs, ... }:
-
 {
-
-  home.packages = with pkgs; [ 
+  config,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs; [
     teams-for-linux
     remmina
     obsidian
@@ -27,6 +28,4 @@
     nix-output-monitor
     discord
   ];
-
 }
-

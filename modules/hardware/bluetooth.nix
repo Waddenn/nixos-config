@@ -1,6 +1,8 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   options.bluetooth.enable = lib.mkEnableOption "Enable Bluetooth";
 
   config = lib.mkIf config.bluetooth.enable {
@@ -9,8 +11,8 @@
 
       settings = {
         General = {
-          Discoverable = false;       
-          DiscoverableTimeout = 0;   
+          Discoverable = false;
+          DiscoverableTimeout = 0;
         };
       };
     };
