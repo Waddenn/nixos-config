@@ -54,5 +54,6 @@
     ./services/onlyoffice.nix
     ./services/hyprland.nix
     ./services/gatus.nix
+    ./modules/services/github-runner.nix
   ];
 }

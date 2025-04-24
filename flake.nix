@@ -228,6 +228,10 @@
       gatus = mkServer "gatus" [
         {gatus.enable = true;}
       ];
+
+      github-runner = mkServer "runner" [
+        {github-runner.enable = true;}
+      ];
     };
   };
 }
