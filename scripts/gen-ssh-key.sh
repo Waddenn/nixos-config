@@ -11,3 +11,4 @@ else
   ssh-keygen -t ed25519 -f "$KEY_PATH" -N ""
   echo "Clé SSH générée : $KEY_PATH"
 fi
+
