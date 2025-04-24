@@ -15,9 +15,9 @@
         "browser.preferences.defaultPerformanceSettings.enabled" = true;
         "layers.acceleration.disabled" = false;
         "dom.security.https_only_mode" = true;
-        "sidebar.verticalTabs" = true;
+        "sidebar.verticalTabs" = false;
         "signon.rememberSignons" = false;
-        "sidebar.revamp" = true;
+        "sidebar.revamp" = false;
         "extensions.formautofill.creditCards.enabled" = false;
         "browser.translations.neverTranslateLanguages" = "fr";
         "browser.toolbars.bookmarks.visibility" = "never";
@@ -43,6 +43,7 @@
         "browser.search.separatePrivateDefault.ui.enabled" = false;
         "signon.autofillForms" = false;
         "signon.formlessCapture.enabled" = false;
+        "media.hardware-video-decoding.enabled" = false;
       };
     };
   };
