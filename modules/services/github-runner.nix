@@ -8,7 +8,6 @@
   githubRepo = "tom/nixos-config";
 in {
   services.github-runners = {
-    enable = true;
     runners.runner1 = {
       replace = true;
       token = githubToken;
