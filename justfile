@@ -41,4 +41,9 @@ supdate:
 sgen:
     nix-shell -p ssh-to-age --run "ssh-to-age -i ~/.ssh/id_ed25519.pub"
 
+# Usage: just senc <fichier>
+# Exemple: just senc cf_api_token.env
+senc file:
+    sops --encrypt {{file}} > {{file}}.enc
+
 
