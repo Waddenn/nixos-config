@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.services.github-runner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
+  options.services.ggithubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
-  config = lib.mkIf config.services.github-runner.enable {
+  config = lib.mkIf config.services.githubRunner.enable {
     services.github-runners = {
       runner1 = {
         replace = true;
