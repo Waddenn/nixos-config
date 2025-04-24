@@ -23,7 +23,7 @@ in {
       description = "Timer for git-auto-pull";
       wantedBy = ["timers.target"];
       timerConfig = {
-        OnCalendar = "hourly";
+        OnCalendar = "daily";
         Persistent = true;
         Unit = "git-auto-pull.service";
       };
