@@ -7,6 +7,7 @@
     ./networking/firewall.nix
     ./programs/firefox.nix
     ./system/autoUpgrade.nix
+    ./system/git-auto-pull.nix
     ./console/keyMap.nix
     ./i18n/i18n.nix
     ./networking/networkmanager.nix

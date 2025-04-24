@@ -22,6 +22,7 @@
   ];
 
   autoUpgrade.enable = true;
+  autoUpgrade.updateFlakeLock = true;
   firefox.enable = true;
   bluetooth.enable = true;
   systemd-boot.enable = true;
