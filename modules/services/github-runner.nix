@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  options.services.ggithubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
+  options.services.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.services.githubRunner.enable {
     services.github-runners = {
