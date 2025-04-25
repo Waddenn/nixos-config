@@ -10,7 +10,7 @@
     services.github-runners = {
       nixos-runner = {
         enable = true;
-        tokenFile = "/run/secrets/github-runner/nixos.token";
+        tokenFile = "/var/lib/github-runner/nixos-runner/.current-token";
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner/nixos-runner";
