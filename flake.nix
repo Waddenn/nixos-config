@@ -66,7 +66,6 @@
       };
       modules =
         [
-          ./modules/global.nix
           ./users/nixos/default.nix
           ./hosts/proxmox-lxc/configuration.nix
           ./modules/virtualisation/oci-containers/beszel-agent.nix
