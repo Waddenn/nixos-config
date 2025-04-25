@@ -38,7 +38,7 @@
 
         workDir = "/var/github-runner-work";
 
-        extraPackages = with pkgs; [alejandra nix-eval-jobs nix-fast-build];
+        extraPackages = with pkgs; [alejandra nix-eval-jobs nix-fast-build curl];
 
         serviceOverrides = {
           ProtectSystem = "full";
