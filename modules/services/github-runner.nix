@@ -8,10 +8,10 @@
 
   config = lib.mkIf config.services.githubRunner.enable {
     services.github-runners = {
-      runner1 = {
+      nixos-runner = {
         replace = true;
-        token = "3VY1Cl29odeCWwijad5gs9TX6qkDJ";
-        url = "https://github.com/tom/nixos-config";
+        tokenFile = "/run/secrets/github-runner/nixos.token";
+        url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner";
       };
