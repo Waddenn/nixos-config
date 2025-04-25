@@ -1,17 +1,15 @@
 # nixos-config
 
-This repository contains my personal configuration files for NixOS, covering setups for my servers, laptops, and desktops. It is designed to manage and customize my NixOS systems in a declarative and reproducible way.
+This repository contains my personal NixOS configurations for desktops, laptops, and servers. The setup is modular and declarative, aiming to make my systems reproducible and easy to manage.
 
-## Highlights
+⚠️ This project is a work in progress and evolves as my needs change.
 
-- Configurations for a wide range of devices, including desktops, laptops, and servers.
-- Modular and organized structure for easier maintenance and scalability.
-- Tailored for managing both personal devices and homelab infrastructure.
+## Features
 
-## Usage
-
-Feel free to explore and adapt these configurations to your own NixOS setup. Contributions or suggestions are welcome!
+- Modular structure for easy customization
+- Covers both personal devices and homelab servers
+- Uses [Nix flakes](https://nixos.wiki/wiki/Flakes) and [home-manager](https://nix-community.github.io/home-manager/)
 
 ---
 
-For more information about NixOS, visit [NixOS Official Website](https://nixos.org/).
+Feel free to explore or adapt for your own use!
