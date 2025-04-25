@@ -239,7 +239,7 @@
       ];
     };
 
-    checks = lib.genAttrs ["beszel" "caddy"] (
+    checks = lib.genAttrs ["beszel" "caddy" "github-runner"] (
       name: let
         sys = self.nixosConfigurations.${name}.config.system.build.toplevel;
       in {

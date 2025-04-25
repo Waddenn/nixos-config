@@ -17,6 +17,6 @@ jobs:
         run: |
           nix-fast-build \
             --eval-max-memory-size 10016 \
-            --eval-workers 4 \
+            --eval-workers 6 \
             --skip-cached \
             --no-nom
