@@ -1,0 +1,20 @@
+name: NixOS CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: [self-hosted, nixos-runner]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Format check (alejandra)
+        run: alejandra -c *
+
+      - name: Check Nix Flake
+        run: nix flake check
