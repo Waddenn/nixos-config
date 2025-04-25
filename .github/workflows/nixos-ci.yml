@@ -18,5 +18,11 @@ jobs:
       - name: Flake eval (nix-eval-jobs)
         run: nix-eval-jobs --flake .#nixosConfigurations --gc-roots-dir gcroot
 
-
-
+      - name: Check Nix flake inputs
+        uses: DeterminateSystems/flake-checker-action@v5
+        with:
+          check-outdated: true
+          check-owner: true
+          check-supported: true
+          fail-mode: true
+          ignore-missing-flake-lock: false
