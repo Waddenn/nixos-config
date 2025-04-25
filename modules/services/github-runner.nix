@@ -11,15 +11,11 @@
       nixos-runner = {
         enable = true;
         replace = true;
-        tokenFile = "/run/secrets/github-runner/nixos.token";
+        tokenFile = "/etc/secrets/github-runner/nixos.token";
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner/nixos-runner";
       };
     };
-
-    systemd.tmpfiles.rules = [
-      "d /var/lib/github-runner/nixos-runner 0750 - - -"
-    ];
   };
 }
