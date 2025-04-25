@@ -9,7 +9,7 @@
   config = lib.mkIf config.githubRunner.enable {
     environment.etc = {
       "secrets/github-runner.token" = {
-        source = ../../../github-runner.token;
+        source = /home/nixos/github-runner.token;
         user = "runner";
         group = "runner";
         mode = "0400";
