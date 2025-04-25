@@ -7,14 +7,14 @@
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
-    environment.etc = {
-      "secrets/github-runner.token" = {
-        source = /home/nixos/github-runner.token;
-        user = "runner";
-        group = "runner";
-        mode = "0400";
-      };
-    };
+    # environment.etc = {
+    #   "secrets/github-runner.token" = {
+    #     source = /home/nixos/github-runner.token;
+    #     user = "runner";
+    #     group = "runner";
+    #     mode = "0400";
+    #   };
+    # };
 
     users.groups.runner = {};
     users.users.runner = {
