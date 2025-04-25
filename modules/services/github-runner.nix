@@ -21,7 +21,6 @@
       "d /var/lib/github-runner/nixos-runner 0750 github-runner github-runner -"
       "d /var/log/github-runner 0750 github-runner github-runner -"
       "d /var/log/github-runner/nixos-runner 0750 github-runner github-runner -"
-      "f /var/lib/github-runner/nixos-runner/.current-token 0600 github-runner github-runner -"
     ];
 
     services.github-runners = {
@@ -34,6 +33,10 @@
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner/nixos-runner";
+        serviceOverrides = {
+          StateDirectory = "github-runner/nixos-runner";
+          LogsDirectory = "github-runner/nixos-runner";
+        };
       };
     };
   };
