@@ -68,7 +68,7 @@
         [
           ./modules/global.nix
           ./users/nixos/default.nix
-          ./modules/templates/proxmox-lxc.nix
+          ./hosts/proxmox-lxc/configuration.nix
           ./modules/virtualisation/oci-containers/beszel-agent.nix
           inputs.sops-nix.nixosModules.sops
           {
