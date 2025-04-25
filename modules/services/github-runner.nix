@@ -49,11 +49,13 @@
 
         extraEnvironment = {
           NIX_CONFIG = "sandbox = false";
-          trusted-users = ["root" "runner"];
         };
       };
     };
 
-    nix.settings.sandbox = false;
+    nix.settings = {
+      sandbox = false;
+      trusted-users = ["root" "runner"];
+    };
   };
 }
