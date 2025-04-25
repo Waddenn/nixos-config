@@ -3,20 +3,23 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  tokenPath = "/secrets/github-runner.token";
+in {
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
     services.github-runners = {
       nixos-runner = {
         enable = true;
-        tokenFile = "/var/lib/github-runner/nixos-runner/.current-token";
         url = "https://github.com/Waddenn/nixos-config";
+        tokenFile = tokenPath;
         extraLabels = ["nixos" "self-hosted"];
-        workDir = "/var/lib/github-runner/nixos-runner";
+        package = pkgs.github-runner;
+
         serviceOverrides = {
-          DynamicUser = false;
-          ProtectSystem = false;
+          ProtectSystem = "off";
+          PrivateDevices = false;
           ProtectHome = false;
         };
       };
