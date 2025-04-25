@@ -9,6 +9,7 @@
   config = lib.mkIf config.githubRunner.enable {
     services.github-runners = {
       nixos-runner = {
+        enable = true;
         replace = true;
         tokenFile = "/run/secrets/github-runner/nixos.token";
         url = "https://github.com/Waddenn/nixos-config";
