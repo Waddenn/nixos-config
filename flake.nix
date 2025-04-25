@@ -8,7 +8,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     alejandra = {
       url = "github:kamadorueda/alejandra/4.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -43,8 +46,6 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${username} = import ./home-manager/${username}/home.nix;
-          sops.defaultSopsFile = ./secrets/secrets.yaml;
-          sops.age.sshKeyPaths = ["/home/tom/.ssh/id_ed25519"];
           networking.hostName = hostname;
           system.stateVersion = "25.05";
           environment.systemPackages = [
@@ -92,11 +93,10 @@
       });
   in {
     nixosConfigurations = {
-      # === Desktops ===
       asus-nixos = mkDesktop "asus-nixos" "tom";
+
       lenovo-nixos = mkDesktop "lenovo-nixos" "tom";
 
-      # === Serveurs ===
       tailscale-subnet = mkServer "tailscale-subnet" [
         {ethtool.enable = true;}
       ];
