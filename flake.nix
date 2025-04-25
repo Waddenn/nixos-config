@@ -238,5 +238,13 @@
         }
       ];
     };
+
+    checks = lib.genAttrs ["asus-nixos" "caddy"] (
+      name: let
+        sys = self.nixosConfigurations.${name}.config.system.build.toplevel;
+      in {
+        "${name}" = sys;
+      }
+    );
   };
 }

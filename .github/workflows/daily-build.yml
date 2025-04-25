@@ -1,0 +1,17 @@
+name: Daily NixOS Build Check
+
+on:
+  schedule:
+    - cron: '0 3 * * *' 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, nixos]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build asus-nixos (fast)
+        run: nix-fast-build --eval-max-memory-size 2048 --eval-workers 2 
