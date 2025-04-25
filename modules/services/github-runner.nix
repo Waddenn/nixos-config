@@ -26,6 +26,9 @@
         extraLabels = ["nixos" "self-hosted"];
         package = pkgs.github-runner;
 
+        user = "root";
+        group = "root";
+
         serviceOverrides = {
           ProtectSystem = "off";
           PrivateDevices = false;
