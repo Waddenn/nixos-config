@@ -19,6 +19,8 @@
     systemd.tmpfiles.rules = [
       "d /var/lib/github-runner 0750 github-runner github-runner -"
       "d /var/lib/github-runner/nixos-runner 0750 github-runner github-runner -"
+      "d /var/log/github-runner 0750 github-runner github-runner -"
+      "d /var/log/github-runner/nixos-runner 0750 github-runner github-runner -"
     ];
 
     services.github-runners = {
