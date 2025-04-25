@@ -7,7 +7,6 @@
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
-    # 🔐 Token GitHub
     environment.etc = {
       "secrets/github-runner.token" = {
         source = ../../secrets/github-runner.token;
@@ -17,7 +16,6 @@
       };
     };
 
-    # 👤 Utilisateur système pour exécuter le runner
     users.groups.runner = {};
     users.users.runner = {
       isSystemUser = true;
@@ -26,7 +24,6 @@
       createHome = true;
     };
 
-    # 📦 Runner GitHub
     services.github-runners = {
       nixos-runner = {
         enable = true;
@@ -39,6 +36,8 @@
         group = "runner";
 
         workDir = "/var/github-runner-work";
+
+        extraPackages = with pkgs; [alejandra nix-eval-jobs];
 
         serviceOverrides = {
           ProtectSystem = "full";
@@ -54,7 +53,6 @@
       };
     };
 
-    # 🧰 Config globale pour Nix
     nix.settings.sandbox = false;
   };
 }
