@@ -230,7 +230,12 @@
       ];
 
       github-runner = mkServer "github-runner" [
-        {githubRunner.enable = true;}
+        {
+          githubRunner.enable = true;
+          environment.systemPackages = [
+            alejandra.defaultPackage.x86_64-linux
+          ];
+        }
       ];
     };
   };
