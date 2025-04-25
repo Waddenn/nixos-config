@@ -239,7 +239,7 @@
       ];
     };
 
-    checks = lib.genAttrs ["asus-nixos" "caddy"] (
+    checks = lib.genAttrs ["beszel" "caddy"] (
       name: let
         sys = self.nixosConfigurations.${name}.config.system.build.toplevel;
       in {
