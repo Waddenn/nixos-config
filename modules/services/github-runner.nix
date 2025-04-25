@@ -14,7 +14,7 @@
         tokenFile = "/run/secrets/github-runner/nixos.token";
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
-        workDir = "/var/lib/github-runner";
+        workDir = "/var/lib/github-runner/nixos-runner";
         user = "github-runner";
         group = "github-runner";
       };
