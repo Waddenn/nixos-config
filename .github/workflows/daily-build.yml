@@ -14,4 +14,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build asus-nixos (fast)
-        run: nix-fast-build --eval-max-memory-size 2048 --eval-workers 2 
+        run: nix-fast-build --eval-max-memory-size 10016 --eval-workers 4 
