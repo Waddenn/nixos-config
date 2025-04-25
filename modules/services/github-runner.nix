@@ -33,6 +33,9 @@
           ProtectSystem = "off";
           PrivateDevices = false;
           ProtectHome = false;
+          SystemCallFilter = "~@system-service"; # ou juste "default" pour ne pas filtrer du tout
+          CapabilityBoundingSet = "~CAP_SYS_ADMIN"; # ou supprime cette ligne si tu la définis ailleurs
+          NoNewPrivileges = false;
         };
       };
     };
