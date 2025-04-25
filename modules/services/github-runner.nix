@@ -15,17 +15,11 @@
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner/nixos-runner";
-        user = "github-runner";
-        group = "github-runner";
       };
     };
 
-    users.groups.github-runner = {};
-    users.users.github-runner = {
-      isSystemUser = true;
-      group = "github-runner";
-      home = "/var/lib/github-runner";
-      createHome = true;
-    };
+    systemd.tmpfiles.rules = [
+      "d /var/lib/github-runner/nixos-runner 0750 - - -"
+    ];
   };
 }
