@@ -7,7 +7,6 @@
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
-    # 1) on importe le token depuis un fichier hors store (ici : /root/github-runner.token)
     environment.etc = {
       "secrets/github-runner.token" = {
         source = ../../secrets/github-runner.token;
@@ -17,7 +16,6 @@
       };
     };
 
-    # 2) on pointe le runner dessus
     services.github-runners = {
       nixos-runner = {
         enable = true;
