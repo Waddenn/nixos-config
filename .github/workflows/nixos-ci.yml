@@ -7,7 +7,7 @@ on:
 
 jobs:
   check:
-    runs-on: [self-hosted, nixos-runner]
+    runs-on: [self-hosted, nixos]
 
     steps:
       - name: Checkout repository
