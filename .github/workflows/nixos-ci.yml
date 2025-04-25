@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Format check (alejandra)
-        run: alejandra -c *
+        run: /run/current-system/sw/bin/alejandra -c *
 
       - name: Flake eval (nix-eval-jobs)
         run: nix run github:nix-community/nix-eval-jobs -- --flake .#nixosConfigurations --gc-roots-dir gcroot
