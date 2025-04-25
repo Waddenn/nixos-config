@@ -33,6 +33,11 @@
           ProtectSystem = "off";
           PrivateDevices = false;
           ProtectHome = false;
+
+          # IMPORTANT
+          DynamicUser = "false";
+          StateDirectory = "github-runner/nixos-runner";
+          LogsDirectory = "github-runner/nixos-runner";
         };
       };
     };
