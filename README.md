@@ -2,7 +2,7 @@
 
 This repository contains my personal NixOS configurations for desktops, laptops, and servers. The setup is modular and declarative, aiming to make my systems reproducible and easy to manage.
 
-⚠️ This project is a work in progress and evolves as my needs change.
+Note: This project is a work in progress and evolves as my needs change.
 
 ## Features
 
