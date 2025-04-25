@@ -5,8 +5,8 @@
 }: {
   programs.git = {
     enable = true;
-    userName = "waddenn";
-    userEmail = "waddenn.github@gmail.com";
+    userName = "Waddenn";
+    userEmail = "tpatelas@proton.me";
     extraConfig = {
       init.defaultBranch = "main";
     };
