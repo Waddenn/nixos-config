@@ -14,6 +14,11 @@
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner/nixos-runner";
+        serviceOverrides = {
+          DynamicUser = false;
+          ProtectSystem = false;
+          ProtectHome = false;
+        };
       };
     };
   };
