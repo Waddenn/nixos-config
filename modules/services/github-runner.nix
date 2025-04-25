@@ -33,8 +33,8 @@
           ProtectSystem = "off";
           PrivateDevices = false;
           ProtectHome = false;
-          SystemCallFilter = "default"; # <- désactive complètement le filtre
-          CapabilityBoundingSet = "~"; # <- autorise toutes les capacités
+          SystemCallFilter = "default";
+          CapabilityBoundingSet = "~";
           NoNewPrivileges = false;
           RestrictAddressFamilies = [];
           RestrictNamespaces = false;
@@ -44,6 +44,9 @@
           ProtectControlGroups = false;
           RestrictRealtime = false;
           ProtectClock = false;
+        };
+        extraEnvironment = {
+          NIX_CONFIG = "sandbox = false";
         };
       };
     };
