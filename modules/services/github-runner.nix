@@ -21,7 +21,7 @@
       owner = "runner";
       group = "runner";
       mode = "0400";
-      sopsFile = ../../secrets/github-runner.token.enc;
+      sopsFile = ../../secrets/github-runner.env.enc;
     };
 
     # 🧪 Exemple d'un autre secret .env
