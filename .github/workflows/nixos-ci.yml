@@ -15,7 +15,7 @@ jobs:
         run: alejandra -c *
 
       - name: Flake eval (nix-eval-jobs)
-        run: nix-eval-jobs -- --flake .#nixosConfigurations --gc-roots-dir gcroot
+        run: nix-eval-jobs --flake .#nixosConfigurations --gc-roots-dir gcroot
 
 
 
