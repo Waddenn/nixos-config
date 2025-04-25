@@ -27,6 +27,7 @@
     services.github-runners = {
       nixos-runner = {
         enable = true;
+        replace = true;
         url = "https://github.com/Waddenn/nixos-config";
         tokenFile = "/etc/secrets/github-runner.token";
         extraLabels = ["nixos" "self-hosted"];
