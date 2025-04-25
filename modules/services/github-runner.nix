@@ -18,6 +18,7 @@
 
     systemd.tmpfiles.rules = [
       "d /var/lib/github-runner 0750 github-runner github-runner -"
+      "d /var/lib/github-runner/nixos-runner 0750 github-runner github-runner -"
     ];
 
     services.github-runners = {
@@ -29,7 +30,7 @@
         tokenFile = "/run/secrets/github-runner/nixos.token";
         url = "https://github.com/Waddenn/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
-        workDir = "/var/lib/github-runner";
+        workDir = "/var/lib/github-runner/nixos-runner";
       };
     };
   };
