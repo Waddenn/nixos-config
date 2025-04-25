@@ -7,15 +7,26 @@
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
+    # 🔐 Token GitHub
     environment.etc = {
       "secrets/github-runner.token" = {
         source = ../../secrets/github-runner.token;
-        user = "root";
-        group = "root";
+        user = "runner";
+        group = "runner";
         mode = "0400";
       };
     };
 
+    # 👤 Utilisateur système pour exécuter le runner
+    users.groups.runner = {};
+    users.users.runner = {
+      isSystemUser = true;
+      group = "runner";
+      home = "/var/lib/github-runner";
+      createHome = true;
+    };
+
+    # 📦 Runner GitHub
     services.github-runners = {
       nixos-runner = {
         enable = true;
@@ -24,8 +35,8 @@
         extraLabels = ["nixos" "self-hosted"];
         package = pkgs.github-runner;
 
-        user = "root";
-        group = "root";
+        user = "runner";
+        group = "runner";
 
         workDir = "/var/github-runner-work";
 
@@ -45,10 +56,14 @@
           RestrictRealtime = false;
           ProtectClock = false;
         };
+
         extraEnvironment = {
           NIX_CONFIG = "sandbox = false";
         };
       };
     };
+
+    # 🧰 Config globale pour Nix
+    nix.settings.sandbox = false;
   };
 }
