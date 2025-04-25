@@ -13,6 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+
+      - name: Install alejandra
+        run: nix-env -iA nixpkgs.alejandra
+
       - name: Check Nix Flake
         run: nix flake check
 
