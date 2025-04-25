@@ -10,7 +10,7 @@
     services.github-runners = {
       runner1 = {
         replace = true;
-        # token = "";
+        token = "3VY1Cl29odeCWwijad5gs9TX6qkDJ";
         url = "https://github.com/tom/nixos-config";
         extraLabels = ["nixos" "self-hosted"];
         workDir = "/var/lib/github-runner";
