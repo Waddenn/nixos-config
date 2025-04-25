@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.services.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
+  options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
-  config = lib.mkIf config.services.githubRunner.enable {
+  config = lib.mkIf config.githubRunner.enable {
     services.github-runners = {
       nixos-runner = {
         replace = true;
