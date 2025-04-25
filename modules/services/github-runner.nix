@@ -41,20 +41,11 @@
         workDir = "/var/github-runner-work";
 
         serviceOverrides = {
-          ProtectSystem = "off";
+          ProtectSystem = "full";
+          ProtectHome = "read-only";
           PrivateDevices = false;
-          ProtectHome = false;
           SystemCallFilter = "default";
-          CapabilityBoundingSet = "~";
-          NoNewPrivileges = false;
-          RestrictAddressFamilies = [];
           RestrictNamespaces = false;
-          LockPersonality = false;
-          ProtectKernelModules = false;
-          ProtectKernelTunables = false;
-          ProtectControlGroups = false;
-          RestrictRealtime = false;
-          ProtectClock = false;
         };
 
         extraEnvironment = {
