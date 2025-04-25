@@ -27,5 +27,9 @@
       home = "/var/lib/github-runner";
       createHome = true;
     };
+
+    systemd.tmpfiles.rules = [
+      "d /var/lib/github-runner/nixos-runner 0750 github-runner github-runner -"
+    ];
   };
 }
