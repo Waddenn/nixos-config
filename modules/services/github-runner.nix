@@ -29,15 +29,16 @@
         user = "root";
         group = "root";
 
-        serviceOverrides = {
-          ProtectSystem = "off";
-          PrivateDevices = false;
-          ProtectHome = false;
+        serviceConfig = {
+          # mkForce pour écraser la définition upstream (qui est bool)
+          DynamicUser = lib.mkForce false;
+          StateDirectory = lib.mkForce "github-runner/nixos-runner";
+          LogsDirectory = lib.mkForce "github-runner/nixos-runner";
 
-          # IMPORTANT
-          DynamicUser = "false";
-          StateDirectory = "github-runner/nixos-runner";
-          LogsDirectory = "github-runner/nixos-runner";
+          # On désactive le sandboxing gênant
+          ProtectSystem = lib.mkForce "off";
+          PrivateDevices = lib.mkForce false;
+          ProtectHome = lib.mkForce false;
         };
       };
     };
