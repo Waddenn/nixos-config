@@ -7,6 +7,15 @@
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
+    users.groups.github-runner = {};
+    users.users.github-runner = {
+      isSystemUser = true;
+      group = "github-runner";
+      home = "/var/lib/github-runner";
+      createHome = true;
+      shell = pkgs.bashInteractive;
+    };
+
     systemd.tmpfiles.rules = [
       "d /var/lib/github-runner 0750 github-runner github-runner -"
     ];
