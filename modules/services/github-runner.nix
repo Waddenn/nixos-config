@@ -7,7 +7,6 @@
   options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
   config = lib.mkIf config.githubRunner.enable {
-    # 🧑‍💻 Utilisateur dédié
     users.groups.runner = {};
     users.users.runner = {
       isSystemUser = true;
@@ -16,21 +15,11 @@
       createHome = true;
     };
 
-    # 🔐 Token GitHub via SOPS
     sops.secrets.github-runner = {
-      owner = "runner";
-      group = "runner";
-      mode = "0400";
-      sopsFile = ../../secrets/github-runner.env.enc;
-    };
-
-    # 🧪 Exemple d'un autre secret .env
-    sops.secrets.cf_api_token = {
       format = "dotenv";
       sopsFile = ../../secrets/github-runner.env.enc;
     };
 
-    # ⚙️ GitHub Runner
     services.github-runners = {
       nixos-runner = {
         enable = true;
