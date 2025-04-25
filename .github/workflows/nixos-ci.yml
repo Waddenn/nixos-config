@@ -15,7 +15,7 @@ jobs:
       - name: Format check (alejandra)
         run: alejandra -c *
 
-      - name: Build daily NixOS configs (fast)
+      - name: Build NixOS configs (fast)
         run: |
           nix-fast-build \
             --eval-max-memory-size 10016 \

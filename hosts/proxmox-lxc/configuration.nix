@@ -7,7 +7,7 @@
 }: {
   imports = [
     (modulesPath + "/virtualisation/proxmox-lxc.nix")
-    ../../modules/global.nix
+    ../modules/global.nix
   ];
 
   boot.isContainer = true;
