@@ -10,7 +10,7 @@
     # 1) on importe le token depuis un fichier hors store (ici : /root/github-runner.token)
     environment.etc = {
       "secrets/github-runner.token" = {
-        source = ./secrets/github-runner.token;
+        source = ../secrets/github-runner.token;
         user = "root";
         group = "root";
         mode = "0400";
