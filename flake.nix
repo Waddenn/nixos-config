@@ -231,8 +231,6 @@
 
       github-runner = mkServer "github-runner" [
         {
-          sops.defaultSopsFile = ./secrets/secrets.yaml;
-          sops.age.sshKeyPaths = ["/home/nixos/.ssh/id_ed25519"];
           githubRunner.enable = true;
           environment.systemPackages = [
             alejandra.defaultPackage.x86_64-linux
