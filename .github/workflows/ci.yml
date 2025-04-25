@@ -23,4 +23,4 @@ jobs:
         run: nix flake check
 
       - name: Format check (alejandra)
-        run: alejandra -c *
+        run: nix run github:kamadorueda/alejandra -- -c *
