@@ -24,11 +24,16 @@
       createHome = true;
     };
 
+    sops.secrets.cf_api_token = {
+      format = "dotenv";
+      sopsFile = ../../secrets/github-runner.env.enc;
+    };
+
     services.github-runners = {
       nixos-runner = {
         enable = true;
         url = "https://github.com/Waddenn/nixos-config";
-        tokenFile = "/etc/secrets/github-runner.token";
+        tokenFile = config.sops.secrets.github-runner.path;
         extraLabels = ["nixos" "self-hosted"];
         package = pkgs.github-runner;
 
