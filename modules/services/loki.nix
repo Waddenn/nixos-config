@@ -16,7 +16,9 @@ in {
     services.loki = {
       enable = true;
       configuration = {
-        server.http_listen_port = 3030;
+        server = {
+          http_listen_port = 3030;
+        };
         auth_enabled = false;
 
         ingester = {
@@ -34,7 +36,7 @@ in {
         schema_config.configs = [
           {
             from = "2022-06-06";
-            store = "boltdb-shipper";
+            store = "boltdb-shipper"; # OK car on bloque structured metadata
             object_store = "filesystem";
             schema = "v11";
             index = {
@@ -58,11 +60,16 @@ in {
         limits_config = {
           reject_old_samples = true;
           reject_old_samples_max_age = "168h";
+          allow_structured_metadata = false;
         };
 
         table_manager = {
           retention_deletes_enabled = false;
           retention_period = "0s";
+        };
+
+        compactor = {
+          working_directory = "/var/lib/loki/compactor";
         };
       };
     };
