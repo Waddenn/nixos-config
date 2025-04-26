@@ -38,8 +38,10 @@ in {
 
       extraConfig = ''
         {
+          admin 0.0.0.0:2019
           metrics
         }
+
       '';
 
       virtualHosts = {
