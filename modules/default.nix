@@ -56,6 +56,5 @@
     ./services/gatus.nix
     ./services/github-runner.nix
     ./virtualisation/oci-containers/beszel-agent.nix
-    ../modules/systemd/bourse-deploy.nix
   ];
 }
