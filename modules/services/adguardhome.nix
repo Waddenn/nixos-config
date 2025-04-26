@@ -10,7 +10,7 @@
       enable = true;
       settings = {
         http = {
-          address = "127.0.0.1:3003";
+          address = "0.0.0.0:3003";
         };
         dns = {
           upstream_dns = [
@@ -44,5 +44,6 @@
       };
     };
     networking.firewall.allowedTCPPorts = [3003 53 80 443];
+    networking.firewall.allowedUDPPorts = [53];
   };
 }
