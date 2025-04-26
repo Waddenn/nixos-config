@@ -68,12 +68,9 @@
         [
           ./users/nixos/default.nix
           ./hosts/proxmox-lxc/configuration.nix
-          ./modules/virtualisation/oci-containers/beszel-agent.nix
           inputs.sops-nix.nixosModules.sops
           {
             networking.hostName = hostname;
-            system.stateVersion = "25.05";
-            virtualisation.oci-containers.containers."beszel-agent".extraOptions = ["--pull=always"];
           }
         ]
         ++ extraModules;
