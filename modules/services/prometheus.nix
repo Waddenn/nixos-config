@@ -31,7 +31,7 @@ in {
             job_name = "caddy";
             static_configs = [
               {
-                targets = ["caddy:9000"];
+                targets = ["caddy:2019"];
               }
             ];
           }
