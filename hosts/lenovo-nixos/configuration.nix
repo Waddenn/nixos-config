@@ -4,7 +4,7 @@
   ...
 }: {
   imports = [
-    ../../modules/global.nix
+    ../../modules/default.nix
   ];
 
   environment.systemPackages = with pkgs; [
