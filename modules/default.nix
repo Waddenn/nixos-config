@@ -55,6 +55,7 @@
     ./services/hyprland.nix
     ./services/gatus.nix
     ./services/github-runner.nix
+    ./services/adguardhome.nix
     ./virtualisation/oci-containers/beszel-agent.nix
   ];
 }

@@ -109,10 +109,8 @@
       ];
 
       adguardhome = mkServer "adguardhome" "nixos" [
-        ./modules/virtualisation/oci-containers/adguardhome.nix
         {
-          systemd.services.systemd-resolved.enable = false;
-          networking.nameservers = ["127.0.0.1" "1.1.1.1" "8.8.8.8"];
+          adguardhome.enable = true;
         }
       ];
 
