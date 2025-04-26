@@ -37,7 +37,9 @@ in {
       environmentFile = config.sops.secrets.cf_api_token.path;
 
       globalConfig = ''
-        metrics
+        metrics {
+          per_host
+        }
       '';
 
       virtualHosts = {
