@@ -216,7 +216,6 @@
       bourse-dashboard = mkServer "bourse-dashboard" "nixos" [
         {
           networking.firewall.allowedTCPPorts = [5000];
-          programs.tmux.enable = true;
         }
       ];
       gatus = mkServer "gatus" "nixos" [

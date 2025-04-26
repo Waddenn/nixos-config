@@ -11,7 +11,7 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
-    echo "✅ Environnement de dev Next.js + NixOS prêt !"
-    echo "📦 Utilise 'pnpm dev' pour lancer Next.js"
+    echo "✅ Next.js + NixOS development environment ready!"
+    echo "📦 Use 'pnpm dev' to start Next.js"
   '';
 }
