@@ -143,6 +143,8 @@
           prometheus.enableClient = true;
           prometheus.enableServer = true;
           gitAutoPull.enable = lib.mkForce false;
+          loki.enable = true;
+          promtail.enable = true;
         }
       ];
 
