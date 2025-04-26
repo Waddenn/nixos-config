@@ -57,16 +57,16 @@
 
     mkServerSystem = {
       hostname,
+      username,
       extraModules ? [],
     }: {
       system = "x86_64-linux";
       specialArgs = {
-        inherit inputs nixpkgs home-manager;
-        username = "nixos";
+        inherit inputs nixpkgs home-manager username;
       };
       modules =
         [
-          ./users/nixos/default.nix
+          ./users/${username}/default.nix
           ./hosts/proxmox-lxc/configuration.nix
           inputs.sops-nix.nixosModules.sops
           {
@@ -82,9 +82,10 @@
         username = username;
       });
 
-    mkServer = name: extraModules:
+    mkServer = name: username: extraModules:
       lib.nixosSystem (mkServerSystem {
         hostname = name;
+        username = username;
         extraModules = extraModules;
       });
   in {
@@ -93,24 +94,24 @@
 
       lenovo-nixos = mkDesktop "lenovo-nixos" "tom";
 
-      tailscale-subnet = mkServer "tailscale-subnet" [
+      tailscale-subnet = mkServer "tailscale-subnet" "nixos" [
         {ethtool.enable = true;}
       ];
 
-      tailscale-exit-node = mkServer "tailscale-exit-node" [
+      tailscale-exit-node = mkServer "tailscale-exit-node" "nixos" [
         {ethtool.enable = true;}
       ];
 
-      uptime-kuma = mkServer "uptime-kuma" [
+      uptime-kuma = mkServer "uptime-kuma" "nixos" [
         ./modules/virtualisation/oci-containers/uptime-kuma.nix
       ];
 
-      beszel = mkServer "beszel" [
+      beszel = mkServer "beszel" "nixos" [
         ./modules/virtualisation/oci-containers/beszel.nix
         {virtualisation.oci-containers.containers."beszel".extraOptions = ["--pull=always"];}
       ];
 
-      adguardhome = mkServer "adguardhome" [
+      adguardhome = mkServer "adguardhome" "nixos" [
         ./modules/virtualisation/oci-containers/adguardhome.nix
         {
           systemd.services.systemd-resolved.enable = false;
@@ -118,16 +119,16 @@
         }
       ];
 
-      myspeed = mkServer "myspeed" [
+      myspeed = mkServer "myspeed" "nixos" [
         ./modules/virtualisation/oci-containers/myspeed.nix
         {virtualisation.oci-containers.containers."MySpeed".extraOptions = ["--pull=always"];}
       ];
 
-      terraform = mkServer "terraform" [
+      terraform = mkServer "terraform" "nixos" [
         {terraform.enable = true;}
       ];
 
-      nextcloud = mkServer "nextcloud" [
+      nextcloud = mkServer "nextcloud" "nixos" [
         ./modules/virtualisation/oci-containers/nextcloud.nix
         {
           virtualisation.oci-containers.containers."mariadb".extraOptions = ["--pull=always"];
@@ -135,11 +136,11 @@
         }
       ];
 
-      homeassistant = mkServer "homeassistant" [
+      homeassistant = mkServer "homeassistant" "nixos" [
         ./modules/virtualisation/oci-containers/homeassistant.nix
       ];
 
-      caddy = mkServer "caddy" [
+      caddy = mkServer "caddy" "nixos" [
         {
           sops.defaultSopsFile = ./secrets/secrets.yaml;
           sops.age.sshKeyPaths = ["/home/nixos/.ssh/id_ed25519"];
@@ -149,83 +150,83 @@
         }
       ];
 
-      linkwarden = mkServer "linkwarden" [
+      linkwarden = mkServer "linkwarden" "nixos" [
         ./modules/virtualisation/oci-containers/linkwarden.nix
         {virtualisation.oci-containers.containers."linkwarden-linkwarden".extraOptions = ["--pull=always"];}
       ];
 
-      ansible = mkServer "ansible" [
+      ansible = mkServer "ansible" "nixos" [
         {ansible.enable = true;}
       ];
 
-      gotify = mkServer "gotify" [
+      gotify = mkServer "gotify" "nixos" [
         {gotify.enable = true;}
       ];
 
-      calibre = mkServer "calibre" [
+      calibre = mkServer "calibre" "nixos" [
         ./modules/virtualisation/oci-containers/calibre.nix
         {virtualisation.oci-containers.containers."calibre".extraOptions = ["--pull=always"];}
       ];
 
-      authentik = mkServer "authentik" [
+      authentik = mkServer "authentik" "nixos" [
         {networking.firewall.allowedUDPPorts = [443 80];}
       ];
 
-      grafana = mkServer "grafana" [
+      grafana = mkServer "grafana" "nixos" [
         {grafana.enable = true;}
       ];
 
-      prometheus = mkServer "prometheus" [
+      prometheus = mkServer "prometheus" "nixos" [
         {prometheus.enableServer = true;}
       ];
 
-      gitea = mkServer "gitea" [
+      gitea = mkServer "gitea" "nixos" [
         {gitea.enable = true;}
       ];
 
-      vaultwarden = mkServer "vaultwarden" [
+      vaultwarden = mkServer "vaultwarden" "nixos" [
         {
           vaultwarden.enable = true;
         }
       ];
 
-      paperless = mkServer "paperless" [
+      paperless = mkServer "paperless" "nixos" [
         {
           paperless.enable = true;
         }
       ];
 
-      gitlab = mkServer "gitlab" [
+      gitlab = mkServer "gitlab" "nixos" [
         {
           gitlab.enable = true;
         }
       ];
 
-      immich = mkServer "immich" [
+      immich = mkServer "immich" "nixos" [
         {immich.enable = true;}
       ];
 
-      nextcloud-pgsql = mkServer "nextcloud-pgsql" [
+      nextcloud-pgsql = mkServer "nextcloud-pgsql" "nixos" [
         {nextcloud.enable = true;}
       ];
 
-      kubernetes = mkServer "kubernetes" [];
+      kubernetes = mkServer "kubernetes" "nixos" [];
 
-      onlyoffice = mkServer "onlyoffice" [
+      onlyoffice = mkServer "onlyoffice" "nixos" [
         {onlyoffice.enable = true;}
       ];
 
-      bourse-dashboard = mkServer "bourse-dashboard" [
+      bourse-dashboard = mkServer "bourse-dashboard" "nixos" [
         {
           networking.firewall.allowedTCPPorts = [5000];
           programs.tmux.enable = true;
         }
       ];
-      gatus = mkServer "gatus" [
+      gatus = mkServer "gatus" "nixos" [
         {gatus.enable = true;}
       ];
 
-      github-runner = mkServer "github-runner" [
+      github-runner = mkServer "github-runner" "nixos" [
         {
           githubRunner.enable = true;
           environment.systemPackages = [
