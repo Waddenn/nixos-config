@@ -5,7 +5,7 @@
   ...
 }: {
   imports = [
-    ../../modules/global.nix
+    ../../modules/default.nix
   ];
 
   sops.defaultSopsFile = ./secrets/secrets.yaml;
