@@ -22,8 +22,10 @@ in {
         ingester = {
           lifecycler = {
             address = "127.0.0.1";
-            ring.kvstore.store = "inmemory";
-            ring.replication_factor = 1;
+            ring = {
+              kvstore.store = "inmemory";
+              replication_factor = 1;
+            };
           };
           chunk_idle_period = "1h";
           max_chunk_age = "1h";
@@ -47,9 +49,10 @@ in {
             active_index_directory = "/var/lib/loki/boltdb-shipper-active";
             cache_location = "/var/lib/loki/boltdb-shipper-cache";
             cache_ttl = "24h";
-            shared_store = "filesystem";
           };
-          filesystem.directory = "/var/lib/loki/chunks";
+          filesystem = {
+            directory = "/var/lib/loki/chunks";
+          };
         };
 
         limits_config = {
@@ -57,17 +60,9 @@ in {
           reject_old_samples_max_age = "168h";
         };
 
-        chunk_store_config.max_look_back_period = "0s";
-
         table_manager = {
           retention_deletes_enabled = false;
           retention_period = "0s";
-        };
-
-        compactor = {
-          working_directory = "/var/lib/loki";
-          shared_store = "filesystem";
-          compactor_ring.kvstore.store = "inmemory";
         };
       };
     };
