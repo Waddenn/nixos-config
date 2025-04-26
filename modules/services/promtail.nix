@@ -30,6 +30,7 @@ in {
         ];
 
         scrape_configs = [
+          # 1. Scrape du journal systemd
           {
             job_name = "journal";
             journal = {
@@ -43,6 +44,34 @@ in {
               {
                 source_labels = ["__journal__systemd_unit"];
                 target_label = "unit";
+              }
+            ];
+          }
+
+          # 2. Scrape de tous les fichiers dans /var/log
+          {
+            job_name = "varlogs";
+            static_configs = [
+              {
+                targets = [];
+                labels = {
+                  job = "varlogs";
+                  __path__ = "/var/log/**/*.log"; # tous les .log classiques
+                };
+              }
+            ];
+          }
+
+          # 3. Scrape de messages génériques comme syslog, messages, dmesg
+          {
+            job_name = "text-logs";
+            static_configs = [
+              {
+                targets = [];
+                labels = {
+                  job = "text-logs";
+                  __path__ = "/var/log/{syslog,messages,dmesg}"; # fichiers clés
+                };
               }
             ];
           }
