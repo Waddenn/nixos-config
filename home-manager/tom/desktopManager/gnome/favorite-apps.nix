@@ -8,8 +8,8 @@
       favorite-apps = [
         "firefox.desktop"
         "org.gnome.Console.desktop"
+        "code.desktop"
         "discord.desktop"
-        "org.remmina.Remmina.desktop"
         "youtube-music.desktop"
       ];
     };

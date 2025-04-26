@@ -172,7 +172,11 @@
       ];
 
       prometheus = mkServer "prometheus" "nixos" [
-        {prometheus.enableServer = true;}
+        {
+          prometheus.enableServer = true;
+          loki.enable = true;
+          promtail.enable = true;
+        }
       ];
 
       gitea = mkServer "gitea" "nixos" [

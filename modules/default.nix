@@ -56,6 +56,8 @@
     ./services/gatus.nix
     ./services/github-runner.nix
     ./services/adguardhome.nix
+    ./services/promtail.nix
+    ./services/loki.nix
     ./virtualisation/oci-containers/beszel-agent.nix
   ];
 }
