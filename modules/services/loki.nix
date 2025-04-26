@@ -22,12 +22,7 @@ in {
         auth_enabled = false;
 
         common = {
-          path_prefix = "/var/lib/loki";
-          storage = {
-            filesystem = {
-              directory = "/var/lib/loki/chunks";
-            };
-          };
+          path_prefix = "/var/lib/loki"; # << obligatoire pour path
         };
 
         ingester = {
@@ -46,9 +41,9 @@ in {
           configs = [
             {
               from = "2024-01-01";
-              store = "tsdb";
-              object_store = "filesystem";
-              schema = "v13";
+              store = "tsdb"; # << index backend
+              object_store = "filesystem"; # << chunks backend
+              schema = "v13"; # << storage schema
               index = {
                 prefix = "index_";
                 period = "24h";
@@ -58,22 +53,22 @@ in {
         };
 
         storage_config = {
-          tsdb_shipper = {
-            active_index_directory = "/var/lib/loki/tsdb-index";
-            shared_store = "filesystem";
-          };
           filesystem = {
-            directory = "/var/lib/loki/chunks";
+            directory = "/var/lib/loki/chunks"; # <- chunks path
+          };
+          tsdb_shipper = {
+            active_index_directory = "/var/lib/loki/tsdb-index"; # <- TSDB index
           };
         };
 
         limits_config = {
           reject_old_samples = true;
           reject_old_samples_max_age = "168h";
+          # plus besoin de allow_structured_metadata: false avec v13
         };
 
         compactor = {
-          working_directory = "/var/lib/loki/compactor";
+          working_directory = "/var/lib/loki/compactor"; # <- obligatoire
         };
       };
     };
