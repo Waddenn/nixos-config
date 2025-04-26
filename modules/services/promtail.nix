@@ -50,46 +50,6 @@ in {
               }
             ];
           }
-
-          {
-            job_name = "varlogs";
-            static_configs = [
-              {
-                targets = [];
-                labels = {
-                  job = "varlogs";
-                  host = "localhost";
-                  __path__ = "/var/log/**/*.log";
-                };
-              }
-            ];
-            relabel_configs = [
-              {
-                source_labels = ["__path__"];
-                target_label = "filename";
-              }
-            ];
-          }
-
-          {
-            job_name = "text-logs";
-            static_configs = [
-              {
-                targets = [];
-                labels = {
-                  job = "text-logs";
-                  host = "localhost";
-                  __path__ = "/var/log/{syslog,messages,dmesg}";
-                };
-              }
-            ];
-            relabel_configs = [
-              {
-                source_labels = ["__path__"];
-                target_label = "filename";
-              }
-            ];
-          }
         ];
       };
     };
