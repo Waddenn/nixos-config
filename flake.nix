@@ -48,9 +48,6 @@
           home-manager.users.${username} = import ./home-manager/${username}/home.nix;
           networking.hostName = hostname;
           system.stateVersion = "25.05";
-          environment.systemPackages = [
-            alejandra.defaultPackage.x86_64-linux
-          ];
         }
       ];
     };

@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  inputs,
   ...
 }: {
   imports = [
@@ -15,6 +16,7 @@
     sops
     just
     mesa
+    inputs.alejandra.defaultPackage.x86_64-linux
   ];
 
   services.flatpak.packages = [
