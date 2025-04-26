@@ -21,6 +21,15 @@ in {
         };
         auth_enabled = false;
 
+        common = {
+          path_prefix = "/var/lib/loki";
+          storage = {
+            filesystem = {
+              directory = "/var/lib/loki/chunks";
+            };
+          };
+        };
+
         ingester = {
           lifecycler = {
             address = "127.0.0.1";
@@ -33,24 +42,25 @@ in {
           max_chunk_age = "1h";
         };
 
-        schema_config.configs = [
-          {
-            from = "2022-06-06";
-            store = "boltdb-shipper"; # OK car on bloque structured metadata
-            object_store = "filesystem";
-            schema = "v11";
-            index = {
-              prefix = "index_";
-              period = "24h";
-            };
-          }
-        ];
+        schema_config = {
+          configs = [
+            {
+              from = "2024-01-01";
+              store = "tsdb";
+              object_store = "filesystem";
+              schema = "v13";
+              index = {
+                prefix = "index_";
+                period = "24h";
+              };
+            }
+          ];
+        };
 
         storage_config = {
-          boltdb_shipper = {
-            active_index_directory = "/var/lib/loki/boltdb-shipper-active";
-            cache_location = "/var/lib/loki/boltdb-shipper-cache";
-            cache_ttl = "24h";
+          tsdb_shipper = {
+            active_index_directory = "/var/lib/loki/tsdb-index";
+            shared_store = "filesystem";
           };
           filesystem = {
             directory = "/var/lib/loki/chunks";
@@ -60,12 +70,6 @@ in {
         limits_config = {
           reject_old_samples = true;
           reject_old_samples_max_age = "168h";
-          allow_structured_metadata = false;
-        };
-
-        table_manager = {
-          retention_deletes_enabled = false;
-          retention_period = "0s";
         };
 
         compactor = {
