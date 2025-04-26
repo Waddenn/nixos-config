@@ -141,6 +141,7 @@
           sops.age.sshKeyPaths = ["/home/nixos/.ssh/id_ed25519"];
           caddy.enable = true;
           prometheus.enableClient = true;
+          prometheus.enableServer = true;
           gitAutoPull.enable = lib.mkForce false;
         }
       ];
