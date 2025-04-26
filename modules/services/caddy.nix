@@ -37,6 +37,7 @@ in {
       environmentFile = config.sops.secrets.cf_api_token.path;
 
       globalConfig = ''
+        admin 0.0.0.0:2019
         metrics
       '';
 
