@@ -41,6 +41,5 @@
   gc.enable = true;
   beszel-agent.enable = true;
   time.timeZone = "Europe/Paris";
-  virtualisation.oci-containers.containers."beszel-agent".extraOptions = ["--pull=always"];
   system.stateVersion = "25.05";
 }
