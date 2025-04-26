@@ -36,13 +36,19 @@ in {
       dataDir = "/var/lib/caddy";
       environmentFile = config.sops.secrets.cf_api_token.path;
 
+      extraConfig = ''
+        {
+          metrics
+        }
+      '';
+
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
           extraConfig =
             securityHeaders
             + ''
-                reverse_proxy http://192.168.40.116:80 {
-                }
+              reverse_proxy http://192.168.40.116:80 {
+              }
 
               tls {
                 dns cloudflare {env.CF_API_TOKEN}
@@ -107,6 +113,6 @@ in {
       };
     };
 
-    networking.firewall.allowedTCPPorts = [443];
+    networking.firewall.allowedTCPPorts = [443 2019];
   };
 }

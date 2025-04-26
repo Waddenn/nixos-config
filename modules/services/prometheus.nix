@@ -27,6 +27,14 @@ in {
               }
             ];
           }
+          {
+            job_name = "caddy";
+            static_configs = [
+              {
+                targets = ["caddy:9000"];
+              }
+            ];
+          }
         ];
       };
       networking.firewall.allowedTCPPorts = [9090];
