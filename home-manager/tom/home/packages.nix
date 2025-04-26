@@ -24,8 +24,7 @@
     foliate
     distrobox
     boxbuddy
-    nix-search-cli
-    nix-output-monitor
     discord
+    errands
   ];
 }
