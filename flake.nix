@@ -235,6 +235,9 @@
           ];
         }
       ];
+      jellyseerr = mkServer "jellyseerr" "nixos" [
+        {jellyseerr.enable = true;}
+      ];
     };
 
     checks = lib.genAttrs ["beszel"] (
