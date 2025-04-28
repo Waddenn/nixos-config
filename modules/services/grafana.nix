@@ -26,7 +26,7 @@
               name = "Prometheus";
               type = "prometheus";
               access = "proxy";
-              url = "http://localhost:9090";
+              url = "http://192.168.1.117:9090";
               isDefault = true;
             }
           ];
@@ -37,14 +37,13 @@
           providers = [
             {
               name = "node-exporter-dashboards";
-              options.path = "/etc/grafana/dashboards"; # <--- ici
+              options.path = "/etc/grafana/dashboards";
             }
           ];
         };
       };
     };
 
-    # Déclare ton dashboard proprement dans /etc/grafana/dashboards
     environment.etc."grafana/dashboards/Node-Exporter-Full.json".source =
       /home/nixos/nixos-config/modules/services/grafana/Node-Exporter-Full.json;
 
