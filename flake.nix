@@ -173,7 +173,7 @@
       prometheus = mkServer "prometheus" "nixos" [
         {
           prometheus.enableServer = true;
-          prometheus.enableClient = true
+          prometheus.enableClient = true;
           loki.enable = true;
           promtail.enable = true;
         }
