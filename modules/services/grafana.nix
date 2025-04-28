@@ -51,7 +51,7 @@
       };
     };
 
-    environment.etc."grafana/dashboards/Node-Exporter-Full1.json".source =
+    environment.etc."grafana/dashboards/Node-Exporter-Full.json".source =
       /home/nixos/nixos-config/modules/services/grafana/Node-Exporter-Full.json;
 
     environment.etc."grafana/dashboards/Simple-System-Logs-Loki.json".source =
