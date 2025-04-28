@@ -26,5 +26,6 @@
     boxbuddy
     discord
     errands
+    ansible
   ];
 }

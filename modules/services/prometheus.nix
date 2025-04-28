@@ -23,15 +23,7 @@ in {
             job_name = "node";
             static_configs = [
               {
-                targets = ["caddy:9000"];
-              }
-            ];
-          }
-          {
-            job_name = "caddy";
-            static_configs = [
-              {
-                targets = ["localhost:2019"];
+                targets = ["localhost:9000"];
               }
             ];
           }
