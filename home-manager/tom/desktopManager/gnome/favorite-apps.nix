@@ -10,7 +10,7 @@
         "org.gnome.Console.desktop"
         "code.desktop"
         "discord.desktop"
-        "youtube-music.desktop"
+        "com.github.th_ch.youtube_music.desktop"
       ];
     };
   };
