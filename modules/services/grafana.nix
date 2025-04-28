@@ -33,7 +33,7 @@
               name = "Loki";
               type = "loki";
               access = "proxy";
-              url = "http://192.168.1.117:3031";
+              url = "http://192.168.1.117:3030";
               isDefault = false;
             }
           ];
