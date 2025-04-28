@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "eek3nds3s581sc"
+        "uid": "P8E80F9AEF21F6940"
       },
       "fieldConfig": {
         "defaults": {
@@ -83,7 +83,7 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 13,
+        "w": 12,
         "x": 0,
         "y": 0
       },
@@ -101,16 +101,16 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "11.6.0+security-01",
       "targets": [
         {
           "datasource": {
             "type": "loki",
-            "uid": "eek3nds3s581sc"
+            "uid": "P8E80F9AEF21F6940"
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "rate({job=\"systemd-journal\"}[1m])",
+          "expr": "count_over_time({job=\"systemd-journal\"}[1m])",
           "queryType": "range",
           "refId": "A"
         }
@@ -121,7 +121,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "eek3nds3s581sc"
+        "uid": "P8E80F9AEF21F6940"
       },
       "fieldConfig": {
         "defaults": {
@@ -167,8 +167,8 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 11,
-        "x": 13,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
       "id": 2,
@@ -186,17 +186,16 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "11.6.0+security-01",
       "targets": [
         {
           "datasource": {
             "type": "loki",
-            "uid": "eek3nds3s581sc"
+            "uid": "P8E80F9AEF21F6940"
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{job=\"systemd-journal\"} | logfmt",
-          "legendFormat": "",
+          "expr": "{job=\"systemd-journal\"}",
           "queryType": "range",
           "refId": "B"
         }
@@ -234,7 +233,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "eek3nds3s581sc"
+        "uid": "P8E80F9AEF21F6940"
       },
       "fieldConfig": {
         "defaults": {},
@@ -259,12 +258,12 @@
         "sortOrder": "Descending",
         "wrapLogMessage": true
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "11.6.0+security-01",
       "targets": [
         {
           "datasource": {
             "type": "loki",
-            "uid": "eek3nds3s581sc"
+            "uid": "P8E80F9AEF21F6940"
           },
           "direction": "backward",
           "editorMode": "code",
@@ -279,7 +278,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "eek3nds3s581sc"
+        "uid": "P8E80F9AEF21F6940"
       },
       "fieldConfig": {
         "defaults": {},
@@ -304,12 +303,12 @@
         "sortOrder": "Descending",
         "wrapLogMessage": true
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "11.6.0+security-01",
       "targets": [
         {
           "datasource": {
             "type": "loki",
-            "uid": "eek3nds3s581sc"
+            "uid": "P8E80F9AEF21F6940"
           },
           "direction": "backward",
           "editorMode": "code",
@@ -337,5 +336,5 @@
   "timezone": "browser",
   "title": "Simple System Logs - Loki",
   "uid": "cek3ruw85dbeod",
-  "version": 7
+  "version": 1
 }
