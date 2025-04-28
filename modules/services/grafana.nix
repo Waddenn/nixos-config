@@ -29,6 +29,13 @@
               url = "http://192.168.1.117:9090";
               isDefault = true;
             }
+            {
+              name = "Loki";
+              type = "loki";
+              access = "proxy";
+              url = "http://192.168.1.117:3100";
+              isDefault = false;
+            }
           ];
         };
 
@@ -36,7 +43,7 @@
           apiVersion = 1;
           providers = [
             {
-              name = "node-exporter-dashboards";
+              name = "default-dashboards";
               options.path = "/etc/grafana/dashboards";
             }
           ];
@@ -46,6 +53,9 @@
 
     environment.etc."grafana/dashboards/Node-Exporter-Full.json".source =
       /home/nixos/nixos-config/modules/services/grafana/Node-Exporter-Full.json;
+
+    environment.etc."grafana/dashboards/Simple-System-Logs-Loki.json".source =
+      /home/nixos/nixos-config/modules/services/grafana/Simple-System-Logs-Loki.json;
 
     networking.firewall.allowedTCPPorts = [3000];
   };
