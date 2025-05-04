@@ -26,6 +26,6 @@
     boxbuddy
     discord
     errands
-    ansible
+    heroic
   ];
 }
