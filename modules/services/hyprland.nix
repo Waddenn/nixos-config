@@ -4,30 +4,12 @@
   pkgs,
   ...
 }: {
-  options.hyprland.enable = lib.mkEnableOption "Enable hyprland";
+  options.hyprland.enable = lib.mkEnableOption "Enable Hyprland integration system-wide";
 
   config = lib.mkIf config.hyprland.enable {
-    programs.hyprland.enable = true;
-
-    environment.systemPackages = with pkgs; [
-      hyprland
-      waybar
-      wofi
-      alacritty
-      kitty
-      wl-clipboard
-      xdg-utils
-      xdg-desktop-portal
-      xdg-desktop-portal-hyprland
-      (pkgs.writeShellScriptBin "start-hyprland" ''
-        exec Hyprland
-      '')
-    ];
-
-    xdg.portal = {
+    programs.hyprland = {
       enable = true;
-      wlr.enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-hyprland];
+      xwayland.enable = true;
     };
   };
 }

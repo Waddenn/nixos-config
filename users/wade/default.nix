@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  users.users.hypruser = {
+  users.users.wade = {
     isNormalUser = true;
     extraGroups = ["wheel" "video" "audio" "networkmanager"];
     shell = pkgs.zsh;
