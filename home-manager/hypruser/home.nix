@@ -3,6 +3,9 @@
   pkgs,
   ...
 }: {
+  imports = [
+    ./desktopManager/hyprland/default.nix
+  ];
   home.username = "hypruser";
   home.homeDirectory = "/home/hypruser";
 

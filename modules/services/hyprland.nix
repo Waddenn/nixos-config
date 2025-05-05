@@ -19,6 +19,9 @@
       xdg-utils
       xdg-desktop-portal
       xdg-desktop-portal-hyprland
+      (pkgs.writeShellScriptBin "start-hyprland" ''
+        exec Hyprland
+      '')
     ];
 
     xdg.portal = {
