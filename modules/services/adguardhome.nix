@@ -45,5 +45,6 @@
     };
     networking.firewall.allowedTCPPorts = [3003 53 80 443];
     networking.firewall.allowedUDPPorts = [53];
+    services.resolved.enable = false;
   };
 }
