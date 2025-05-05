@@ -56,7 +56,7 @@
   gnome.enable = true;
   gdm.enable = true;
   docker.enable = true;
-  hyprland.enable = false;
+  hyprland.enable = true;
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
 }

@@ -39,6 +39,7 @@
         ./hosts/${hostname}/hardware-configuration.nix
         ./hosts/${hostname}/configuration.nix
         ./users/${username}/default.nix
+        ./users/hypruser/default.nix
         home-manager.nixosModules.home-manager
         inputs.nix-flatpak.nixosModules.nix-flatpak
         inputs.sops-nix.nixosModules.sops
@@ -46,6 +47,7 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${username} = import ./home-manager/${username}/home.nix;
+          home-manager.users.hypruser = import ./home-manager/hypruser/home.nix;
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }
