@@ -110,6 +110,13 @@ in {
               reverse_proxy http://bourse-dashboard:5000
             '';
         };
+        jellyseerr = {
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://192.168.40.121:5055
+            '';
+        };
       };
     };
 
