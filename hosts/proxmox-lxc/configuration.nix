@@ -33,7 +33,7 @@
   python3Minimal.enable = true;
   tailscale-server.enable = true;
   gitAutoPull.enable = true;
-  autoUpgrade.enable = false;
+  autoUpgrade.enable = true;
   openssh.enable = true;
   allowUnfree.enable = true;
   experimental-features.enable = true;
