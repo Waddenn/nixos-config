@@ -110,7 +110,7 @@ in {
               reverse_proxy http://bourse-dashboard:5000
             '';
         };
-        jellyseerr = {
+        "jellyseerr.hexaflare.net" = {
           extraConfig =
             securityHeaders
             + ''
