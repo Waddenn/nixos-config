@@ -6,12 +6,11 @@
   home.username = "wade";
   home.homeDirectory = "/home/wade";
 
-  wayland.windowsManager.hyprland = {
+  services.hyprland = {
     enable = true;
-    setting = {
-      
-    }
-  }
+    settings = {
+    };
+  };
 
   programs.home-manager.enable = true;
 
