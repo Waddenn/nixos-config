@@ -47,7 +47,7 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${username} = import ./home-manager/${username}/home.nix;
-          home-manager.users.hypruser = import ./home-manager/wade/home.nix;
+          home-manager.users.wade = import ./home-manager/wade/home.nix;
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }

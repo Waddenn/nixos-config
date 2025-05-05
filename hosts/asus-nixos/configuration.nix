@@ -16,6 +16,7 @@
     sops
     just
     mesa
+    kitty
     inputs.alejandra.defaultPackage.x86_64-linux
   ];
 
