@@ -40,6 +40,7 @@
   fish.enable = true;
   zsh.enable = false;
   gc.enable = true;
+  documentation.man.enable = false;
   beszel-agent.enable = true;
   time.timeZone = "Europe/Paris";
   system.stateVersion = "25.05";
