@@ -18,6 +18,7 @@ in {
     ./wofi
     ./hyprpaper
     ./animation.nix
+    ./hyprlock
     ./themes/nixy.nix
   ];
   home.username = "wade";
@@ -101,6 +102,9 @@ in {
         ", Print, exec, grim - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
         "$mainMod SHIFT, S, exec, slurp | grim -g - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
       ];
+      bindl = [
+        ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock when closing Lid
+      ];
 
       input = {
         kb_layout = "fr";
@@ -161,7 +165,6 @@ in {
         focus_on_activate = true;
         new_window_takes_over_fullscreen = 2;
       };
-
       decoration = {
         active_opacity = active-opacity;
         inactive_opacity = inactive-opacity;
