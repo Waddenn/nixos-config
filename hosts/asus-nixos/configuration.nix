@@ -16,7 +16,6 @@
     sops
     just
     mesa
-    kitty
     inputs.alejandra.defaultPackage.x86_64-linux
   ];
 
@@ -60,4 +59,5 @@
   hyprland.enable = true;
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
+  virtualisation.libvirtd.enable = true;
 }

@@ -8,6 +8,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    stylix.url = "github:danth/stylix";
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -43,6 +44,7 @@
         home-manager.nixosModules.home-manager
         inputs.nix-flatpak.nixosModules.nix-flatpak
         inputs.sops-nix.nixosModules.sops
+        inputs.stylix.nixosModules.stylix
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
