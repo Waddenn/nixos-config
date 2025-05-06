@@ -24,7 +24,6 @@
     foliate
     distrobox
     boxbuddy
-    discord
     errands
     heroic
     gnome-boxes

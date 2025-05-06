@@ -36,6 +36,7 @@
     brightnessctl
     pamixer
     inputs.alejandra.defaultPackage.x86_64-linux
+    trayscale
   ];
 
   services.flatpak.packages = [
@@ -43,6 +44,7 @@
     "org.fedoraproject.MediaWriter"
     "com.github.taiko2k.avvie"
     "com.boxy_svg.BoxySVG"
+    "com.github.tchx84.Flatseal"
   ];
 
   autoUpgrade.enable = true;
@@ -79,4 +81,5 @@
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
   virtualisation.libvirtd.enable = true;
+  discord.enable = true;
 }
