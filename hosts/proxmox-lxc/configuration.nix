@@ -37,7 +37,8 @@
   openssh.enable = true;
   allowUnfree.enable = true;
   experimental-features.enable = true;
-  fish.enable = false;
+  fish.enable = true;
+  zsh.enable = false;
   gc.enable = true;
   beszel-agent.enable = true;
   time.timeZone = "Europe/Paris";
