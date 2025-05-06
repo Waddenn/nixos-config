@@ -28,7 +28,6 @@
   environment.systemPackages = with pkgs; [
     git
     just
-    kitty
   ];
 
   python3Minimal.enable = true;
