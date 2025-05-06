@@ -6,7 +6,8 @@
   users.users.wade = {
     isNormalUser = true;
     extraGroups = ["wheel" "video" "audio" "networkmanager"];
-    shell = pkgs.zsh;
+    shell = pkgs.fish;
     initialPassword = "password";
   };
+  users.defaultUserShell = pkgs.fish;
 }
