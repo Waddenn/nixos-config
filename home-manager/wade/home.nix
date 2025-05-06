@@ -12,10 +12,24 @@
   home.username = "wade";
   home.homeDirectory = "/home/wade";
   home.packages = with pkgs; [
-    kitty
-    firefox
-    wofi
+    obsidian
+    blanket
+    papers
+    whatip
+    vscode
+    youtube-music
+    fastfetch
+    discord
+    git
   ];
+
+  programs.kitty = {
+    enable = true;
+    extraConfig = ''
+      confirm_os_window_close 0
+    '';
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
     xwayland.enable = true;
@@ -28,6 +42,11 @@
         "$mainMod,        e, exec, nautilus"
         "$mainMod,       T, togglefloating,"
         "$mainMod,F, fullscreen,"
+        "$mainMod,        d, exec, wofi --show drun"
+        ", XF86AudioRaiseVolume, exec, pamixer -i 5"
+        ", XF86AudioLowerVolume, exec, pamixer -d 5"
+        ", XF86MonBrightnessUp, exec, brightnessctl s +5%"
+        ", XF86MonBrightnessDown, exec, brightnessctl s 5%-"
         "$mainMod, 1, workspace, 1"
         "$mainMod, 2, workspace, 2"
         "$mainMod, 3, workspace, 3"
@@ -38,12 +57,21 @@
         "$mainMod, 8, workspace, 8"
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
-        "$mainMod,        d, exec, wofi --show drun"
       ];
 
       input = {
         kb_layout = "fr";
+        natural_scroll = false;
       };
+
+      gestures = {
+        workspace_swipe = true;
+        workspace_swipe_fingers = 3;
+      };
+
+      # monitor = [
+      #   "SDC4172,2880x1800@60,0x0,1"
+      # ];
     };
   };
 

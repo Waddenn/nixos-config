@@ -33,6 +33,8 @@
     sops
     just
     mesa
+    brightnessctl
+    pamixer
     inputs.alejandra.defaultPackage.x86_64-linux
   ];
 
