@@ -26,6 +26,7 @@
     nix-flatpak,
     sops-nix,
     alejandra,
+    stylix,
     ...
   }: let
     lib = nixpkgs.lib;

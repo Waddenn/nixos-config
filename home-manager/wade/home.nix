@@ -5,6 +5,7 @@
 }: {
   imports = [
     ./wofi
+    ./themes/nixy.nix
   ];
   home.username = "wade";
   home.homeDirectory = "/home/wade";
