@@ -28,6 +28,7 @@
   environment.systemPackages = with pkgs; [
     git
     just
+    kitty
   ];
 
   python3Minimal.enable = true;
@@ -37,7 +38,7 @@
   openssh.enable = true;
   allowUnfree.enable = true;
   experimental-features.enable = true;
-  zsh.enable = true;
+  fish.enable = true;
   gc.enable = true;
   beszel-agent.enable = true;
   time.timeZone = "Europe/Paris";

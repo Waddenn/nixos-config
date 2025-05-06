@@ -44,7 +44,6 @@ in {
     pamixer
     brightnessctl
     playerctl
-    swayosd
   ];
 
   programs.kitty = {
@@ -151,6 +150,7 @@ in {
 
       exec-once = [
         "systemctl --user enable --now hyprpaper.service &"
+        "swayosd-server"
       ];
 
       misc = {

@@ -35,6 +35,7 @@
     mesa
     inputs.alejandra.defaultPackage.x86_64-linux
     trayscale
+    swayosd
   ];
 
   services.flatpak.packages = [
