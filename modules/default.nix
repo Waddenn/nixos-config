@@ -60,6 +60,5 @@
     ./services/loki.nix
     ./virtualisation/oci-containers/beszel-agent.nix
     ./services/jellyseerr.nix
-    ./programs/discord.nix
   ];
 }

@@ -83,8 +83,8 @@
 
     polarity = "dark";
     image = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/anotherhadi/awesome-wallpapers/refs/heads/main/app/static/wallpapers/black-grey-and-white.png";
-      sha256 = "sha256-NQo6sEt7qt82sI8yCxNwSs0+NnWx17oko7MHSap34DI=";
+      url = "https://raw.githubusercontent.com/anotherhadi/awesome-wallpapers/refs/heads/main/app/static/wallpapers/black-oil-3_dark.png";
+      sha256 = "sha256-Ad8ql38qswHcVYI0qTIVOFcG1euiyUWONWiLkDrtiRQ=";
     };
   };
 }

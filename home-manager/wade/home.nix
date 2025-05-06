@@ -41,6 +41,10 @@ in {
     qt6ct
     wayland-utils
     wayland-protocols
+    pamixer
+    brightnessctl
+    playerctl
+    swayosd
   ];
 
   programs.kitty = {
@@ -63,11 +67,21 @@ in {
         "$mainMod,        e, exec, nautilus"
         "$mainMod,       T, togglefloating,"
         "$mainMod,F, fullscreen,"
-        "$mainMod,        d, exec, wofi --show drun"
-        ", XF86AudioRaiseVolume, exec, pamixer -i 5"
-        ", XF86AudioLowerVolume, exec, pamixer -d 5"
-        ", XF86MonBrightnessUp, exec, brightnessctl s +5%"
-        ", XF86MonBrightnessDown, exec, brightnessctl s 5%-"
+        "$mainMod,        space, exec, wofi --show drun"
+
+        # Volume + OSD
+        ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
+        ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
+        ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
+
+        # Micro
+        ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
+
+        # Luminosité + OSD
+        ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
+        ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
+
+        # Workspaces
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
@@ -78,15 +92,29 @@ in {
         "$mainMod, code:17, workspace, 8"
         "$mainMod, code:18, workspace, 9"
         "$mainMod, code:19, workspace, 10"
-        # Screenshot shortcuts
+
+        # Média
+        "$mainMod, F1, exec, playerctl play-pause"
+        "$mainMod, F2, exec, playerctl previous"
+        "$mainMod, F3, exec, playerctl next"
+
+        # Screenshots
         ", Print, exec, grim - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
         "$mainMod SHIFT, S, exec, slurp | grim -g - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
       ];
 
       input = {
         kb_layout = "fr";
+
+        kb_options = "caps:escape";
+        follow_mouse = 1;
+        repeat_delay = 300;
+        repeat_rate = 50;
+        numlock_by_default = true;
+
         touchpad = {
           natural_scroll = true;
+          clickfinger_behavior = true;
         };
       };
 
@@ -112,7 +140,7 @@ in {
         gaps_in = gaps-in;
         gaps_out = gaps-out;
         border_size = border-size;
-        layout = "master";
+        layout = "dwindle";
         "col.inactive_border" = lib.mkForce background;
       };
 
@@ -120,6 +148,73 @@ in {
         workspace_swipe = true;
         workspace_swipe_fingers = 3;
       };
+
+      exec-once = [
+        "systemctl --user enable --now hyprpaper.service &"
+      ];
+
+      misc = {
+        vfr = true;
+        disable_hyprland_logo = true;
+        disable_splash_rendering = true;
+        disable_autoreload = true;
+        focus_on_activate = true;
+        new_window_takes_over_fullscreen = 2;
+      };
+
+      decoration = {
+        active_opacity = active-opacity;
+        inactive_opacity = inactive-opacity;
+        rounding = rounding;
+        shadow = {
+          enabled = true;
+          range = 20;
+          render_power = 3;
+        };
+        blur = {
+          enabled =
+            if blur
+            then "true"
+            else "false";
+          size = 18;
+        };
+      };
+
+      windowrulev2 = [
+        "float, tag:modal"
+        "pin, tag:modal"
+        "center, tag:modal"
+        # telegram media viewer
+        "float, title:^(Media viewer)$"
+
+        # Bitwarden extension
+        "float, title:^(.*Bitwarden Password Manager.*)$"
+
+        # gnome calculator
+        "float, class:^(org.gnome.Calculator)$"
+        "size 360 490, class:^(org.gnome.Calculator)$"
+
+        # make Firefox/Zen PiP window floating and sticky
+        "float, title:^(Picture-in-Picture)$"
+        "pin, title:^(Picture-in-Picture)$"
+
+        # idle inhibit while watching videos
+        "idleinhibit focus, class:^(mpv|.+exe|celluloid)$"
+        "idleinhibit focus, class:^(zen)$, title:^(.*YouTube.*)$"
+        "idleinhibit fullscreen, class:^(zen)$"
+
+        "dimaround, class:^(gcr-prompter)$"
+        "dimaround, class:^(xdg-desktop-portal-gtk)$"
+        "dimaround, class:^(polkit-gnome-authentication-agent-1)$"
+        "dimaround, class:^(zen)$, title:^(File Upload)$"
+
+        # fix xwayland apps
+        "rounding 0, xwayland:1"
+        "center, class:^(.*jetbrains.*)$, title:^(Confirm Exit|Open Project|win424|win201|splash)$"
+        "size 640 400, class:^(.*jetbrains.*)$, title:^(splash)$"
+      ];
+
+      layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
 
       monitor = [
         "eDP-1,2880x1800@60,0x0,2"
@@ -156,6 +251,7 @@ in {
     interactiveShellInit = ''
       set -U fish_user_paths $HOME/.local/bin $fish_user_paths
       fish_config theme choose "Tomorrow Night Bright"
+      set -g fish_greeting ""
     '';
 
     plugins = [

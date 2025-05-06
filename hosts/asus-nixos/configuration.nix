@@ -33,8 +33,6 @@
     sops
     just
     mesa
-    brightnessctl
-    pamixer
     inputs.alejandra.defaultPackage.x86_64-linux
     trayscale
   ];
@@ -81,5 +79,5 @@
   hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
   virtualisation.libvirtd.enable = true;
-  discord.enable = true;
+  services.blueman.enable = true;
 }

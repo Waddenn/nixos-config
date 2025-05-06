@@ -27,5 +27,6 @@
     errands
     heroic
     gnome-boxes
+    discord
   ];
 }
