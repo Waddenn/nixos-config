@@ -5,7 +5,7 @@
 }: {
   imports = [
     ./wofi
-    ./hyprpanel
+    ./hyprpaper
     ./themes/nixy.nix
   ];
   home.username = "wade";
