@@ -17,6 +17,7 @@ in {
   imports = [
     ./wofi
     ./hyprpaper
+    ./clipman
     ./animation.nix
     ./hyprlock
     ./themes/nixy.nix
@@ -45,6 +46,7 @@ in {
     pamixer
     brightnessctl
     playerctl
+    resources
   ];
 
   programs.kitty = {
@@ -69,19 +71,15 @@ in {
         "$mainMod,F, fullscreen,"
         "$mainMod,        space, exec, wofi --show drun"
 
-        # Volume + OSD
         ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
         ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
         ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
 
-        # Micro
         ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
 
-        # Luminosité + OSD
         ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
         ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
 
-        # Workspaces
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
@@ -93,17 +91,21 @@ in {
         "$mainMod, code:18, workspace, 9"
         "$mainMod, code:19, workspace, 10"
 
-        # Média
         "$mainMod, F1, exec, playerctl play-pause"
         "$mainMod, F2, exec, playerctl previous"
         "$mainMod, F3, exec, playerctl next"
 
-        # Screenshots
+        "$mainMod, L, exec, ${pkgs.hyprlock}/bin/hyprlock"
+
+        "$mainMod SHIFT, R, exec, resources"
+
+        "$mainMod SHIFT, C, exec, clipboard"
+
         ", Print, exec, grim - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
         "$mainMod SHIFT, S, exec, slurp | grim -g - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
       ];
       bindl = [
-        ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock when closing Lid
+        ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock"
       ];
 
       input = {
@@ -187,21 +189,16 @@ in {
         "float, tag:modal"
         "pin, tag:modal"
         "center, tag:modal"
-        # telegram media viewer
         "float, title:^(Media viewer)$"
 
-        # Bitwarden extension
         "float, title:^(.*Bitwarden Password Manager.*)$"
 
-        # gnome calculator
         "float, class:^(org.gnome.Calculator)$"
         "size 360 490, class:^(org.gnome.Calculator)$"
 
-        # make Firefox/Zen PiP window floating and sticky
         "float, title:^(Picture-in-Picture)$"
         "pin, title:^(Picture-in-Picture)$"
 
-        # idle inhibit while watching videos
         "idleinhibit focus, class:^(mpv|.+exe|celluloid)$"
         "idleinhibit focus, class:^(zen)$, title:^(.*YouTube.*)$"
         "idleinhibit fullscreen, class:^(zen)$"
@@ -211,7 +208,6 @@ in {
         "dimaround, class:^(polkit-gnome-authentication-agent-1)$"
         "dimaround, class:^(zen)$, title:^(File Upload)$"
 
-        # fix xwayland apps
         "rounding 0, xwayland:1"
         "center, class:^(.*jetbrains.*)$, title:^(Confirm Exit|Open Project|win424|win201|splash)$"
         "size 640 400, class:^(.*jetbrains.*)$, title:^(splash)$"
