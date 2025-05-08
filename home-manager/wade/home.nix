@@ -18,21 +18,23 @@ in {
     ./wofi
     ./hyprpaper
     ./clipman
+    ./hyprpanel
     ./animation.nix
     ./hyprlock
+    ./script/screenshot
+    ./script/system
+    ./script/hyprpanel
+    ./script/nixy
     ./themes/nixy.nix
   ];
   home.username = "wade";
   home.homeDirectory = "/home/wade";
   home.packages = with pkgs; [
-    obsidian
     blanket
     papers
     whatip
-    vscode
     youtube-music
     fastfetch
-    discord
     grim
     slurp
     swappy
@@ -47,6 +49,7 @@ in {
     brightnessctl
     playerctl
     resources
+    hyprpanel
   ];
 
   programs.kitty = {
@@ -67,9 +70,18 @@ in {
         "$mainMod,        q, killactive,"
         "$mainMod SHIFT,  q, exit,"
         "$mainMod,        e, exec, nautilus"
+        "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
+        "$mainMod,        b, exec, firefox"
+        "$mainMod,       left, movefocus, l"
+        "$mainMod,       right, movefocus, r"
+        "$mainMod,       up, movefocus, u"
+        "$mainMod,       down, movefocus, d"
         "$mainMod,       T, togglefloating,"
         "$mainMod,F, fullscreen,"
-        "$mainMod,        space, exec, wofi --show drun"
+        "$mainMod,        X, exec, powermenu" # Powermenu
+        "$mainMod,        space, exec, menu" # Launcher
+        "$mainMod,        C, exec, quickmenu" # Quickmenu
+        # "$mainMod,        space, exec, wofi --show drun"
 
         ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
         ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
@@ -91,6 +103,17 @@ in {
         "$mainMod, code:18, workspace, 9"
         "$mainMod, code:19, workspace, 10"
 
+        "$mainMod SHIFT, code:10, movetoworkspace, 1"
+        "$mainMod SHIFT, code:11, movetoworkspace, 2"
+        "$mainMod SHIFT, code:12, movetoworkspace, 3"
+        "$mainMod SHIFT, code:13, movetoworkspace, 4"
+        "$mainMod SHIFT, code:14, movetoworkspace, 5"
+        "$mainMod SHIFT, code:15, movetoworkspace, 6"
+        "$mainMod SHIFT, code:16, movetoworkspace, 7"
+        "$mainMod SHIFT, code:17, movetoworkspace, 8"
+        "$mainMod SHIFT, code:18, movetoworkspace, 9"
+        "$mainMod SHIFT, code:19, movetoworkspace, 10"
+
         "$mainMod, F1, exec, playerctl play-pause"
         "$mainMod, F2, exec, playerctl previous"
         "$mainMod, F3, exec, playerctl next"
@@ -100,9 +123,16 @@ in {
         "$mainMod SHIFT, R, exec, resources"
 
         "$mainMod SHIFT, C, exec, clipboard"
+        "$mainMod SHIFT, T, exec, hyprpanel-toggle"
 
-        ", Print, exec, grim - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
-        "$mainMod SHIFT, S, exec, slurp | grim -g - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy"
+        "$mainMod,PRINT, exec, screenshot region" # Screenshot region
+        ",PRINT, exec, screenshot monitor" # Screenshot monitor
+        "$mainMod SHIFT,PRINT, exec, screenshot window" # Screenshot window
+        "ALT,PRINT, exec, screenshot region swappy" # Screenshot region then edit
+      ];
+      bindm = [
+        "$mainMod,mouse:272, movewindow" # Move Window (mouse)
+        "$mainMod,R, resizewindow" # Resize Window (mouse)
       ];
       bindl = [
         ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock"
@@ -157,6 +187,7 @@ in {
       exec-once = [
         "systemctl --user enable --now hyprpaper.service &"
         "swayosd-server"
+        "hyprpanel"
       ];
 
       misc = {
