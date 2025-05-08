@@ -113,4 +113,7 @@
   hardware.amd.enable = true;
   virtualisation.libvirtd.enable = false;
   services.power-profiles-daemon.enable = true;
+
+  # home-manager.users.tom = ./home/tom/home.nix;
+  home-manager.users.wade = import ./home.nix;
 }

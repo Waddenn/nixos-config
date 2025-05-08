@@ -15,18 +15,18 @@
   background = "rgb(" + config.lib.stylix.colors.base00 + ")";
 in {
   imports = [
-    ./wofi
-    ./hyprpaper
-    ./clipman
-    ./hyprpanel
-    ./animation.nix
-    ./hyprlock
-    ./script/hyprfocus
-    ./script/screenshot
-    ./script/system
-    ./script/hyprpanel
-    ./script/nixy
-    ./themes/nixy.nix
+    ../../home/system/wofi
+    ../../home/system/hyprpaper
+    ../../home/system/clipman
+    ../../home/system/hyprpanel
+    ../../home/system/hyprlock
+    ../../home/script/hyprfocus
+    ../../home/script/screenshot
+    ../../home/script/system
+    ../../home/script/hyprpanel
+    ../../home/script/nixy
+    ../../home/system/hyprland/animation.nix
+    ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];
   home.username = "wade";
@@ -143,14 +143,14 @@ in {
         "$mainMod SHIFT, C, exec, clipboard"
         "$mainMod SHIFT, T, exec, hyprpanel-toggle"
 
-        "$mainMod,PRINT, exec, screenshot region" # Screenshot region
-        ",PRINT, exec, screenshot monitor" # Screenshot monitor
-        "$mainMod SHIFT,PRINT, exec, screenshot window" # Screenshot window
-        "ALT,PRINT, exec, screenshot region swappy" # Screenshot region then edit
+        "$mainMod,PRINT, exec, screenshot region"
+        ",PRINT, exec, screenshot monitor"
+        "$mainMod SHIFT,PRINT, exec, screenshot window"
+        "ALT,PRINT, exec, screenshot region swappy"
       ];
       bindm = [
-        "$mainMod,mouse:272, movewindow" # Move Window (mouse)
-        "$mainMod,R, resizewindow" # Resize Window (mouse)
+        "$mainMod,mouse:272, movewindow"
+        "$mainMod,R, resizewindow"
       ];
       bindl = [
         ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock"
