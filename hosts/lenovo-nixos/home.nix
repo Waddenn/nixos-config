@@ -3,6 +3,12 @@
   pkgs,
   ...
 }: {
+  imports = [
+    ../../home/programs/git.nix
+    ../../home/programs/fish.nix
+    ../../system/gnome/default.nix
+  ];
+
   home.packages = with pkgs; [
     teams-for-linux
     remmina
@@ -26,4 +32,11 @@
     heroic
     gnome-boxes
   ];
+
+  home.username = "tom";
+  home.homeDirectory = "/home/tom";
+
+  home.stateVersion = "24.05";
+
+  programs.home-manager.enable = true;
 }

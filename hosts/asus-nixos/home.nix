@@ -68,6 +68,10 @@ in {
     glib
     direnv
     meson
+    trayscale
+    showtime
+    libreoffice
+    nautilus
   ];
 
   programs.kitty = {
