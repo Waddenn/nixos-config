@@ -60,5 +60,8 @@
     ./services/loki.nix
     ./virtualisation/oci-containers/beszel-agent.nix
     ./services/jellyseerr.nix
+    ./services/upower.nix
+    ./services/blueman.nix
+    ./hardware/amd.nix
   ];
 }

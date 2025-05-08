@@ -45,6 +45,7 @@
     xdg-desktop-portal-hyprland
     plex-desktop
     xdg-utils
+    plexamp
   ];
 
   # xdg.portal = {
@@ -106,10 +107,10 @@
   gdm.enable = true;
   docker.enable = true;
   hyprland.enable = true;
-  hardware.cpu.amd.updateMicrocode = true;
   linuxPackages.enableTesting = false;
-  virtualisation.libvirtd.enable = true;
-  services.blueman.enable = true;
-  services.upower.enable = true;
+  upower.enable = true;
+  blueman.enable = true;
+  hardware.amd.enable = true;
+  virtualisation.libvirtd.enable = false;
   services.power-profiles-daemon.enable = true;
 }
