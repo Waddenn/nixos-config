@@ -21,11 +21,13 @@ in {
     ./hyprpanel
     ./animation.nix
     ./hyprlock
+    ./script/hyprfocus
     ./script/screenshot
     ./script/system
     ./script/hyprpanel
     ./script/nixy
     ./themes/nixy.nix
+    ../../modules/programs/fzf.nix
   ];
   home.username = "wade";
   home.homeDirectory = "/home/wade";
@@ -50,6 +52,22 @@ in {
     playerctl
     resources
     hyprpanel
+    planify
+    peaclock
+    cbonsai
+    pipes
+    cmatrix
+    hyprshot
+    hyprpicker
+    imv
+    wf-recorder
+    wlr-randr
+    gnome-themes-extra
+    libva
+    dconf
+    glib
+    direnv
+    meson
   ];
 
   programs.kitty = {
@@ -78,11 +96,11 @@ in {
         "$mainMod,       down, movefocus, d"
         "$mainMod,       T, togglefloating,"
         "$mainMod,F, fullscreen,"
-        "$mainMod,        X, exec, powermenu" # Powermenu
-        "$mainMod,        space, exec, menu" # Launcher
-        "$mainMod,        C, exec, quickmenu" # Quickmenu
-        # "$mainMod,        space, exec, wofi --show drun"
-
+        "$mainMod,        X, exec, powermenu"
+        "$mainMod,        space, exec, menu"
+        "$mainMod,        C, exec, quickmenu"
+        "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
+        "$mainMod,        p, exec, planify"
         ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
         ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
         ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
@@ -187,7 +205,9 @@ in {
       exec-once = [
         "systemctl --user enable --now hyprpaper.service &"
         "swayosd-server"
-        "hyprpanel"
+        "dbus-update-activation-environment --systemd --all &"
+        "systemctl --user enable --now hyprpaper.service &"
+        "systemctl --user enable --now hypridle.service &"
       ];
 
       misc = {
