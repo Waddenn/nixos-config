@@ -18,6 +18,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    hyprpanel.url = "github:jas-singhfsu/hyprpanel";
     hyprspace = {
       url = "github:KZDKM/Hyprspace";
       inputs.hyprland.follows = "hyprland";
@@ -35,6 +36,7 @@
     ...
   }: let
     lib = nixpkgs.lib;
+    system = "x86_64-linux";
 
     mkDesktopSystem = {
       hostname,
@@ -52,10 +54,14 @@
         inputs.sops-nix.nixosModules.sops
         inputs.stylix.nixosModules.stylix
         {
-          home-manager.useGlobalPkgs = true;
+          home-manager.useGlobalPkgs = false;
           home-manager.useUserPackages = true;
-          home-manager.users.${username} = import ./home-manager/${username}/home.nix;
-          home-manager.users.wade = import ./home-manager/wade/home.nix;
+          home-manager.backupFileExtension = "backup";
+          home-manager.extraSpecialArgs = {
+            inherit system inputs;
+          };
+          home-manager.users.${username} = ./home-manager/${username}/home.nix;
+          home-manager.users.wade = ./home-manager/wade/home.nix;
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }
@@ -96,6 +102,9 @@
         extraModules = extraModules;
       });
   in {
+    nixpkgs.overlays = [
+      inputs.hyprpanel.overlay.${system}
+    ];
     nixosConfigurations = {
       asus-nixos = mkDesktop "asus-nixos" "tom";
 
