@@ -60,8 +60,8 @@
           home-manager.extraSpecialArgs = {
             inherit system inputs;
           };
-          home-manager.users.${username} = ./home-manager/${username}/home.nix;
-          home-manager.users.wade = ./home-manager/wade/home.nix;
+          home-manager.users.${username} = ./home/${username}/home.nix;
+          home-manager.users.wade = ./home/wade/home.nix;
           networking.hostName = hostname;
           system.stateVersion = "25.05";
         }
