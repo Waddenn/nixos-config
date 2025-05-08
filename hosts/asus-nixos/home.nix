@@ -19,6 +19,7 @@ in {
     ../../home/system/hyprpaper
     ../../home/system/clipman
     ../../home/system/hyprpanel
+    ../../home/system/hyprland/hyprspace.nix
     ../../home/system/hyprlock
     ../../home/script/hyprfocus
     ../../home/script/screenshot
@@ -32,46 +33,6 @@ in {
   home.username = "wade";
   home.homeDirectory = "/home/wade";
   home.packages = with pkgs; [
-    blanket
-    papers
-    whatip
-    youtube-music
-    fastfetch
-    grim
-    slurp
-    swappy
-    wl-clipboard
-    qt5.qtwayland
-    qt6.qtwayland
-    libsForQt5.qt5ct
-    qt6ct
-    wayland-utils
-    wayland-protocols
-    pamixer
-    brightnessctl
-    playerctl
-    resources
-    hyprpanel
-    planify
-    peaclock
-    cbonsai
-    pipes
-    cmatrix
-    hyprshot
-    hyprpicker
-    imv
-    wf-recorder
-    wlr-randr
-    gnome-themes-extra
-    libva
-    dconf
-    glib
-    direnv
-    meson
-    trayscale
-    showtime
-    libreoffice
-    nautilus
   ];
 
   programs.kitty = {

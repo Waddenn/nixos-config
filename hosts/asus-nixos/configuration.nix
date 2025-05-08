@@ -40,11 +40,50 @@
     discord
     nextcloud-client
     miru
-    xdg-desktop-portal
-    xdg-desktop-portal-hyprland
+    # xdg-desktop-portal
+    # xdg-desktop-portal-hyprland
     plex-desktop
     xdg-utils
     plexamp
+    blanket
+    papers
+    whatip
+    youtube-music
+    fastfetch
+    grim
+    slurp
+    swappy
+    wl-clipboard
+    # qt5.qtwayland
+    # qt6.qtwayland
+    # libsForQt5.qt5ct
+    # qt6ct
+    # wayland-utils
+    # wayland-protocols
+    pamixer
+    brightnessctl
+    playerctl
+    resources
+    planify
+    peaclock
+    cbonsai
+    pipes
+    cmatrix
+    hyprshot
+    hyprpicker
+    imv
+    wf-recorder
+    wlr-randr
+    # gnome-themes-extra
+    libva
+    dconf
+    glib
+    direnv
+    meson
+    trayscale
+    showtime
+    libreoffice
+    nautilus
   ];
 
   # xdg.portal = {
