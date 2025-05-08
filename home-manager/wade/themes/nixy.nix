@@ -13,7 +13,7 @@
       active-opacity = 0.96;
       inactive-opacity = 0.92;
       blur = true;
-      border-size = 3;
+      border-size = 2;
       animation-speed = "fast"; # "fast" | "medium" | "slow"
       fetch = "none"; # "nerdfetch" | "neofetch" | "pfetch" | "none"
       textColorOnWallpaper =
@@ -83,8 +83,8 @@
 
     polarity = "dark";
     image = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/anotherhadi/awesome-wallpapers/refs/heads/main/app/static/wallpapers/black-oil-3_dark.png";
-      sha256 = "sha256-Ad8ql38qswHcVYI0qTIVOFcG1euiyUWONWiLkDrtiRQ=";
+      url = "https://raw.githubusercontent.com/anotherhadi/awesome-wallpapers/refs/heads/main/app/static/wallpapers/black-grey-and-white.png";
+      sha256 = "sha256-NQo6sEt7qt82sI8yCxNwSs0+NnWx17oko7MHSap34DI=";
     };
   };
 }
