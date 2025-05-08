@@ -6,11 +6,9 @@
   home.packages = with pkgs; [
     teams-for-linux
     remmina
-    obsidian
     blanket
     papers
     whatip
-    vscode
     mullvad-browser
     resources
     dconf-editor
@@ -27,6 +25,5 @@
     errands
     heroic
     gnome-boxes
-    discord
   ];
 }
