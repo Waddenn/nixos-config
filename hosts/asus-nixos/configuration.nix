@@ -36,7 +36,36 @@
     inputs.alejandra.defaultPackage.x86_64-linux
     trayscale
     swayosd
+    vscode
+    obsidian
+    discord
+    nextcloud-client
+    miru
+    xdg-desktop-portal
+    xdg-desktop-portal-hyprland
+    plex-desktop
+    xdg-utils
   ];
+
+  # xdg.portal = {
+  #   enable = true;
+  #   xdgOpenUsePortal = true;
+  #   config = {
+  #     common.default = ["gtk"];
+  #     hyprland.default = ["gtk" "hyprland"];
+  #   };
+
+  #   extraPortals = [pkgs.xdg-desktop-portal-gtk];
+  # };
+
+  # environment.variables = {
+  #   XDG_DATA_HOME = "$HOME/.local/share";
+  #   PASSWORD_STORE_DIR = "$HOME/.local/share/password-store";
+  #   EDITOR = "nano";
+  #   TERMINAL = "kitty";
+  #   TERM = "kitty";
+  #   BROWSER = "firefox";
+  # };
 
   services.flatpak.packages = [
     "tv.plex.PlexDesktop"
@@ -65,15 +94,15 @@
   rtkit.enable = true;
   timeZone.enable = true;
   zram.enable = true;
-  gnome-excludePackages.enable = true;
-  gnomeExtensions.enable = true;
+  gnome-excludePackages.enable = false;
+  gnomeExtensions.enable = false;
   flatpak.enable = true;
   printing.enable = true;
   pipewire.enable = true;
   fprintd.enable = false;
   fwupd.enable = true;
   xkb.enable = true;
-  gnome.enable = true;
+  gnome.enable = false;
   gdm.enable = true;
   docker.enable = true;
   hyprland.enable = true;
@@ -81,4 +110,6 @@
   linuxPackages.enableTesting = false;
   virtualisation.libvirtd.enable = true;
   services.blueman.enable = true;
+  services.upower.enable = true;
+  services.power-profiles-daemon.enable = true;
 }
