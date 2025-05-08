@@ -114,7 +114,7 @@ in {
       "bar.clock.format" = "%a %b %d  %I:%M %p";
       "bar.notifications.show_total" = true;
       "theme.notification.border_radius" = "${toString rounding}px";
-      "theme.osd.enable" = true;
+      "theme.osd.enable" = false;
       "theme.osd.orientation" = "vertical";
       "theme.osd.location" = "left";
       "theme.osd.radius" = "${toString rounding}px";
