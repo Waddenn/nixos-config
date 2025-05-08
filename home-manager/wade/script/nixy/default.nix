@@ -11,8 +11,8 @@
   inputs,
   ...
 }: let
-  configDirectory = config.var.configDirectory;
-  hostname = config.var.hostname;
+  configDirectory = "/home/wade/nixos-config";
+  hostname = "asus-nixos";
 
   nixy =
     pkgs.writeShellScriptBin "nixy"
