@@ -28,6 +28,8 @@ in {
     ../../home/script/nixy
     ../../home/script/notification
     ../../home/script/caffeine
+    ../../home/script/sounds
+    ../../home/script/brightness
     ../../home/system/hyprland
     ../../home/system/hypridle
     ../../home/system/mime

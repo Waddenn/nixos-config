@@ -41,7 +41,6 @@
     libreoffice
     nautilus
     bitwarden
-    thunar
   ];
 
   services.flatpak.packages = [
