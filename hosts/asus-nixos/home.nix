@@ -27,6 +27,7 @@ in {
     ../../home/script/hyprpanel
     ../../home/script/nixy
     ../../home/system/hyprland
+    ../../home/system/hypridle
     ../../home/system/mime
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
