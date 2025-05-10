@@ -31,8 +31,8 @@ in {
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];
-  home.username = "wade";
-  home.homeDirectory = "/home/wade";
+  home.username = "tom";
+  home.homeDirectory = "/home/tom";
   home.packages = with pkgs; [
   ];
 
@@ -91,7 +91,7 @@ in {
     ];
   };
 
-  file.".face.icon" = {source = ./profile_picture.png;};
+  # file.".face.icon" = {source = ./profile_picture.png;};
 
   programs.home-manager.enable = true;
 

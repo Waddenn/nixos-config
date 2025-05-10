@@ -9,7 +9,7 @@
   services = {
     xserver = {
       enable = true;
-      xkb.layout = fr;
+      xkb.layout = "fr";
       xkb.variant = "";
     };
     gnome.gnome-keyring.enable = true;
@@ -18,7 +18,7 @@
       resyncTimer = "10m";
     };
   };
-  console.keyMap = keyboardLayout;
+  console.keyMap = "fr";
 
   environment.variables = {
     XDG_DATA_HOME = "$HOME/.local/share";
@@ -73,7 +73,10 @@
       hyprland.default = ["gtk" "hyprland"];
     };
 
-    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-hyprland
+    ];
   };
 
   security = {

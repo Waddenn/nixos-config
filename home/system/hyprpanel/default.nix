@@ -27,7 +27,6 @@
   position = config.theme.bar.position;
 
   notificationOpacity = 90;
-  # location = config.var.location;  # Supprimé car dépendance externe possible
 in {
   imports = [inputs.hyprpanel.homeManagerModules.hyprpanel];
 
@@ -35,7 +34,7 @@ in {
     enable = true;
     hyprland.enable = true;
     overwrite.enable = true;
-    overlay.enable = true;
+    overlay.enable = false;
     settings = {
       layout = {
         "bar.layouts" = {

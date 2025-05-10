@@ -6,7 +6,7 @@
 }: {
   users.users.tom = {
     isNormalUser = true;
-    description = "Tom";
+    description = "tom";
     extraGroups = ["networkmanager" "wheel" "lp" "scanner" "docker"];
     initialPassword = "password";
     shell = pkgs.fish;

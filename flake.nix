@@ -17,7 +17,7 @@
       url = "github:kamadorueda/alejandra/4.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    hyprland.url = "github:hyprwm/Hyprland";
     hyprpanel.url = "github:jas-singhfsu/hyprpanel";
     hyprspace = {
       url = "github:KZDKM/Hyprspace";
@@ -54,8 +54,10 @@
         inputs.sops-nix.nixosModules.sops
         inputs.stylix.nixosModules.stylix
         {
-          home-manager.useGlobalPkgs = false;
+          nixpkgs.overlays = [inputs.hyprpanel.overlay];
+          home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+
           home-manager.backupFileExtension = "backup";
           home-manager.extraSpecialArgs = {
             inherit system inputs;
@@ -100,9 +102,6 @@
         extraModules = extraModules;
       });
   in {
-    nixpkgs.overlays = [
-      inputs.hyprpanel.overlay.${system}
-    ];
     nixosConfigurations = {
       asus-nixos = mkDesktop "asus-nixos" "tom";
 
