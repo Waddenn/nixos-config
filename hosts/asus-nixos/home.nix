@@ -26,6 +26,8 @@ in {
     ../../home/script/system
     ../../home/script/hyprpanel
     ../../home/script/nixy
+    ../../home/script/notification
+    ../../home/script/caffeine
     ../../home/system/hyprland
     ../../home/system/hypridle
     ../../home/system/mime
