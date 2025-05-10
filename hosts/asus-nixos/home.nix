@@ -29,6 +29,7 @@ in {
     ../../home/system/mime
     ../../home/programs/thunar
     ../../home/programs/nextcloud
+    ../../home/programs/zen
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];

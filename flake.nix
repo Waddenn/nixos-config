@@ -19,6 +19,7 @@
     };
     hyprland.url = "github:hyprwm/Hyprland";
     hyprpanel.url = "github:jas-singhfsu/hyprpanel";
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
     hyprspace = {
       url = "github:KZDKM/Hyprspace";
       inputs.hyprland.follows = "hyprland";
