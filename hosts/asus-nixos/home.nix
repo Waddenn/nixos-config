@@ -91,6 +91,8 @@ in {
     ];
   };
 
+  file.".face.icon" = {source = ./profile_picture.png;};
+
   programs.home-manager.enable = true;
 
   home.stateVersion = "25.05";
