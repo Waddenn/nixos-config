@@ -86,6 +86,5 @@
   blueman.enable = true;
   hardware.amd.enable = true;
   virtualisation.libvirtd.enable = false;
-  # home-manager.users.tom = ./home/tom/home.nix;
   home-manager.users.tom = import ./home.nix;
 }

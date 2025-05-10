@@ -16,6 +16,7 @@ in {
   imports = [
     ./bindings.nix
     ./animation.nix
+    ./polkitagent.nix
   ];
 
   home.packages = with pkgs; [
@@ -41,14 +42,14 @@ in {
     meson
   ];
 
- wayland.windowManager.hyprland = {
+  wayland.windowManager.hyprland = {
     enable = true;
     xwayland.enable = true;
     systemd = {
       enable = false;
       variables = [
         "--all"
-      ]; 
+      ];
     };
     package = null;
     portalPackage = null;
