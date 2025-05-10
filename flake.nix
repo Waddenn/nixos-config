@@ -48,7 +48,7 @@
         ./hosts/${hostname}/hardware-configuration.nix
         ./hosts/${hostname}/configuration.nix
         ./users/${username}/default.nix
-        ./users/wade/default.nix
+        # ./users/wade/default.nix
         home-manager.nixosModules.home-manager
         inputs.nix-flatpak.nixosModules.nix-flatpak
         inputs.sops-nix.nixosModules.sops

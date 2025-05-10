@@ -41,9 +41,17 @@ in {
     meson
   ];
 
-  wayland.windowManager.hyprland = {
+ wayland.windowManager.hyprland = {
     enable = true;
     xwayland.enable = true;
+    systemd = {
+      enable = false;
+      variables = [
+        "--all"
+      ]; 
+    };
+    package = null;
+    portalPackage = null;
     settings = {
       input = {
         kb_layout = "fr";

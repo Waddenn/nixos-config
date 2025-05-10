@@ -40,6 +40,7 @@
     planify
     libreoffice
     nautilus
+    xdg-desktop-portal
   ];
 
   services.flatpak.packages = [
