@@ -26,8 +26,8 @@ in {
     ../../home/script/system
     ../../home/script/hyprpanel
     ../../home/script/nixy
-    ../../home/system/hyprland/animation.nix
-    ../../home/system/hyprland/default.nix
+    ../../home/system/hyprland
+    ../../home/system/mime
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];

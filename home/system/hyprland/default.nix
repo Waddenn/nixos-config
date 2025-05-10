@@ -13,74 +13,38 @@
   blur = config.theme.blur;
   background = "rgb(" + config.lib.stylix.colors.base00 + ")";
 in {
+  imports = [
+    ./bindings.nix
+    ./animation.nix
+  ];
+
+  home.packages = with pkgs; [
+    qt5.qtwayland
+    qt6.qtwayland
+    libsForQt5.qt5ct
+    qt6ct
+    hyprshot
+    hyprpicker
+    swappy
+    imv
+    wf-recorder
+    wlr-randr
+    wl-clipboard
+    brightnessctl
+    gnome-themes-extra
+    libva
+    dconf
+    wayland-utils
+    wayland-protocols
+    glib
+    direnv
+    meson
+  ];
+
   wayland.windowManager.hyprland = {
     enable = true;
     xwayland.enable = true;
     settings = {
-      "$mainMod" = "SUPER";
-      bind = [
-        "$mainMod,        Return, exec, kitty"
-        "$mainMod,        q, killactive,"
-        "$mainMod SHIFT,  q, exit,"
-        "$mainMod,        e, exec, nautilus"
-        "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
-        "$mainMod,        b, exec, firefox"
-        "$mainMod,       left, movefocus, l"
-        "$mainMod,       right, movefocus, r"
-        "$mainMod,       up, movefocus, u"
-        "$mainMod,       down, movefocus, d"
-        "$mainMod,       T, togglefloating,"
-        "$mainMod,F, fullscreen,"
-        "$mainMod,        X, exec, powermenu"
-        "$mainMod,        space, exec, menu"
-        "$mainMod,        C, exec, quickmenu"
-        "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
-        "$mainMod,        p, exec, planify"
-        ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
-        ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
-        ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
-        ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
-        ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
-        ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
-        "$mainMod, code:10, workspace, 1"
-        "$mainMod, code:11, workspace, 2"
-        "$mainMod, code:12, workspace, 3"
-        "$mainMod, code:13, workspace, 4"
-        "$mainMod, code:14, workspace, 5"
-        "$mainMod, code:15, workspace, 6"
-        "$mainMod, code:16, workspace, 7"
-        "$mainMod, code:17, workspace, 8"
-        "$mainMod, code:18, workspace, 9"
-        "$mainMod, code:19, workspace, 10"
-        "$mainMod SHIFT, code:10, movetoworkspace, 1"
-        "$mainMod SHIFT, code:11, movetoworkspace, 2"
-        "$mainMod SHIFT, code:12, movetoworkspace, 3"
-        "$mainMod SHIFT, code:13, movetoworkspace, 4"
-        "$mainMod SHIFT, code:14, movetoworkspace, 5"
-        "$mainMod SHIFT, code:15, movetoworkspace, 6"
-        "$mainMod SHIFT, code:16, movetoworkspace, 7"
-        "$mainMod SHIFT, code:17, movetoworkspace, 8"
-        "$mainMod SHIFT, code:18, movetoworkspace, 9"
-        "$mainMod SHIFT, code:19, movetoworkspace, 10"
-        "$mainMod, F1, exec, playerctl play-pause"
-        "$mainMod, F2, exec, playerctl previous"
-        "$mainMod, F3, exec, playerctl next"
-        "$mainMod, L, exec, ${pkgs.hyprlock}/bin/hyprlock"
-        "$mainMod SHIFT, R, exec, resources"
-        "$mainMod SHIFT, C, exec, clipboard"
-        "$mainMod SHIFT, T, exec, hyprpanel-toggle"
-        "$mainMod,PRINT, exec, screenshot region"
-        ",PRINT, exec, screenshot monitor"
-        "$mainMod SHIFT,PRINT, exec, screenshot window"
-        "ALT,PRINT, exec, screenshot region swappy"
-      ];
-      bindm = [
-        "$mainMod,mouse:272, movewindow"
-        "$mainMod,R, resizewindow"
-      ];
-      bindl = [
-        ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock"
-      ];
       input = {
         kb_layout = "fr";
         kb_options = "caps:escape";
@@ -157,19 +121,31 @@ in {
         "float, tag:modal"
         "pin, tag:modal"
         "center, tag:modal"
+        # telegram media viewer
         "float, title:^(Media viewer)$"
+
+        # Bitwarden extension
         "float, title:^(.*Bitwarden Password Manager.*)$"
+
+        # gnome calculator
         "float, class:^(org.gnome.Calculator)$"
         "size 360 490, class:^(org.gnome.Calculator)$"
+
+        # make Firefox/Zen PiP window floating and sticky
         "float, title:^(Picture-in-Picture)$"
         "pin, title:^(Picture-in-Picture)$"
+
+        # idle inhibit while watching videos
         "idleinhibit focus, class:^(mpv|.+exe|celluloid)$"
         "idleinhibit focus, class:^(zen)$, title:^(.*YouTube.*)$"
         "idleinhibit fullscreen, class:^(zen)$"
+
         "dimaround, class:^(gcr-prompter)$"
         "dimaround, class:^(xdg-desktop-portal-gtk)$"
         "dimaround, class:^(polkit-gnome-authentication-agent-1)$"
         "dimaround, class:^(zen)$, title:^(File Upload)$"
+
+        # fix xwayland apps
         "rounding 0, xwayland:1"
         "center, class:^(.*jetbrains.*)$, title:^(Confirm Exit|Open Project|win424|win201|splash)$"
         "size 640 400, class:^(.*jetbrains.*)$, title:^(splash)$"
