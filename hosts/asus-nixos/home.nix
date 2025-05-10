@@ -22,16 +22,7 @@ in {
     # ../../home/system/hyprland/hyprspace.nix
     ../../home/system/hyprlock
     ../../home/system/zathura
-    ../../home/script/hyprfocus
-    ../../home/script/screenshot
-    ../../home/script/system
-    ../../home/script/hyprpanel
-    ../../home/script/nixy
-    ../../home/script/notification
-    ../../home/script/caffeine
-    ../../home/script/sounds
-    ../../home/script/night-shift
-    ../../home/script/brightness
+    ../../home/script
     ../../home/system/hyprland
     ../../home/system/udiskie
     ../../home/system/hypridle

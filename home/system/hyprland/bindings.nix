@@ -4,14 +4,12 @@
       "$mainMod" = "SUPER";
       bind = [
         "$mainMod,RETURN, exec, uwsm app -- ${pkgs.kitty}/bin/kitty"
-        "$mainMod,E, exec,  uwsm app -- ${pkgs.xfce.thunar}/bin/thunar"
+        "$mainMod,E, exec,  uwsm app -- nautilus"
         "$mainMod,K, exec,  uwsm app -- ${pkgs.bitwarden}/bin/bitwarden"
         "$mainMod,L, exec,  uwsm app -- ${pkgs.hyprlock}/bin/hyprlock"
         "$mainMod SHIFT,  q, exit,"
         "$mainMod,        q, killactive,"
-        # "$mainMod,        e, exec, nautilus"
         "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
-        # "$mainMod,        b, exec, firefox"
         "$mainMod,       left, movefocus, l"
         "$mainMod,       right, movefocus, r"
         "$mainMod,       up, movefocus, u"
