@@ -32,6 +32,8 @@
     age
     sops
     just
+    vulkan-tools
+    vulkan-loader
     mesa
     inputs.alejandra.defaultPackage.x86_64-linux
     swayosd
@@ -40,10 +42,9 @@
     discord
     nextcloud-client
     miru
-    # xdg-desktop-portal
-    # xdg-desktop-portal-hyprland
-    plex-desktop
-    xdg-utils
+    xdg-desktop-portal
+    xdg-desktop-portal-hyprland
+    # xdg-utils
     plexamp
     blanket
     papers
@@ -58,8 +59,8 @@
     # qt6.qtwayland
     # libsForQt5.qt5ct
     # qt6ct
-    # wayland-utils
-    # wayland-protocols
+    wayland-utils
+    wayland-protocols
     pamixer
     brightnessctl
     playerctl
@@ -74,7 +75,7 @@
     imv
     wf-recorder
     wlr-randr
-    # gnome-themes-extra
+    gnome-themes-extra
     libva
     dconf
     glib
@@ -84,34 +85,37 @@
     showtime
     libreoffice
     nautilus
+    distrobox
+    boxbuddy
+    appimage-run
   ];
 
-  # xdg.portal = {
-  #   enable = true;
-  #   xdgOpenUsePortal = true;
-  #   config = {
-  #     common.default = ["gtk"];
-  #     hyprland.default = ["gtk" "hyprland"];
-  #   };
+  xdg.portal = {
+    enable = true;
+    xdgOpenUsePortal = true;
+    config = {
+      common.default = ["gtk"];
+      hyprland.default = ["gtk" "hyprland"];
+    };
 
-  #   extraPortals = [pkgs.xdg-desktop-portal-gtk];
-  # };
+    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+  };
 
-  # environment.variables = {
-  #   XDG_DATA_HOME = "$HOME/.local/share";
-  #   PASSWORD_STORE_DIR = "$HOME/.local/share/password-store";
-  #   EDITOR = "nano";
-  #   TERMINAL = "kitty";
-  #   TERM = "kitty";
-  #   BROWSER = "firefox";
-  # };
+  environment.variables = {
+    XDG_DATA_HOME = "$HOME/.local/share";
+    PASSWORD_STORE_DIR = "$HOME/.local/share/password-store";
+    EDITOR = "nano";
+    TERMINAL = "kitty";
+    TERM = "kitty";
+    BROWSER = "firefox";
+  };
 
   services.flatpak.packages = [
     "tv.plex.PlexDesktop"
     "org.fedoraproject.MediaWriter"
     "com.github.taiko2k.avvie"
-    "com.boxy_svg.BoxySVG"
     "com.github.tchx84.Flatseal"
+    "com.valvesoftware.Steam"
   ];
 
   autoUpgrade.enable = true;
@@ -127,7 +131,7 @@
   experimental-features.enable = true;
   allowUnfree.enable = true;
   direnv.enable = true;
-  steam.enable = true;
+  steam.enable = false;
   zsh.enable = true;
   fish.enable = true;
   rtkit.enable = true;
@@ -146,12 +150,25 @@
   docker.enable = true;
   hyprland.enable = true;
   linuxPackages.enableTesting = false;
-  upower.enable = true;
+  upower.enable = false;
   blueman.enable = true;
   hardware.amd.enable = true;
   virtualisation.libvirtd.enable = false;
-  services.power-profiles-daemon.enable = true;
-
+  services.gnome.gnome-keyring.enable = true;
   # home-manager.users.tom = ./home/tom/home.nix;
   home-manager.users.wade = import ./home.nix;
+
+  services.libinput.enable = true;
+  programs.dconf.enable = true;
+  services = {
+    dbus = {
+      enable = true;
+      implementation = "broker";
+      packages = with pkgs; [gcr gnome-settings-daemon];
+    };
+    gvfs.enable = true;
+    upower.enable = true;
+    power-profiles-daemon.enable = true;
+    udisks2.enable = true;
+  };
 }

@@ -1,0 +1,183 @@
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
+  border-size = config.theme.border-size;
+  gaps-in = config.theme.gaps-in;
+  gaps-out = config.theme.gaps-out;
+  active-opacity = config.theme.active-opacity;
+  inactive-opacity = config.theme.inactive-opacity;
+  rounding = config.theme.rounding;
+  blur = config.theme.blur;
+  background = "rgb(" + config.lib.stylix.colors.base00 + ")";
+in {
+  wayland.windowManager.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+    settings = {
+      "$mainMod" = "SUPER";
+      bind = [
+        "$mainMod,        Return, exec, kitty"
+        "$mainMod,        q, killactive,"
+        "$mainMod SHIFT,  q, exit,"
+        "$mainMod,        e, exec, nautilus"
+        "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
+        "$mainMod,        b, exec, firefox"
+        "$mainMod,       left, movefocus, l"
+        "$mainMod,       right, movefocus, r"
+        "$mainMod,       up, movefocus, u"
+        "$mainMod,       down, movefocus, d"
+        "$mainMod,       T, togglefloating,"
+        "$mainMod,F, fullscreen,"
+        "$mainMod,        X, exec, powermenu"
+        "$mainMod,        space, exec, menu"
+        "$mainMod,        C, exec, quickmenu"
+        "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
+        "$mainMod,        p, exec, planify"
+        ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
+        ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
+        ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
+        ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
+        ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
+        ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
+        "$mainMod, code:10, workspace, 1"
+        "$mainMod, code:11, workspace, 2"
+        "$mainMod, code:12, workspace, 3"
+        "$mainMod, code:13, workspace, 4"
+        "$mainMod, code:14, workspace, 5"
+        "$mainMod, code:15, workspace, 6"
+        "$mainMod, code:16, workspace, 7"
+        "$mainMod, code:17, workspace, 8"
+        "$mainMod, code:18, workspace, 9"
+        "$mainMod, code:19, workspace, 10"
+        "$mainMod SHIFT, code:10, movetoworkspace, 1"
+        "$mainMod SHIFT, code:11, movetoworkspace, 2"
+        "$mainMod SHIFT, code:12, movetoworkspace, 3"
+        "$mainMod SHIFT, code:13, movetoworkspace, 4"
+        "$mainMod SHIFT, code:14, movetoworkspace, 5"
+        "$mainMod SHIFT, code:15, movetoworkspace, 6"
+        "$mainMod SHIFT, code:16, movetoworkspace, 7"
+        "$mainMod SHIFT, code:17, movetoworkspace, 8"
+        "$mainMod SHIFT, code:18, movetoworkspace, 9"
+        "$mainMod SHIFT, code:19, movetoworkspace, 10"
+        "$mainMod, F1, exec, playerctl play-pause"
+        "$mainMod, F2, exec, playerctl previous"
+        "$mainMod, F3, exec, playerctl next"
+        "$mainMod, L, exec, ${pkgs.hyprlock}/bin/hyprlock"
+        "$mainMod SHIFT, R, exec, resources"
+        "$mainMod SHIFT, C, exec, clipboard"
+        "$mainMod SHIFT, T, exec, hyprpanel-toggle"
+        "$mainMod,PRINT, exec, screenshot region"
+        ",PRINT, exec, screenshot monitor"
+        "$mainMod SHIFT,PRINT, exec, screenshot window"
+        "ALT,PRINT, exec, screenshot region swappy"
+      ];
+      bindm = [
+        "$mainMod,mouse:272, movewindow"
+        "$mainMod,R, resizewindow"
+      ];
+      bindl = [
+        ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock"
+      ];
+      input = {
+        kb_layout = "fr";
+        kb_options = "caps:escape";
+        follow_mouse = 1;
+        repeat_delay = 300;
+        repeat_rate = 50;
+        numlock_by_default = true;
+        touchpad = {
+          natural_scroll = true;
+          clickfinger_behavior = true;
+        };
+      };
+      env = [
+        "XDG_SESSION_TYPE,wayland"
+        "XDG_SESSION_DESKTOP,Hyprland"
+        "XDG_CURRENT_DESKTOP,Hyprland"
+        "QT_QPA_PLATFORM,wayland"
+        "QT_AUTO_SCREEN_SCALE_FACTOR,1"
+        "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
+        "ELECTRON_OZONE_PLATFORM_HINT,wayland"
+        "MOZ_ENABLE_WAYLAND,1"
+        "SDL_VIDEODRIVER,wayland"
+        "CLUTTER_BACKEND,wayland"
+        "WLR_BACKEND,vulkan"
+        "WLR_RENDERER,vulkan"
+        "WLR_NO_HARDWARE_CURSORS,1"
+        "XWAYLAND_SCALE,1"
+      ];
+      general = {
+        resize_on_border = true;
+        gaps_in = gaps-in;
+        gaps_out = gaps-out;
+        border_size = border-size;
+        layout = "dwindle";
+        "col.inactive_border" = lib.mkForce background;
+      };
+      gestures = {
+        workspace_swipe = true;
+        workspace_swipe_fingers = 3;
+      };
+      exec-once = [
+        "systemctl --user enable --now hyprpaper.service &"
+        "swayosd-server"
+        "dbus-update-activation-environment --systemd --all &"
+        "systemctl --user enable --now hyprpaper.service &"
+        "systemctl --user enable --now hypridle.service &"
+      ];
+      misc = {
+        vfr = true;
+        disable_hyprland_logo = true;
+        disable_splash_rendering = true;
+        disable_autoreload = true;
+        focus_on_activate = true;
+        new_window_takes_over_fullscreen = 2;
+      };
+      decoration = {
+        active_opacity = active-opacity;
+        inactive_opacity = inactive-opacity;
+        rounding = rounding;
+        shadow = {
+          enabled = true;
+          range = 20;
+          render_power = 3;
+        };
+        blur = {
+          enabled =
+            if blur
+            then "true"
+            else "false";
+          size = 18;
+        };
+      };
+      windowrulev2 = [
+        "float, tag:modal"
+        "pin, tag:modal"
+        "center, tag:modal"
+        "float, title:^(Media viewer)$"
+        "float, title:^(.*Bitwarden Password Manager.*)$"
+        "float, class:^(org.gnome.Calculator)$"
+        "size 360 490, class:^(org.gnome.Calculator)$"
+        "float, title:^(Picture-in-Picture)$"
+        "pin, title:^(Picture-in-Picture)$"
+        "idleinhibit focus, class:^(mpv|.+exe|celluloid)$"
+        "idleinhibit focus, class:^(zen)$, title:^(.*YouTube.*)$"
+        "idleinhibit fullscreen, class:^(zen)$"
+        "dimaround, class:^(gcr-prompter)$"
+        "dimaround, class:^(xdg-desktop-portal-gtk)$"
+        "dimaround, class:^(polkit-gnome-authentication-agent-1)$"
+        "dimaround, class:^(zen)$, title:^(File Upload)$"
+        "rounding 0, xwayland:1"
+        "center, class:^(.*jetbrains.*)$, title:^(Confirm Exit|Open Project|win424|win201|splash)$"
+        "size 640 400, class:^(.*jetbrains.*)$, title:^(splash)$"
+      ];
+      layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
+      monitor = [
+        "eDP-1,2880x1800@60,0x0,2"
+      ];
+    };
+  };
+}
