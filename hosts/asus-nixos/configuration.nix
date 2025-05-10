@@ -25,7 +25,6 @@
     vscode
     obsidian
     discord
-    nextcloud-client
     miru
     blanket
     papers

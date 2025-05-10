@@ -34,11 +34,11 @@ in {
 
   # bookmarks for the side pane
   gtk.gtk3.bookmarks = [
-    "file:///home/${user}/Downloads Downloads"
-    "file:///home/${user}/Pictures Pictures"
-    "file:///home/${user}/nextcloud Nextcloud"
-    "file:///home/${user}/.config/nixos NixOS"
-    "file:///home/${user}/dev Development"
+    "file:///home/tom/Downloads Downloads"
+    "file:///home/tom/Pictures Pictures"
+    "file:///home/tom/Nextcloud Nextcloud"
+    "file:///home/tom/nixos-config NixOS"
+    "file:///home/tom/dev Development"
   ];
 
   home.file.".config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml".text = ''

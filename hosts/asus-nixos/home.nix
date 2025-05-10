@@ -30,12 +30,14 @@ in {
     ../../home/script/notification
     ../../home/script/caffeine
     ../../home/script/sounds
+    ../../home/script/night-shift
     ../../home/script/brightness
     ../../home/system/hyprland
     ../../home/system/udiskie
     ../../home/system/hypridle
     ../../home/system/mime
     ../../home/programs/thunar
+    ../../home/programs/nextcloud
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];
