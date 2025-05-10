@@ -81,7 +81,7 @@
   gdm.enable = false;
   docker.enable = false;
   hyprland.enable = true;
-  linuxPackages.enableTesting = false;
+  linuxPackages.enableLatest = true;
   upower.enable = false;
   blueman.enable = true;
   hardware.amd.enable = true;

@@ -11,7 +11,7 @@
   inputs,
   ...
 }: let
-  configDirectory = "/home/wade/nixos-config";
+  configDirectory = "/home/tom/nixos-config";
   hostname = "asus-nixos";
 
   nixy =
