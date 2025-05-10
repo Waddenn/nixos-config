@@ -32,6 +32,7 @@ in {
     ../../home/script/sounds
     ../../home/script/brightness
     ../../home/system/hyprland
+    ../../home/system/udiskie
     ../../home/system/hypridle
     ../../home/system/mime
     ../../themes/nixy.nix
@@ -97,7 +98,7 @@ in {
     ];
   };
 
-  file.".face.icon" = {source = ./profile_picture.png;};
+  # file.".face.icon" = {source = ./profile_picture.png;};
 
   programs.home-manager.enable = true;
 
