@@ -35,6 +35,7 @@ in {
     ../../home/system/udiskie
     ../../home/system/hypridle
     ../../home/system/mime
+    ../../home/programs/thunar
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];
