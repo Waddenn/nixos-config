@@ -21,6 +21,7 @@ in {
     ../../home/system/hyprpanel
     # ../../home/system/hyprland/hyprspace.nix
     ../../home/system/hyprlock
+    ../../home/system/zathura
     ../../home/script/hyprfocus
     ../../home/script/screenshot
     ../../home/script/system
@@ -96,7 +97,7 @@ in {
     ];
   };
 
-  # file.".face.icon" = {source = ./profile_picture.png;};
+  file.".face.icon" = {source = ./profile_picture.png;};
 
   programs.home-manager.enable = true;
 
