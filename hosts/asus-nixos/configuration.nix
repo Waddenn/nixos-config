@@ -40,7 +40,8 @@
     planify
     libreoffice
     nautilus
-    xdg-desktop-portal
+    bitwarden
+    thunar
   ];
 
   services.flatpak.packages = [

@@ -27,6 +27,8 @@
   position = config.theme.bar.position;
 
   notificationOpacity = 90;
+
+  location = "Paris";
 in {
   imports = [inputs.hyprpanel.homeManagerModules.hyprpanel];
 
@@ -34,7 +36,7 @@ in {
     enable = true;
     hyprland.enable = true;
     overwrite.enable = true;
-    overlay.enable = false;
+    overlay.enable = true;
     settings = {
       layout = {
         "bar.layouts" = {
@@ -113,18 +115,17 @@ in {
       "bar.clock.format" = "%a %b %d  %I:%M %p";
       "bar.notifications.show_total" = true;
       "theme.notification.border_radius" = "${toString rounding}px";
-      "theme.osd.enable" = false;
+      "theme.osd.enable" = true;
       "theme.osd.orientation" = "vertical";
       "theme.osd.location" = "left";
       "theme.osd.radius" = "${toString rounding}px";
       "theme.osd.margins" = "0px 0px 0px 10px";
       "theme.osd.muted_zero" = true;
-      # "menus.clock.weather.location" = "${location}";  # Supprimé
-      # "menus.clock.weather.unit" = "metric";           # Supprimé
-      # "menus.dashboard.powermenu.confirmation" = false; # Option safe, gardée
-      # "menus.dashboard.powermenu.avatar.image" = "~/.face.icon"; # Supprimé
+      "menus.clock.weather.location" = "${location}";
+      "menus.clock.weather.unit" = "metric";
+      "menus.dashboard.powermenu.confirmation" = false;
+      # "menus.dashboard.powermenu.avatar.image" = "~/.face.icon";
 
-      # Shortcuts: gardez ceux qui ne dépendent pas de commandes externes non installées
       "menus.dashboard.shortcuts.left.shortcut1.icon" = "";
       "menus.dashboard.shortcuts.left.shortcut1.command" = "zen";
       "menus.dashboard.shortcuts.left.shortcut1.tooltip" = "Zen";
@@ -140,9 +141,9 @@ in {
       "menus.dashboard.shortcuts.right.shortcut1.icon" = "";
       "menus.dashboard.shortcuts.right.shortcut1.command" = "hyprpicker -a";
       "menus.dashboard.shortcuts.right.shortcut1.tooltip" = "Color Picker";
-      # "menus.dashboard.shortcuts.right.shortcut3.icon" = "󰄀"; # Supprimé car dépend de swappy
-      # "menus.dashboard.shortcuts.right.shortcut3.command" = "screenshot region swappy"; # Supprimé
-      # "menus.dashboard.shortcuts.right.shortcut3.tooltip" = "Screenshot"; # Supprimé
+      "menus.dashboard.shortcuts.right.shortcut3.icon" = "󰄀";
+      "menus.dashboard.shortcuts.right.shortcut3.command" = "screenshot region swappy";
+      "menus.dashboard.shortcuts.right.shortcut3.tooltip" = "Screenshot";
 
       "theme.bar.menus.monochrome" = true;
       "wallpaper.enable" = false;
@@ -206,10 +207,23 @@ in {
       "theme.bar.menus.menu.media.background.color" = "${background-alt}";
       "theme.bar.menus.menu.media.card.color" = "${background-alt}";
       "theme.bar.menus.menu.media.card.tint" = 90;
-      # "bar.customModules.updates.pollingInterval" = 1440000; # Supprimé
-      # "bar.customModules.cava.showIcon" = false; # Supprimé
-      # "bar.customModules.cava.stereo" = true; # Supprimé
-      # "bar.customModules.cava.showActiveOnly" = true; # Supprimé
+      "bar.customModules.updates.pollingInterval" = 1440000;
+      "bar.media.show_active_only" = true;
+      "theme.bar.location" = "${position}";
+      "bar.workspaces.numbered_active_indicator" = "color";
+      "bar.workspaces.monitorSpecific" = false;
+      "bar.workspaces.applicationIconEmptyWorkspace" = "";
+      "bar.workspaces.showApplicationIcons" = true;
+      "bar.workspaces.showWsIcons" = true;
+      "theme.bar.dropdownGap" = "4.5em";
+      "theme.bar.menus.shadow" = "${
+        if transparent
+        then "0 0 0 0"
+        else "0px 0px 3px 1px #16161e"
+      }";
+      "bar.customModules.cava.showIcon" = false;
+      "bar.customModules.cava.stereo" = true;
+      "bar.customModules.cava.showActiveOnly" = true;
       "menus.power.lowBatteryNotification" = true;
       "notifications.position" = "top right";
       "notifications.showActionsOnHover" = true;

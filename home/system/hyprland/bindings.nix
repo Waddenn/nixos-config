@@ -3,12 +3,15 @@
     settings = {
       "$mainMod" = "SUPER";
       bind = [
-        "$mainMod,        Return, exec, kitty"
-        "$mainMod,        q, killactive,"
+        "$mmainModod,RETURN, exec, uwsm app -- ${pkgs.kitty}/bin/kitty"
+        "$mainMod,E, exec,  uwsm app -- ${pkgs.xfce.thunar}/bin/thunar"
+        "$mainMod,B, exec,  uwsm app -- firefox"
+        "$mainMod,K, exec,  uwsm app -- ${pkgs.bitwarden}/bin/bitwarden"
+        "$mainMod,L, exec,  uwsm app -- ${pkgs.hyprlock}/bin/hyprlock"
         "$mainMod SHIFT,  q, exit,"
-        "$mainMod,        e, exec, nautilus"
+        # "$mainMod,        e, exec, nautilus"
         "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
-        "$mainMod,        b, exec, firefox"
+        # "$mainMod,        b, exec, firefox"
         "$mainMod,       left, movefocus, l"
         "$mainMod,       right, movefocus, r"
         "$mainMod,       up, movefocus, u"
@@ -20,12 +23,12 @@
         "$mainMod,        C, exec, quickmenu"
         "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
         "$mainMod,        p, exec, planify"
-        ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
-        ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
-        ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
-        ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
-        ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
-        ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
+        # ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
+        # ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
+        # ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
+        # ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
+        # ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
+        # ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
@@ -64,6 +67,13 @@
       ];
       bindl = [
         ",switch:Lid Switch, exec, ${pkgs.hyprlock}/bin/hyprlock"
+      ];
+
+      bindle = [
+        ",XF86AudioRaiseVolume, exec, sound-up" # Sound Up
+        ",XF86AudioLowerVolume, exec, sound-down" # Sound Down
+        ",XF86MonBrightnessUp, exec, brightness-up" # Brightness Up
+        ",XF86MonBrightnessDown, exec, brightness-down" # Brightness Down
       ];
     };
   };
