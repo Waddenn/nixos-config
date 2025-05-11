@@ -10,7 +10,7 @@
         "$mainMod SHIFT,  q, exit,"
         "$mainMod,        q, killactive,"
         "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
-        "$mainMod,       left, movefocus, l"
+        "$mainMod,B, exec,  uwsm app -- firefox"
         "$mainMod,       right, movefocus, r"
         "$mainMod,       up, movefocus, u"
         "$mainMod,       down, movefocus, d"
@@ -20,13 +20,7 @@
         "$mainMod,        space, exec, menu"
         "$mainMod,        C, exec, quickmenu"
         "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
-        "$mainMod,        p, exec, planify"
-        # ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise"
-        # ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower"
-        # ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
-        # ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
-        # ", XF86MonBrightnessUp, exec, swayosd-client --brightness raise"
-        # ", XF86MonBrightnessDown, exec, swayosd-client --brightness lower"
+        "$mainMod,P, exec,  uwsm app -- ${pkgs.planify}/bin/io.github.alainm23.planify"
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
@@ -68,10 +62,10 @@
       ];
 
       bindle = [
-        ",XF86AudioRaiseVolume, exec, sound-up" # Sound Up
-        ",XF86AudioLowerVolume, exec, sound-down" # Sound Down
-        ",XF86MonBrightnessUp, exec, brightness-up" # Brightness Up
-        ",XF86MonBrightnessDown, exec, brightness-down" # Brightness Down
+        ",XF86AudioRaiseVolume, exec, sound-up"
+        ",XF86AudioLowerVolume, exec, sound-down"
+        ",XF86MonBrightnessUp, exec, brightness-up"
+        ",XF86MonBrightnessDown, exec, brightness-down"
       ];
     };
   };

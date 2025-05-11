@@ -40,6 +40,9 @@
     libreoffice
     nautilus
     bitwarden
+    trayscale
+    gnome-text-editor
+    nextcloud-client
   ];
 
   services.flatpak.packages = [

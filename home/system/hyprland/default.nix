@@ -70,7 +70,8 @@ in {
         "XDG_SESSION_TYPE,wayland"
         "XDG_SESSION_DESKTOP,Hyprland"
         "XDG_CURRENT_DESKTOP,Hyprland"
-        "QT_QPA_PLATFORM,wayland"
+        "GDK_BACKEND,wayland,x11,*"
+        "QT_QPA_PLATFORM,wayland;xcb"
         "QT_AUTO_SCREEN_SCALE_FACTOR,1"
         "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
         "ELECTRON_OZONE_PLATFORM_HINT,wayland"
@@ -81,6 +82,7 @@ in {
         "WLR_RENDERER,vulkan"
         "WLR_NO_HARDWARE_CURSORS,1"
         "XWAYLAND_SCALE,1"
+        "XCURSOR_SIZE=24"
       ];
       general = {
         resize_on_border = true;

@@ -9,7 +9,7 @@
   ...
 }: let
   nerdfont-fzf = pkgs.writeShellScriptBin "nerdfont-fzf" ''
-    icons=$(${pkgs.jq}/bin/jq -r 'to_entries[] | "\(.key):\(.value.char)"' "/home/${config.var.username}/.config/nerdfont_glyphnames.json" | awk -F: '{print "\033[95m "$2" \033[0m "$1}')
+    icons=$(${pkgs.jq}/bin/jq -r 'to_entries[] | "\(.key):\(.value.char)"' "/home/tom/.config/nerdfont_glyphnames.json" | awk -F: '{print "\033[95m "$2" \033[0m "$1}')
     fzf_result=$(echo "$icons" | ${pkgs.fzf}/bin/fzf --ansi --border none | awk '{print $1}')
     if [ -z "$fzf_result" ]; then
       echo "No icon selected"

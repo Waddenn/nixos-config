@@ -5,11 +5,11 @@
 }:
 with lib; let
   defaultApps = {
-    browser = ["firefox.desktop"];
+    browser = ["zen-beta.desktop"];
     text = ["org.gnome.TextEditor.desktop"];
     image = ["imv-dir.desktop"];
-    audio = ["org.gnome.Showtime.desktop"];
-    video = ["org.gnome.Showtime.desktop"];
+    audio = ["mpv.desktop"];
+    video = ["mpv.desktop"];
     directory = ["thunar.desktop"];
     office = ["libreoffice.desktop"];
     pdf = ["zathura.desktop"];
