@@ -41,16 +41,14 @@ in {
       layout = {
         "bar.layouts" = {
           "*" = {
-            "left" = ["dashboard" "workspaces" "windowtitle"];
-            "middle" = ["media" "cava"];
+            "left" = ["dashboard" "workspaces" "media"];
+            "middle" = ["clock" "notifications"];
             "right" = [
               "systray"
               "volume"
               "bluetooth"
               "battery"
               "network"
-              "clock"
-              "notifications"
             ];
           };
         };
@@ -58,6 +56,7 @@ in {
     };
 
     override = {
+      "scalingPriority" = "hyprland";
       "theme.font.name" = "${font}";
       "theme.font.size" = "${fontSize}px";
       "theme.bar.outer_spacing" = "${
@@ -112,14 +111,18 @@ in {
       "bar.volume.label" = false;
       "bar.network.truncation_size" = 12;
       "bar.bluetooth.label" = false;
-      "bar.clock.format" = "%a %b %d  %I:%M %p";
+      "bar.battery.label" = false;
+      "bar.clock.format" = "%A %d %B - %H:%M";
+      "menus.clock.time.military" = true;
       "bar.notifications.show_total" = true;
+      "theme.bar.menus.menu.notifications.height" = "38em";
       "theme.notification.border_radius" = "${toString rounding}px";
       "theme.osd.enable" = true;
-      "theme.osd.orientation" = "vertical";
-      "theme.osd.location" = "left";
+      "theme.osd.orientation" = "horizontal";
+      "theme.osd.location" = "bottom";
+      "theme.osd.scaling" = 100;
       "theme.osd.radius" = "${toString rounding}px";
-      "theme.osd.margins" = "0px 0px 0px 10px";
+      "theme.osd.margins" = "0px 0px 40px 0px";
       "theme.osd.muted_zero" = true;
       "menus.clock.weather.location" = "${location}";
       "menus.clock.weather.unit" = "metric";
@@ -157,6 +160,7 @@ in {
       "theme.bar.menus.border.radius" = "${toString rounding}px";
       "theme.bar.menus.popover.text" = "${foreground}";
       "theme.bar.menus.popover.background" = "${background-alt}";
+      "theme.bar.menus.popover.scaling" = 75;
       "theme.bar.menus.listitems.active" = "${accent}";
       "theme.bar.menus.icons.active" = "${accent}";
       "theme.bar.menus.switch.enabled" = "${accent}";
