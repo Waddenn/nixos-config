@@ -1,30 +1,32 @@
+# - ## Screenshot
+#-
+#- This module provides a script to take screenshots using `grimblast` and `swappy`.
+#-
+#- - `screenshot [region|window|monitor] [swappy]` - Take a screenshot of the region, window, or monitor. Optionally, use `swappy` to copy the screenshot to the clipboard.
 {pkgs, ...}: let
   screenshot = pkgs.writeShellScriptBin "screenshot" ''
-    if [[ $2 == "swappy" ]]; then
+    if [[ $2 == "swappy" ]];then
       folder="/tmp"
     else
       folder="$HOME/Pictures"
     fi
     filename="$(date +%Y-%m-%d_%H:%M:%S).png"
-    filepath="$folder/$filename"
 
-    if [[ $1 == "region" ]]; then
-      region="$(${pkgs.slurp}/bin/slurp)"
-      ${pkgs.grim}/bin/grim -g "$region" "$filepath"
-    elif [[ $1 == "window" ]]; then
-      region="$(${pkgs.slurp}/bin/slurp -w 0)" # Window-like selection
-      ${pkgs.grim}/bin/grim -g "$region" "$filepath"
-    elif [[ $1 == "monitor" ]]; then
-      output="$(${pkgs.grim}/bin/grim -l | head -n1 | awk '{print $1}')" # or pick dynamically
-      ${pkgs.grim}/bin/grim -o "$output" "$filepath"
-    else
-      ${pkgs.grim}/bin/grim "$filepath" # fallback: full screen
+    if [[ $1 == "window" ]];then
+      mode="active"
+    elif [[ $1 == "region" ]];then
+      mode="area"
+    elif [[ $1 == "monitor" ]];then
+      mode="output"
     fi
 
-    if [[ $2 == "swappy" ]]; then
-      ${pkgs.swappy}/bin/swappy -f "$filepath" -o "$HOME/Pictures/$filename"
+    ${pkgs.grimblast}/bin/grimblast --notify --freeze copysave $mode "$folder/$filename" || exit 1
+
+    if [[ $2 == "swappy" ]];then
+      ${pkgs.swappy}/bin/swappy -f "$folder/$filename" -o "$HOME/Pictures/$filename"
+      exit 0
     fi
   '';
 in {
-  home.packages = [screenshot pkgs.grim pkgs.slurp pkgs.swappy];
+  home.packages = [pkgs.hyprshot screenshot pkgs.slurp pkgs.grim pkgs.grimblast];
 }
