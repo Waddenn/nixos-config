@@ -42,6 +42,12 @@ in {
     meson
   ];
 
+  dconf.settings = {
+    "org/gnome/desktop/wm/preferences" = {
+      button-layout = "";
+    };
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
     xwayland.enable = true;
@@ -102,6 +108,11 @@ in {
         "dbus-update-activation-environment --systemd --all &"
         "systemctl --user enable --now hyprpaper.service &"
         "systemctl --user enable --now hypridle.service &"
+
+        # "[workspace 1 silent] firefox"
+        # "[workspace 1 silent] code"
+        # "[workspace 3 silent] kitty"
+        # "[workspace 4 silent] discord"
       ];
       misc = {
         vfr = true;
@@ -158,8 +169,6 @@ in {
 
         # fix xwayland apps
         "rounding 0, xwayland:1"
-        "center, class:^(.*jetbrains.*)$, title:^(Confirm Exit|Open Project|win424|win201|splash)$"
-        "size 640 400, class:^(.*jetbrains.*)$, title:^(splash)$"
       ];
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
       monitor = [
