@@ -11,6 +11,7 @@
     ../../modules/utils.nix
     ../../modules/sddm.nix
     ../../themes/nixy.nix
+    ./variables.nix
   ];
 
   sops.defaultSopsFile = ./secrets/secrets.yaml;
