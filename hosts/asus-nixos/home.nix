@@ -28,8 +28,9 @@ in {
     ../../home/system/hypridle
     ../../home/system/mime
     ../../home/programs/thunar
-    # ../../home/programs/nextcloud
     ../../home/programs/zen
+    ../../home/programs/fish
+    ../../home/programs/git
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
   ];
@@ -52,45 +53,6 @@ in {
     extraConfig = {
       init.defaultBranch = "main";
     };
-  };
-
-  programs.fish = {
-    enable = true;
-
-    shellAliases = {
-      ll = "ls -lh";
-      la = "ls -lha";
-      gs = "git status";
-      gc = "git commit";
-      gp = "git push";
-      gl = "git pull";
-      k = "kubectl";
-      d = "docker";
-      tf = "terraform";
-      cls = "clear";
-      update = "nix flake update && sudo nixos-rebuild switch --flake .#$(hostname)";
-    };
-
-    interactiveShellInit = ''
-      set -U fish_user_paths $HOME/.local/bin $fish_user_paths
-      fish_config theme choose "Tomorrow Night Bright"
-      set -g fish_greeting ""
-    '';
-
-    plugins = [
-      {
-        name = "z";
-        src = pkgs.fishPlugins.z.src;
-      }
-      {
-        name = "fzf-fish";
-        src = pkgs.fishPlugins.fzf-fish.src;
-      }
-      {
-        name = "done";
-        src = pkgs.fishPlugins.done.src;
-      }
-    ];
   };
 
   # file.".face.icon" = {source = ./profile_picture.png;};

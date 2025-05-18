@@ -4,7 +4,6 @@
   ...
 }: {
   imports = [
-    # Choose your theme here:
     ../../themes/nixy.nix
   ];
 
