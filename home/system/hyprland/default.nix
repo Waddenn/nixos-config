@@ -76,20 +76,25 @@ in {
         "XDG_SESSION_TYPE,wayland"
         "XDG_SESSION_DESKTOP,Hyprland"
         "XDG_CURRENT_DESKTOP,Hyprland"
-        "GDK_BACKEND,wayland,x11,*"
-        "QT_QPA_PLATFORM,wayland;xcb"
+
+        "GDK_BACKEND,wayland"
+        "QT_QPA_PLATFORM,wayland"
         "QT_AUTO_SCREEN_SCALE_FACTOR,1"
         "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
+
         "ELECTRON_OZONE_PLATFORM_HINT,wayland"
         "MOZ_ENABLE_WAYLAND,1"
         "SDL_VIDEODRIVER,wayland"
         "CLUTTER_BACKEND,wayland"
+
         "WLR_BACKEND,vulkan"
         "WLR_RENDERER,vulkan"
         "WLR_NO_HARDWARE_CURSORS,1"
+
         "XWAYLAND_SCALE,1"
         "XCURSOR_SIZE=24"
       ];
+
       general = {
         resize_on_border = true;
         gaps_in = gaps-in;

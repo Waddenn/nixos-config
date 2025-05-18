@@ -37,7 +37,7 @@
     pamixer
     playerctl
     resources
-    planify
+    # planify
     libreoffice
     nautilus
     bitwarden
@@ -89,5 +89,6 @@
   blueman.enable = true;
   hardware.amd.enable = true;
   virtualisation.libvirtd.enable = false;
+  programs.chromium.enable = true;
   home-manager.users.tom = import ./home.nix;
 }

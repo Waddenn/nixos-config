@@ -20,7 +20,7 @@
         "$mainMod,        space, exec, menu"
         "$mainMod,        C, exec, quickmenu"
         "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
-        "$mainMod,P, exec,  uwsm app -- ${pkgs.planify}/bin/io.github.alainm23.planify"
+        # "$mainMod,P, exec,  uwsm app -- ${pkgs.planify}/bin/io.github.alainm23.planify"
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
