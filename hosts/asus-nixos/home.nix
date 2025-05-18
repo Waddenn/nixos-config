@@ -33,11 +33,18 @@ in {
     ../../home/programs/git
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
+    ./variables.nix
   ];
   home.username = "tom";
   home.homeDirectory = "/home/tom";
-  home.packages = with pkgs; [
-  ];
+
+  home.file.".face.icon" = {
+    source = ./profile_picture.png;
+  };
+
+  programs.home-manager.enable = true;
+
+  home.stateVersion = "25.05";
 
   programs.kitty = {
     enable = true;
@@ -45,19 +52,4 @@ in {
       confirm_os_window_close 0
     '';
   };
-
-  programs.git = {
-    enable = true;
-    userName = "Waddenn";
-    userEmail = "tpatelas@proton.me";
-    extraConfig = {
-      init.defaultBranch = "main";
-    };
-  };
-
-  # file.".face.icon" = {source = ./profile_picture.png;};
-
-  programs.home-manager.enable = true;
-
-  home.stateVersion = "25.05";
 }
