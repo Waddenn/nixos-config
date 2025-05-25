@@ -11,6 +11,7 @@
   config = lib.mkIf config.firefox.enable {
     programs.firefox = {
       enable = true;
+      package = pkgs.firefox-bin;
       preferences = {
         "browser.preferences.defaultPerformanceSettings.enabled" = true;
         "layers.acceleration.disabled" = false;
@@ -44,6 +45,10 @@
         "signon.autofillForms" = false;
         "signon.formlessCapture.enabled" = false;
         "media.hardware-video-decoding.enabled" = false;
+
+        "toolkit.cosmeticAnimations.enabled" = false;
+        "ui.prefersReducedMotion" = 1;
+        "general.smoothScroll" = false;
       };
     };
   };
