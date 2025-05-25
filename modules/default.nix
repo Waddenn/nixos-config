@@ -62,6 +62,7 @@
     ./services/jellyseerr.nix
     ./services/upower.nix
     ./services/blueman.nix
+    ./services/glance.nix
     ./hardware/amd.nix
   ];
 }

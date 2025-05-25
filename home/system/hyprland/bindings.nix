@@ -66,6 +66,8 @@
         ",XF86AudioLowerVolume, exec, sound-down"
         ",XF86MonBrightnessUp, exec, brightness-up"
         ",XF86MonBrightnessDown, exec, brightness-down"
+        ",XF86AudioPlay, exec, playerctl play-pause"
+        ",XF86AudioPause, exec, playerctl play-pause"
       ];
     };
   };

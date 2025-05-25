@@ -3,6 +3,8 @@
   lib,
   ...
 }: let
+  domain = "start.hadi.diy";
+
   rgb-to-hsl = color: let
     r = ((lib.toInt config.lib.stylix.colors."${color}-rgb-r") * 100.0) / 255;
     g = ((lib.toInt config.lib.stylix.colors."${color}-rgb-g") * 100.0) / 255;
@@ -30,13 +32,12 @@
   in
     lib.concatMapStringsSep " " roundToString [h s l];
 in {
-  options.glance.enable = lib.mkEnableOption "Enable the Glance dashboard";
-
-  config = lib.mkIf config.glance.enable {
-    services.glance = {
+  services = {
+    glance = {
       enable = true;
       settings = {
         theme = {
+          # primary-color = rgb-to-hsl "base0D";
           contrast-multiplier = lib.mkForce 1.4;
         };
         pages = [
@@ -79,7 +80,7 @@ in {
                     service = "adguard";
                     url = "https://adguard.hadi.diy";
                     username = "hadi";
-                    password = "${secret:adguard-pwd}";
+                    password = "\${secret:adguard-pwd}";
                   }
                 ];
               }
@@ -276,12 +277,12 @@ in {
                         sites = [
                           {
                             title = "Jellyfin";
-                            url = "https://jellyfin.hexaflare.net";
+                            url = "https://jellyfin.hadi.diy";
                             icon = "si:jellyfin";
                           }
                           {
                             title = "Jellyseerr";
-                            url = "https://jellyseerr.hexaflare.net";
+                            url = "https://jellyseerr.hadi.diy";
                             icon = "si:odysee";
                           }
                           {
@@ -319,7 +320,16 @@ in {
             name = "Home";
           }
         ];
-        server.port = 5678;
+        server = {port = 5678;};
+      };
+    };
+    nginx.virtualHosts."${domain}" = {
+      useACMEHost = "hadi.diy";
+      forceSSL = true;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:${
+          toString config.services.glance.settings.server.port
+        }";
       };
     };
   };
