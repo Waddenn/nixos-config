@@ -104,7 +104,7 @@
             sleep 0.2 && ${pkgs.hyprpicker}/bin/hyprpicker -a
             ;;
           "Toggle VPN")
-            openvpn-toggle
+            tailscale-toggle
             ;;
         esac
       fi

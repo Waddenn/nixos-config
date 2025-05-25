@@ -1,10 +1,10 @@
 {pkgs, ...}: let
   tailscale-up = pkgs.writeShellScriptBin "tailscale-up" ''
-    if ! tailscale status | grep -q "Logged in"; then
+    if ! tailscale status --json | jq -e '.Self.Online == true' > /dev/null; then
       sudo tailscale up
       notif "Tailscale" "Activated" "Tailscale VPN has been activated"
     else
-      notif "Tailscale" "Already active" "Tailscale VPN is already connected"
+      notif "Tailscale" "Already active" "Tailscale is already connected"
     fi
   '';
 
@@ -14,7 +14,7 @@
   '';
 
   tailscale-toggle = pkgs.writeShellScriptBin "tailscale-toggle" ''
-    if tailscale status | grep -q "Logged in"; then
+    if tailscale status --json | jq -e '.Self.Online == true' > /dev/null; then
       tailscale-down
     else
       tailscale-up
@@ -22,6 +22,8 @@
   '';
 in {
   home.packages = [
+    pkgs.tailscale
+    pkgs.jq
     tailscale-up
     tailscale-down
     tailscale-toggle
