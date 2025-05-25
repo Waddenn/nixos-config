@@ -8,6 +8,7 @@
   imports = [
     (modulesPath + "/virtualisation/proxmox-lxc.nix")
     ../../modules
+    ../../themes/nixy.nix
   ];
 
   boot.isContainer = true;
