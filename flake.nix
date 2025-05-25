@@ -254,6 +254,9 @@
       jellyseerr = mkServer "jellyseerr" "nixos" [
         {jellyseerr.enable = true;}
       ];
+      glance = mkServer "glance" "nixos" [
+        {glance.enable = true;}
+      ];
     };
 
     checks = lib.genAttrs ["beszel"] (
