@@ -43,7 +43,8 @@
     bitwarden
     trayscale
     gnome-text-editor
-    nextcloud-client
+    mpv
+    chromium
   ];
 
   services.flatpak.packages = [
@@ -51,6 +52,8 @@
     "org.fedoraproject.MediaWriter"
     "com.github.taiko2k.avvie"
     "com.github.tchx84.Flatseal"
+    "com.github.iwalton3.jellyfin-mpv-shim"
+    "io.github.alainm23.planify"
   ];
 
   autoUpgrade.enable = true;
@@ -90,5 +93,7 @@
   hardware.amd.enable = true;
   virtualisation.libvirtd.enable = false;
   programs.chromium.enable = true;
+  programs.gnome-disks.enable = true;
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
   home-manager.users.tom = import ./home.nix;
 }
