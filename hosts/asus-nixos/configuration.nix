@@ -27,7 +27,6 @@
     obsidian
     discord
     miru
-    blanket
     papers
     whatip
     youtube-music
@@ -45,14 +44,15 @@
     mpv
     microfetch
     chromium
+    cmatrix
+    cbonsai
+    yazi
   ];
 
   services.flatpak.packages = [
-    "tv.plex.PlexDesktop"
     "org.fedoraproject.MediaWriter"
     "com.github.taiko2k.avvie"
     "com.github.tchx84.Flatseal"
-    "com.github.iwalton3.jellyfin-mpv-shim"
     "io.github.alainm23.planify"
   ];
 
@@ -69,7 +69,7 @@
   experimental-features.enable = false;
   allowUnfree.enable = false;
   direnv.enable = true;
-  steam.enable = false;
+  steam.enable = true;
   zsh.enable = true;
   fish.enable = true;
   rtkit.enable = true;
@@ -94,6 +94,7 @@
   virtualisation.libvirtd.enable = false;
   programs.chromium.enable = true;
   programs.gnome-disks.enable = true;
+  programs.yazi.enable = true;
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   home-manager.users.tom = import ./home.nix;
 }

@@ -113,11 +113,6 @@ in {
         "dbus-update-activation-environment --systemd --all &"
         "systemctl --user enable --now hyprpaper.service &"
         "systemctl --user enable --now hypridle.service &"
-
-        # "[workspace 1 silent] firefox"
-        # "[workspace 1 silent] code"
-        # "[workspace 3 silent] kitty"
-        # "[workspace 4 silent] discord"
       ];
       misc = {
         vfr = true;
@@ -174,6 +169,11 @@ in {
 
         # fix xwayland apps
         "rounding 0, xwayland:1"
+
+        "workspace 1 silent, class:^(firefox)$"
+        "workspace 2 silent, class:^(code)$"
+        "workspace 4 silent, class:^(com.github.th_ch.youtube_music)$"
+        "workspace 5 silent, class:^(discord)$"
       ];
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
       monitor = [
