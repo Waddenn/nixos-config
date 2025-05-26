@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  inputs,
   ...
 }: let
   rgb-to-hsl = color: let

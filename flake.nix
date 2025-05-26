@@ -85,6 +85,7 @@
           ./users/${username}/default.nix
           ./hosts/proxmox-lxc/configuration.nix
           inputs.sops-nix.nixosModules.sops
+          inputs.stylix.nixosModules.stylix
           {
             networking.hostName = hostname;
           }
