@@ -1,27 +1,27 @@
-name: Daily flake update
+# name: Daily flake update
 
-on:
-  schedule:
-    - cron: "0 2 * * *" 
-  workflow_dispatch:     
+# on:
+#   schedule:
+#     - cron: "0 2 * * *" 
+#   workflow_dispatch:     
 
-jobs:
-  update:
-    runs-on: [self-hosted, nixos]
+# jobs:
+#   update:
+#     runs-on: [self-hosted, nixos]
 
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: Update flake inputs
-        run: nix flake update
+#       - name: Update flake inputs
+#         run: nix flake update
 
-      - name: Commit and push updated flake.lock
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "[CI]: Daily flake.lock update"
-          commit_user_name: GitHub Actions
-          commit_user_email: actions@github.com
+#       - name: Commit and push updated flake.lock
+#         uses: stefanzweifel/git-auto-commit-action@v5
+#         with:
+#           commit_message: "[CI]: Daily flake.lock update"
+#           commit_user_name: GitHub Actions
+#           commit_user_email: actions@github.com
