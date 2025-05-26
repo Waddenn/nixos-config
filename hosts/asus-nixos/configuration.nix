@@ -37,13 +37,13 @@
     pamixer
     playerctl
     resources
-    # planify
     libreoffice
     nautilus
     bitwarden
     trayscale
     gnome-text-editor
     mpv
+    microfetch
     chromium
   ];
 

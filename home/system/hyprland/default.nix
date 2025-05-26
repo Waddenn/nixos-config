@@ -178,6 +178,7 @@ in {
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
       monitor = [
         "eDP-1,2880x1800@60,0x0,2"
+        "HDMI-A-1,preferred,2880x0,1"
       ];
     };
   };
