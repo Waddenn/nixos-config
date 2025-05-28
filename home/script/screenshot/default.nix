@@ -5,25 +5,34 @@
     fullpath="$folder/$filename"
 
     case "$1" in
-      "window") mode="window" ;;
-      "region") mode="area" ;;
-      "monitor") mode="output" ;;
-      "active-window") mode="active" ;;
-      *) echo "Usage: screenshot [region|window|monitor|active-window] [swappy]"; exit 1 ;;
+      "window")
+        mode=(-m window)
+        ;;
+      "region")
+        mode=(-m region)
+        ;;
+      "monitor")
+        mode=(-m active -m output)
+        ;;
+      "active-window")
+        mode=(-m active -m window)
+        ;;
+      *)
+        echo "Usage: screenshot [region|window|monitor|active-window] [swappy]"
+        exit 1
+        ;;
     esac
 
+    ${pkgs.hyprshot}/bin/hyprshot ''${mode[@]} -o "$folder" -f "$filename" || exit 1
+
     if [[ $2 == "swappy" ]]; then
-      ${pkgs.grimblast}/bin/grimblast --notify --freeze copysave "$mode" "$fullpath"
-      ${pkgs.swappy}/bin/swappy -f "$fullpath" -o "$fullpath"
-    else
-      ${pkgs.hyprshot}/bin/hyprshot -m "$mode" -o "$folder" -f "$filename"
+      ${pkgs.swappy}/bin/swappy -f "$fullpath" -o "$folder/$filename"
     fi
   '';
 in {
   home.packages = [
     screenshot
     pkgs.hyprshot
-    pkgs.grimblast
     pkgs.swappy
   ];
 }
