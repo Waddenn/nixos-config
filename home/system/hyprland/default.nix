@@ -17,6 +17,7 @@ in {
     ./bindings.nix
     ./animation.nix
     ./polkitagent.nix
+    ./hyprspace.nix
   ];
 
   home.packages = with pkgs; [
@@ -170,10 +171,9 @@ in {
         # fix xwayland apps
         "rounding 0, xwayland:1"
 
-        "workspace 1 silent, class:^(firefox)$"
-        "workspace 2 silent, class:^(code)$"
-        "workspace 4 silent, class:^(com.github.th_ch.youtube_music)$"
-        "workspace 5 silent, class:^(discord)$"
+        "workspace 1, class:^(firefox)$"
+        "workspace 4, class:^(com.github.th_ch.youtube_music)$"
+        "workspace 5, class:^(discord)$"
       ];
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
       monitor = [

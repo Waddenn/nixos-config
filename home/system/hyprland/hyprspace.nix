@@ -16,7 +16,7 @@
           exitOnClick = true;
           exitOnSwitch = true;
           drawActiveWorkspace = true;
-          autoDrag = false;
+          autoDrag = true;
         };
       };
     };
