@@ -11,7 +11,7 @@
   config = lib.mkIf config.firefox.enable {
     programs.firefox = {
       enable = true;
-      package = pkgs.firefox-bin;
+      package = pkgs.firefox;
       preferences = {
         "browser.preferences.defaultPerformanceSettings.enabled" = true;
         "layers.acceleration.disabled" = false;

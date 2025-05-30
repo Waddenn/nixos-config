@@ -22,6 +22,7 @@
     sops
     just
     inputs.alejandra.defaultPackage.x86_64-linux
+    inputs.plex-client.packages.${system}.plex-minimal
     swayosd
     vscode
     obsidian
@@ -47,7 +48,25 @@
     cmatrix
     cbonsai
     yazi
+    vim
+    neovim
+    nextcloud-client
+    sshfs
   ];
+
+  fileSystems."/mnt/plexade" = {
+    device = "root@plexade:/srv";
+    fsType = "fuse.sshfs";
+    options = [
+      "x-systemd.automount"
+      "noauto"
+      "allow_other"
+      "reconnect"
+      "ServerAliveInterval=15"
+      "ServerAliveCountMax=3"
+      "StrictHostKeyChecking=no"
+    ];
+  };
 
   services.flatpak.packages = [
     "org.fedoraproject.MediaWriter"
@@ -94,7 +113,6 @@
   virtualisation.libvirtd.enable = false;
   programs.chromium.enable = true;
   programs.gnome-disks.enable = true;
-  programs.yazi.enable = true;
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   home-manager.users.tom = import ./home.nix;
 }

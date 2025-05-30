@@ -13,6 +13,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    plex-client = {
+      url = "path:/home/tom/dev/plex-client";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     alejandra = {
       url = "github:kamadorueda/alejandra/4.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,6 +38,7 @@
     sops-nix,
     alejandra,
     stylix,
+    plex-client,
     ...
   }: let
     lib = nixpkgs.lib;

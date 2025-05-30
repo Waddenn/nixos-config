@@ -19,7 +19,6 @@ in {
     ../../home/system/hyprpaper
     ../../home/system/clipman
     ../../home/system/hyprpanel
-    # ../../home/system/hyprland/hyprspace.nix
     ../../home/system/hyprlock
     ../../home/system/zathura
     ../../home/script
