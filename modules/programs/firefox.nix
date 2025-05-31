@@ -44,7 +44,7 @@
         "browser.search.separatePrivateDefault.ui.enabled" = false;
         "signon.autofillForms" = false;
         "signon.formlessCapture.enabled" = false;
-        "media.hardware-video-decoding.enabled" = false;
+        "media.hardware-video-decoding.enabled" = true;
 
         "toolkit.cosmeticAnimations.enabled" = false;
         "ui.prefersReducedMotion" = 1;
