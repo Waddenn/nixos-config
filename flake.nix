@@ -14,7 +14,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     plex-client = {
-      url = "path:/home/tom/dev/plex-client";
+      url = "github:Waddenn/plex-client";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     alejandra = {

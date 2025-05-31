@@ -865,14 +865,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1748679866,
-        "narHash": "sha256-a2OtSIHb6HGoTivc/ZW88XuLb2Qxni4Tt5DbsdKpcFA=",
-        "path": "/home/tom/dev/plex-client",
-        "type": "path"
+        "lastModified": 1748691402,
+        "narHash": "sha256-jmgJmwzNnQbg1IIb+IyLRhEC5Ih5VBTcvg+zZOp+Mns=",
+        "owner": "Waddenn",
+        "repo": "plex-client",
+        "rev": "cb2b39d281180690472deea991d2bb5b93648506",
+        "type": "github"
       },
       "original": {
-        "path": "/home/tom/dev/plex-client",
-        "type": "path"
+        "owner": "Waddenn",
+        "repo": "plex-client",
+        "type": "github"
       }
     },
     "pre-commit-hooks": {

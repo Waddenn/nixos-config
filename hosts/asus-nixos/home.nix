@@ -72,4 +72,11 @@ in {
       confirm_os_window_close 0
     '';
   };
+  programs.mpv = {
+    enable = true;
+    config = {
+      vo = "gpu";
+      gpu-api = "opengl";
+    };
+  };
 }
