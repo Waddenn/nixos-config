@@ -10,7 +10,7 @@ with lib; let
     image = ["imv-dir.desktop"];
     audio = ["mpv.desktop"];
     video = ["mpv.desktop"];
-    directory = ["nautilus.desktop"];
+    directory = ["yazi.desktop"];
     office = ["libreoffice.desktop"];
     pdf = ["zathura.desktop"];
     terminal = ["kitty.desktop"];
@@ -94,4 +94,16 @@ in {
       defaultApplications = associations;
     };
   };
+
+  home.file."~/.local/share/applications/yazi.desktop".text = ''
+    [Desktop Entry]
+    Name=Yazi
+    Comment=Terminal-based file manager
+    Exec=kitty -e yazi %U
+    Terminal=false
+    Type=Application
+    MimeType=inode/directory;
+    Categories=System;Utility;FileManager;
+    NoDisplay=false
+  '';
 }

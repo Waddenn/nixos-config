@@ -27,9 +27,6 @@
     vscode
     obsidian
     discord
-    miru
-    papers
-    whatip
     youtube-music
     fastfetch
     grim
@@ -38,8 +35,6 @@
     playerctl
     resources
     libreoffice
-    nautilus
-    bitwarden
     trayscale
     gnome-text-editor
     mpv

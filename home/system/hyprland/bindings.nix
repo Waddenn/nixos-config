@@ -4,12 +4,12 @@
       "$mainMod" = "SUPER";
       bind = [
         "$mainMod,RETURN, exec, uwsm app -- ${pkgs.kitty}/bin/kitty"
-        "$mainMod,E, exec,  uwsm app -- nautilus"
         "$mainMod,K, exec,  uwsm app -- ${pkgs.bitwarden}/bin/bitwarden"
         "$mainMod,L, exec,  uwsm app -- ${pkgs.hyprlock}/bin/hyprlock"
         "$mainMod SHIFT,  q, exit,"
         "$mainMod,        q, killactive,"
         "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
+        "$mainMod,E, exec, uwsm app -- ${pkgs.kitty}/bin/kitty -e yazi"
         "$mainMod,B, exec,  uwsm app -- firefox"
         "$mainMod,       right, movefocus, r"
         "$mainMod,       up, movefocus, u"
@@ -41,9 +41,9 @@
         "$mainMod SHIFT, code:17, movetoworkspace, 8"
         "$mainMod SHIFT, code:18, movetoworkspace, 9"
         "$mainMod SHIFT, code:19, movetoworkspace, 10"
-        "$mainMod, F1, exec, playerctl play-pause"
-        "$mainMod, F2, exec, playerctl previous"
-        "$mainMod, F3, exec, playerctl next"
+        "$mainMod, XF86AudioMute, exec, playerctl play-pause"
+        "$mainMod, XF86AudioLowerVolume, exec, playerctl previous"
+        "$mainMod, XF86AudioRaiseVolume, exec, playerctl next"
         "$mainMod, L, exec, ${pkgs.hyprlock}/bin/hyprlock"
         "$mainMod SHIFT, R, exec, resources"
         "$mainMod SHIFT, C, exec, clipboard"
@@ -64,10 +64,13 @@
       bindle = [
         ",XF86AudioRaiseVolume, exec, sound-up"
         ",XF86AudioLowerVolume, exec, sound-down"
+        ",XF86AudioMute, exec, sound-toggle"
         ",XF86MonBrightnessUp, exec, brightness-up"
         ",XF86MonBrightnessDown, exec, brightness-down"
         ",XF86AudioPlay, exec, playerctl play-pause"
         ",XF86AudioPause, exec, playerctl play-pause"
+        ",XF86AudioNext, exec, playerctl next"
+        ",XF86AudioPrev, exec, playerctl previous"
       ];
     };
   };
