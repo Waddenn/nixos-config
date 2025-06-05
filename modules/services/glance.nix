@@ -323,6 +323,7 @@ in {
           port = 5678;
           host = "0.0.0.0";
         };
+        openFirewall = true;
       };
     };
   };
