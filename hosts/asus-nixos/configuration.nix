@@ -58,7 +58,6 @@
 
   firefox.enable = true;
   bluetooth.enable = true;
-  systemd-boot.enable = true;
   i18n.enable = true;
   tailscale-client.enable = true;
   direnv.enable = true;
@@ -71,7 +70,6 @@
   fwupd.enable = true;
   docker.enable = false;
   hyprland.enable = true;
-  linuxPackages.enableLatest = true;
   blueman.enable = true;
   hardware.amd.enable = true;
   programs.chromium.enable = true;

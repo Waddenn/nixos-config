@@ -1,16 +1,11 @@
 {...}: {
   imports = [
-    ./boot/loader/systemd-boot.nix
-    ./boot/loader/grub.nix
-    ./boot/kernel.nix
     ./hardware/bluetooth.nix
     ./networking/firewall.nix
     ./programs/firefox.nix
     ./system/autoUpgrade.nix
     ./systemd/git-auto-pull.nix
-    ./console/keyMap.nix
     ./i18n/i18n.nix
-    ./networking/networkmanager.nix
     ./services/tailscale-client.nix
     ./services/tailscale-server.nix
     ./nix/gc.nix
@@ -23,15 +18,12 @@
     ./programs/terraform.nix
     ./programs/ansible.nix
     ./programs/python3Minimal.nix
-    ./security/rtkit.nix
     ./time/timeZone.nix
-    ./zramSwap/zramswap.nix
     ./environment/gnome/excludePackages.nix
     ./environment/systemPackages/gnomeExtensions.nix
     ./environment/systemPackages/ethtool.nix
     ./services/flatpak.nix
     ./services/printing.nix
-    ./services/pipewire.nix
     ./services/fwupd.nix
     ./services/fprintd.nix
     ./services/xserver-xkb.nix
