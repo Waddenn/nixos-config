@@ -5,22 +5,16 @@
       bind = [
         "$mainMod,RETURN, exec, uwsm app -- ${pkgs.kitty}/bin/kitty"
         "$mainMod,K, exec,  uwsm app -- ${pkgs.bitwarden}/bin/bitwarden"
-        "$mainMod,L, exec,  uwsm app -- ${pkgs.hyprlock}/bin/hyprlock"
+        "$mainMod,B, exec,  uwsm app -- firefox"
+        "$mainMod,E, exec, uwsm app -- ${pkgs.kitty}/bin/kitty -e yazi"
+
         "$mainMod SHIFT,  q, exit,"
         "$mainMod,        q, killactive,"
-        "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
-        "$mainMod,E, exec, uwsm app -- ${pkgs.kitty}/bin/kitty -e yazi"
-        "$mainMod,B, exec,  uwsm app -- firefox"
-        "$mainMod,       right, movefocus, r"
-        "$mainMod,       up, movefocus, u"
-        "$mainMod,       down, movefocus, d"
         "$mainMod,       T, togglefloating,"
         "$mainMod,F, fullscreen,"
-        "$mainMod,        X, exec, powermenu"
-        "$mainMod,        space, exec, menu"
-        "$mainMod,        C, exec, quickmenu"
-        "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
-        # "$mainMod,P, exec,  uwsm app -- ${pkgs.planify}/bin/io.github.alainm23.planify"
+
+        "$mainMod,L, exec,  uwsm app -- ${pkgs.hyprlock}/bin/hyprlock"
+
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
@@ -41,17 +35,29 @@
         "$mainMod SHIFT, code:17, movetoworkspace, 8"
         "$mainMod SHIFT, code:18, movetoworkspace, 9"
         "$mainMod SHIFT, code:19, movetoworkspace, 10"
+
         "$mainMod, XF86AudioMute, exec, playerctl play-pause"
         "$mainMod, XF86AudioLowerVolume, exec, playerctl previous"
         "$mainMod, XF86AudioRaiseVolume, exec, playerctl next"
-        "$mainMod, L, exec, ${pkgs.hyprlock}/bin/hyprlock"
-        "$mainMod SHIFT, R, exec, resources"
-        "$mainMod SHIFT, C, exec, clipboard"
-        "$mainMod SHIFT, T, exec, hyprpanel-toggle"
+
         "$mainMod,PRINT, exec, screenshot region"
         ",PRINT, exec, screenshot monitor"
         "$mainMod SHIFT,PRINT, exec, screenshot window"
         "ALT,PRINT, exec, screenshot region swappy"
+
+        "$mainMod, right, focusmonitor, +1"
+        "$mainMod, left, focusmonitor, -1"
+        "$mainMod SHIFT, right, movewindow, mon:+1"
+        "$mainMod SHIFT, left, movewindow, mon:-1"
+
+        "$mainMod,        X, exec, powermenu"
+        "$mainMod,        space, exec, menu"
+        "$mainMod,        C, exec, quickmenu"
+        "$mainMod SHIFT,  SPACE, exec, hyprfocus-toggle"
+        "$mainMod SHIFT, R, exec, resources"
+        "$mainMod SHIFT, C, exec, clipboard"
+        "$mainMod SHIFT, T, exec, hyprpanel-toggle"
+        "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
       ];
       bindm = [
         "$mainMod,mouse:272, movewindow"
