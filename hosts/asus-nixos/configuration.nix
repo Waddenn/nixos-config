@@ -9,6 +9,7 @@
     ../../modules/fonts.nix
     ../../modules/nix.nix
     ../../modules/utils.nix
+    ../../modules/systemd-boot.nix
     ../../modules/sddm.nix
     ../../modules/audio.nix
     ../../themes/nixy.nix
@@ -27,7 +28,7 @@
     swayosd
     vscode
     obsidian
-    discord
+    vesktop
     youtube-music
     fastfetch
     grim
@@ -60,20 +61,14 @@
   systemd-boot.enable = true;
   i18n.enable = true;
   tailscale-client.enable = true;
-  allowUnfree.enable = false;
   direnv.enable = true;
   steam.enable = true;
   fish.enable = true;
   timeZone.enable = true;
-  gnome-excludePackages.enable = false;
-  gnomeExtensions.enable = false;
   flatpak.enable = true;
   printing.enable = true;
-  pipewire.enable = true;
   fprintd.enable = false;
   fwupd.enable = true;
-  gnome.enable = false;
-  gdm.enable = false;
   docker.enable = false;
   hyprland.enable = true;
   linuxPackages.enableLatest = true;
