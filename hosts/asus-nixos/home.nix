@@ -32,6 +32,8 @@ in {
     ../../home/programs/fish
     ../../home/programs/git
     ../../home/programs/mpv
+    ../../home/programs/chromium
+    ../../home/programs/plex-desktop
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
     ./variables.nix
@@ -44,24 +46,6 @@ in {
   };
 
   home.packages = with pkgs; [
-    (writeShellScriptBin "chromium" ''
-      exec "${pkgs.chromium}/bin/chromium" \
-        --ozone-platform=wayland \
-        --enable-features=UseOzonePlatform \
-        --enable-wayland-ime \
-        --gtk-version=4 \
-        "$@"
-    '')
-
-    (pkgs.writeShellScriptBin "plex-desktop" ''
-      exec ${pkgs.chromium}/bin/chromium \
-        --app=https://app.plex.tv/desktop \
-        --ozone-platform=wayland \
-        --enable-features=VaapiVideoDecoder \
-        --enable-zero-copy \
-        --ignore-gpu-blocklist \
-        --enable-gpu-rasterization
-    '')
   ];
 
   programs.home-manager.enable = true;
