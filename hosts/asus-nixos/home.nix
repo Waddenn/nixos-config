@@ -28,6 +28,7 @@ in {
     ../../home/system/mime
     ../../home/programs/thunar
     ../../home/programs/kitty
+    ../../home/programs/tailscale
     # ../../home/programs/zen
     ../../home/programs/fish
     ../../home/programs/git
