@@ -3,8 +3,27 @@
   config,
   inputs,
   ...
-}: {
+}: let
+  hostname = config.var.hostname;
+  keyboardLayout = config.var.keyboardLayout;
+  configDir = config.var.configDirectory;
+  timeZone = config.var.timeZone;
+  defaultLocale = config.var.defaultLocale;
+  extraLocale = config.var.extraLocale;
+  autoUpgrade = config.var.autoUpgrade;
+in {
+  networking.hostName = hostname;
+
+  networking.networkmanager.enable = true;
   systemd.services.NetworkManager-wait-online.enable = false;
+
+  system.autoUpgrade = {
+    enable = autoUpgrade;
+    dates = "04:00";
+    flake = "${configDir}";
+    flags = ["--update-input" "nixpkgs" "--commit-lock-file"];
+    allowReboot = false;
+  };
 
   services = {
     xserver = {
@@ -19,6 +38,7 @@
     };
   };
   console.keyMap = "fr";
+  zramSwap.enable = true;
 
   environment.variables = {
     XDG_DATA_HOME = "$HOME/.local/share";
@@ -83,6 +103,7 @@
     wget
     curl
     vim
+    neovim
   ];
 
   xdg.portal = {
@@ -107,6 +128,20 @@
 
     # don't ask for password for wheel group
     sudo.wheelNeedsPassword = false;
+  };
+
+  fileSystems."/mnt/plexade" = {
+    device = "root@plexade:/srv";
+    fsType = "fuse.sshfs";
+    options = [
+      "x-systemd.automount"
+      "noauto"
+      "allow_other"
+      "reconnect"
+      "ServerAliveInterval=15"
+      "ServerAliveCountMax=3"
+      "StrictHostKeyChecking=no"
+    ];
   };
 
   services.logind.extraConfig = ''
