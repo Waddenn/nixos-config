@@ -43,25 +43,9 @@
     cmatrix
     cbonsai
     yazi
-    vim
-    neovim
     nextcloud-client
     sshfs
   ];
-
-  fileSystems."/mnt/plexade" = {
-    device = "root@plexade:/srv";
-    fsType = "fuse.sshfs";
-    options = [
-      "x-systemd.automount"
-      "noauto"
-      "allow_other"
-      "reconnect"
-      "ServerAliveInterval=15"
-      "ServerAliveCountMax=3"
-      "StrictHostKeyChecking=no"
-    ];
-  };
 
   services.flatpak.packages = [
     "org.fedoraproject.MediaWriter"
@@ -70,23 +54,16 @@
     "io.github.alainm23.planify"
   ];
 
-  autoUpgrade.enable = true;
-  autoUpgrade.updateFlakeLock = true;
   firefox.enable = true;
   bluetooth.enable = true;
   systemd-boot.enable = true;
-  keyMap.enable = false;
   i18n.enable = true;
-  networkmanager.enable = true;
   tailscale-client.enable = true;
-  gc.enable = false;
   experimental-features.enable = false;
   allowUnfree.enable = false;
   direnv.enable = true;
   steam.enable = true;
-  zsh.enable = true;
   fish.enable = true;
-  rtkit.enable = true;
   timeZone.enable = true;
   zram.enable = true;
   gnome-excludePackages.enable = false;
@@ -102,12 +79,12 @@
   docker.enable = false;
   hyprland.enable = true;
   linuxPackages.enableLatest = true;
-  upower.enable = false;
   blueman.enable = true;
   hardware.amd.enable = true;
   virtualisation.libvirtd.enable = false;
   programs.chromium.enable = true;
   programs.gnome-disks.enable = true;
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  programs.kdeconnect.enable = true;
+  # environment.sessionVariables.NIXOS_OZONE_WL = "1";
   home-manager.users.tom = import ./home.nix;
 }

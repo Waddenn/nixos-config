@@ -39,7 +39,6 @@
   allowUnfree.enable = true;
   experimental-features.enable = true;
   fish.enable = true;
-  zsh.enable = false;
   gc.enable = true;
   documentation.man.enable = false;
   beszel-agent.enable = true;
