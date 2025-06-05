@@ -319,7 +319,10 @@ in {
             name = "Home";
           }
         ];
-        server.port = 5678;
+        server = {
+          port = 5678;
+          address = "0.0.0.0";
+        };
       };
     };
   };
