@@ -17,7 +17,7 @@ in {
     ./bindings.nix
     ./animation.nix
     ./polkitagent.nix
-    ./hyprspace.nix
+    # ./hyprspace.nix
   ];
 
   home.packages = with pkgs; [
@@ -92,8 +92,10 @@ in {
         "WLR_RENDERER,vulkan"
         "WLR_NO_HARDWARE_CURSORS,1"
 
-        "XWAYLAND_SCALE,1"
+        "XWAYLAND_SCALE,2"
         "XCURSOR_SIZE=24"
+        "XCURSOR_THEME,phinger-cursors-light"
+        "GDK_SCALE,2"
       ];
 
       general = {
@@ -178,8 +180,9 @@ in {
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
       monitor = [
         "eDP-1,2880x1800@60,0x0,2"
-        "HDMI-A-1,preferred,2880x0,1"
+        "DP-3,3440x1440@60,2880x0,1"
       ];
+      xwayland.force_zero_scaling = true;
     };
   };
 }

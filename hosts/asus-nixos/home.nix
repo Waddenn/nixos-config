@@ -27,9 +27,11 @@ in {
     ../../home/system/hypridle
     ../../home/system/mime
     ../../home/programs/thunar
-    ../../home/programs/zen
+    ../../home/programs/kitty
+    # ../../home/programs/zen
     ../../home/programs/fish
     ../../home/programs/git
+    ../../home/programs/mpv
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
     ./variables.nix
@@ -65,18 +67,4 @@ in {
   programs.home-manager.enable = true;
 
   home.stateVersion = "25.05";
-
-  programs.kitty = {
-    enable = true;
-    extraConfig = ''
-      confirm_os_window_close 0
-    '';
-  };
-  programs.mpv = {
-    enable = true;
-    config = {
-      vo = "gpu";
-      gpu-api = "opengl";
-    };
-  };
 }
