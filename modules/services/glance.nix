@@ -332,6 +332,7 @@ in {
       group = "glance";
       home = "/var/lib/glance";
     };
+    networking.firewall.allowedTCPPorts = [5678];
 
     users.groups.glance = {};
   };
