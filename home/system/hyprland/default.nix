@@ -146,21 +146,10 @@ in {
         "float, tag:modal"
         "pin, tag:modal"
         "center, tag:modal"
-        # telegram media viewer
-        "float, title:^(Media viewer)$"
 
-        # Bitwarden extension
-        "float, title:^(.*Bitwarden Password Manager.*)$"
-
-        # gnome calculator
-        "float, class:^(org.gnome.Calculator)$"
-        "size 360 490, class:^(org.gnome.Calculator)$"
-
-        # make Firefox/Zen PiP window floating and sticky
         "float, title:^(Picture-in-Picture)$"
         "pin, title:^(Picture-in-Picture)$"
 
-        # idle inhibit while watching videos
         "idleinhibit focus, class:^(mpv|.+exe|celluloid)$"
         "idleinhibit focus, class:^(zen)$, title:^(.*YouTube.*)$"
         "idleinhibit fullscreen, class:^(zen)$"
@@ -170,7 +159,6 @@ in {
         "dimaround, class:^(polkit-gnome-authentication-agent-1)$"
         "dimaround, class:^(zen)$, title:^(File Upload)$"
 
-        # fix xwayland apps
         "rounding 0, xwayland:1"
 
         "workspace 1, class:^(firefox)$"
