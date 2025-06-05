@@ -10,6 +10,7 @@
     ../../modules/nix.nix
     ../../modules/utils.nix
     ../../modules/sddm.nix
+    ../../modules/audio.nix
     ../../themes/nixy.nix
     ./variables.nix
   ];
@@ -59,13 +60,11 @@
   systemd-boot.enable = true;
   i18n.enable = true;
   tailscale-client.enable = true;
-  experimental-features.enable = false;
   allowUnfree.enable = false;
   direnv.enable = true;
   steam.enable = true;
   fish.enable = true;
   timeZone.enable = true;
-  zram.enable = true;
   gnome-excludePackages.enable = false;
   gnomeExtensions.enable = false;
   flatpak.enable = true;
@@ -73,7 +72,6 @@
   pipewire.enable = true;
   fprintd.enable = false;
   fwupd.enable = true;
-  xkb.enable = false;
   gnome.enable = false;
   gdm.enable = false;
   docker.enable = false;
@@ -81,7 +79,6 @@
   linuxPackages.enableLatest = true;
   blueman.enable = true;
   hardware.amd.enable = true;
-  virtualisation.libvirtd.enable = false;
   programs.chromium.enable = true;
   programs.gnome-disks.enable = true;
   programs.kdeconnect.enable = true;
