@@ -327,4 +327,12 @@ in {
       };
     };
   };
+  users.users.glance = {
+    isSystemUser = true;
+    description = "User for Glance service";
+    group = "glance";
+    home = "/var/lib/glance";
+  };
+
+  users.groups.glance = {};
 }
