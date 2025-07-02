@@ -22,6 +22,7 @@
   environment.systemPackages = with pkgs; [
     age
     sops
+    zsh
     just
     inputs.alejandra.defaultPackage.x86_64-linux
     inputs.plex-client.packages.${system}.plex-minimal
@@ -41,12 +42,14 @@
     gnome-text-editor
     mpv
     microfetch
-    chromium
     cmatrix
     cbonsai
     yazi
     nextcloud-client
     sshfs
+    ungoogled-chromium
+    miru
+    plex-desktop
   ];
 
   services.flatpak.packages = [
@@ -72,7 +75,6 @@
   hyprland.enable = true;
   blueman.enable = true;
   hardware.amd.enable = true;
-  programs.chromium.enable = true;
   programs.gnome-disks.enable = true;
   programs.kdeconnect.enable = true;
   # environment.sessionVariables.NIXOS_OZONE_WL = "1";
