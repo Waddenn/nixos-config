@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    (pkgs.writeShellScriptBin "plex-desktop" ''
+    (pkgs.writeShellScriptBin "plex-w" ''
       exec ${pkgs.chromium}/bin/chromium \
         --app=https://app.plex.tv/desktop \
         --ozone-platform=wayland \

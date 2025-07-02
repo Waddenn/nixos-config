@@ -57,6 +57,7 @@
         "$mainMod SHIFT, R, exec, resources"
         "$mainMod SHIFT, C, exec, clipboard"
         "$mainMod SHIFT, T, exec, hyprpanel-toggle"
+        "$mainMod SHIFT, D, exec, autodisplay"
         "$mainMod SHIFT,  e, exec, ${pkgs.wofi-emoji}/bin/wofi-emoji"
       ];
       bindm = [
