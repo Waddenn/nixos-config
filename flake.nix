@@ -58,9 +58,6 @@
         inputs.sops-nix.nixosModules.sops
         inputs.stylix.nixosModules.stylix
         {
-          nixpkgs.overlays = [
-            inputs.hyprpanel.overlay
-          ];
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
 
