@@ -260,6 +260,13 @@
       glance = mkServer "glance" "nixos" [
         {glance.enable = true;}
       ];
+
+      valheim = mkServer "valheim" "nixos" [
+        ./modules/virtualisation/oci-containers/valheim-server.nix
+        {
+          virtualisation.oci-containers.containers."valheim".extraOptions = ["--pull=always"];
+        }
+      ];
     };
 
     checks = lib.genAttrs ["beszel"] (
