@@ -61,10 +61,8 @@
   ];
 
   firefox.enable = true;
-  bluetooth.enable = true;
   tailscale-client.enable = true;
   direnv.enable = true;
-  steam.enable = true;
   fish.enable = true;
   flatpak.enable = true;
   printing.enable = true;
@@ -72,7 +70,6 @@
   fwupd.enable = true;
   docker.enable = false;
   hyprland.enable = true;
-  blueman.enable = true;
   hardware.amd.enable = true;
   programs.gnome-disks.enable = true;
   programs.kdeconnect.enable = true;

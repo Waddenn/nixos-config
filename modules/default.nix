@@ -7,7 +7,6 @@
     ./services/tailscale-client.nix
     ./services/tailscale-server.nix
     ./programs/direnv.nix
-    ./programs/steam.nix
     ./programs/zsh.nix
     ./programs/fish.nix
     ./programs/terraform.nix

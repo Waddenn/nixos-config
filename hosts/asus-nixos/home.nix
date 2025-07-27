@@ -37,6 +37,7 @@ in {
     ../../home/programs/plex-desktop
     ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
+    ../../modules/programs/steam.nix
     ./variables.nix
   ];
   home.username = "tom";
