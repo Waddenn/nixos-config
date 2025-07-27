@@ -29,10 +29,9 @@
   environment.systemPackages = with pkgs; [
     git
     just
-    zlib
+    python3Full
   ];
 
-  python3Minimal.enable = true;
   tailscale-server.enable = true;
   gitAutoPull.enable = true;
   autoUpgrade.enable = true;
