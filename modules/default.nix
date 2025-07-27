@@ -10,7 +10,6 @@
     ./services/tailscale-server.nix
     ./nix/gc.nix
     ./nix/settings.nix
-    ./nixpkgs/config.nix
     ./programs/direnv.nix
     ./programs/steam.nix
     ./programs/zsh.nix
@@ -18,7 +17,6 @@
     ./programs/terraform.nix
     ./programs/ansible.nix
     ./programs/python3Minimal.nix
-    ./time/timeZone.nix
     ./environment/gnome/excludePackages.nix
     ./environment/systemPackages/gnomeExtensions.nix
     ./environment/systemPackages/ethtool.nix
