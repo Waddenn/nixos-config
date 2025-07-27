@@ -37,11 +37,17 @@
   autoUpgrade.enable = true;
   openssh.enable = true;
   allowUnfree.enable = true;
-  experimental-features.enable = true;
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   fish.enable = true;
-  gc.enable = true;
   documentation.man.enable = false;
   beszel-agent.enable = true;
   time.timeZone = "Europe/Paris";
   system.stateVersion = "25.05";
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    persistent = true;
+    options = "--delete-older-than 14d";
+  };
 }

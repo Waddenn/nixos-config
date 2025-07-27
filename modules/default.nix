@@ -7,8 +7,6 @@
     ./systemd/git-auto-pull.nix
     ./services/tailscale-client.nix
     ./services/tailscale-server.nix
-    ./nix/gc.nix
-    ./nix/settings.nix
     ./programs/direnv.nix
     ./programs/steam.nix
     ./programs/zsh.nix
