@@ -35,7 +35,7 @@
   };
   systemd.services."docker-valheim" = {
     serviceConfig = {
-      Restart = lib.mkOverride 90 "always";
+      Restart = lib.mkOverride 90 "on-failure";
       RestartMaxDelaySec = lib.mkOverride 90 "1m";
       RestartSec = lib.mkOverride 90 "100ms";
       RestartSteps = lib.mkOverride 90 9;
