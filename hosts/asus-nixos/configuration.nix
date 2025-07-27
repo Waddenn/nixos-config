@@ -12,6 +12,7 @@
     ../../modules/systemd-boot.nix
     ../../modules/sddm.nix
     ../../modules/audio.nix
+    ../../modules/bluetooth.nix
     ../../themes/nixy.nix
     ./variables.nix
   ];

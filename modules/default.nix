@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./hardware/bluetooth.nix
     ./networking/firewall.nix
     ./programs/firefox.nix
     ./system/autoUpgrade.nix
@@ -48,7 +47,6 @@
     ./virtualisation/oci-containers/beszel-agent.nix
     ./services/jellyseerr.nix
     ./services/upower.nix
-    ./services/blueman.nix
     ./services/glance.nix
     ./hardware/amd.nix
   ];
