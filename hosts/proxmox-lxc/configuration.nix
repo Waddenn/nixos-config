@@ -29,6 +29,7 @@
   environment.systemPackages = with pkgs; [
     git
     just
+    zlib
   ];
 
   python3Minimal.enable = true;
