@@ -61,12 +61,10 @@
 
   firefox.enable = true;
   bluetooth.enable = true;
-  i18n.enable = true;
   tailscale-client.enable = true;
   direnv.enable = true;
   steam.enable = true;
   fish.enable = true;
-  timeZone.enable = true;
   flatpak.enable = true;
   printing.enable = true;
   fprintd.enable = false;

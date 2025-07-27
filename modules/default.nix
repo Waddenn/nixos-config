@@ -5,7 +5,6 @@
     ./programs/firefox.nix
     ./system/autoUpgrade.nix
     ./systemd/git-auto-pull.nix
-    ./i18n/i18n.nix
     ./services/tailscale-client.nix
     ./services/tailscale-server.nix
     ./nix/gc.nix
