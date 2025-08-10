@@ -13,7 +13,7 @@
     ../../modules/sddm.nix
     ../../modules/audio.nix
     ../../modules/bluetooth.nix
-    ../../themes/nixy.nix
+    ../../modules/programs/steam.nix
     ./variables.nix
   ];
 
@@ -51,6 +51,7 @@
     ungoogled-chromium
     miru
     plex-desktop
+    code-cursor
   ];
 
   services.flatpak.packages = [
@@ -73,6 +74,7 @@
   hardware.amd.enable = true;
   programs.gnome-disks.enable = true;
   programs.kdeconnect.enable = true;
+  steam.enable = true;
   # environment.sessionVariables.NIXOS_OZONE_WL = "1";
   home-manager.users.tom = import ./home.nix;
 }

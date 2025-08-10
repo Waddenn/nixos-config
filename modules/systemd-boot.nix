@@ -6,7 +6,7 @@
       systemd-boot = {
         enable = true;
         consoleMode = "auto";
-        configurationLimit = 8;
+        configurationLimit = 30;
       };
     };
     tmp.cleanOnBoot = true;

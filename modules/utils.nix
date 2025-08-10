@@ -120,19 +120,6 @@ in {
     neovim
   ];
 
-  xdg.portal = {
-    enable = true;
-    xdgOpenUsePortal = true;
-    config = {
-      common.default = ["hyprland"];
-    };
-
-    extraPortals = [
-      inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland
-      # pkgs.xdg-desktop-portal-gtk
-    ];
-  };
-
   security = {
     # allow wayland lockers to unlock the screen
     pam.services.hyprlock.text = "auth include login";

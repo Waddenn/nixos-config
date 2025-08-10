@@ -24,7 +24,7 @@ in {
     ../../home/script
     ../../home/system/hyprland
     ../../home/system/udiskie
-    ../../home/system/hypridle
+    # ../../home/system/hypridle
     ../../home/system/mime
     ../../home/programs/thunar
     ../../home/programs/kitty
@@ -35,9 +35,7 @@ in {
     ../../home/programs/mpv
     ../../home/programs/chromium
     ../../home/programs/plex-desktop
-    ../../themes/nixy.nix
     ../../modules/programs/fzf.nix
-    ../../modules/programs/steam.nix
     ./variables.nix
   ];
   home.username = "tom";

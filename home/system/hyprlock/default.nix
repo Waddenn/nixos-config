@@ -1,3 +1,4 @@
+# Hyprlock is a lockscreen for Hyprland
 {
   config,
   lib,
@@ -10,7 +11,6 @@ in {
     enable = true;
     settings = {
       general = {
-        grace = 5;
         no_fade_in = false;
         disable_loading_bar = false;
       };
@@ -26,57 +26,60 @@ in {
 
       label = [
         {
-          # Date
+          # Day-Month-Date
           monitor = "";
           text = ''cmd[update:1000] echo -e "$(date +"%A, %B %d")"'';
           color = foreground;
-          font_size = 40;
+          font_size = 28;
           font_family = font + " Bold";
-          position = "0, 540";
+          position = "0, 490";
           halign = "center";
           valign = "center";
         }
+        # Time
         {
-          # Time
           monitor = "";
-          text = ''cmd[update:1000] echo "<span>$(date +"%H:%M")</span>"'';
+          text = ''cmd[update:1000] echo "<span>$(date +"%I:%M")</span>"'';
           color = foreground;
-          font_size = 220;
+          font_size = 160;
           font_family = "steelfish outline regular";
           position = "0, 370";
           halign = "center";
           valign = "center";
         }
+        # USER
         {
-          # Username
           monitor = "";
           text = "    $USER";
           color = foreground;
-          outline_thickness = 3;
-          font_size = 42;
+          outline_thickness = 2;
+          dots_size = 0.2; # Scale of input-field height, 0.2 - 0.8
+          dots_spacing = 0.2; # Scale of dots' absolute size, 0.0 - 1.0
+          dots_center = true;
+          font_size = 18;
           font_family = font + " Bold";
-          position = "0, -100";
+          position = "0, -180";
           halign = "center";
           valign = "center";
         }
       ];
 
+      # INPUT FIELD
       input-field = lib.mkForce {
         monitor = "";
-        size = "500, 100";
-        outline_thickness = 3;
-        dots_size = 0.2;
-        dots_spacing = 0.2;
+        size = "300, 60";
+        outline_thickness = 2;
+        dots_size = 0.2; # Scale of input-field height, 0.2 - 0.8
+        dots_spacing = 0.2; # Scale of dots' absolute size, 0.0 - 1.0
         dots_center = true;
-        outer_color = "rgba(25, 25, 25, 0.2)";
-        inner_color = "rgba(25, 25, 25, 0.25)";
+        outer_color = "rgba(25, 25, 25, 0)";
+        inner_color = "rgba(25, 25, 25, 0.1)";
         font_color = foreground;
         fade_on_empty = false;
-        font_size = 38;
         font_family = font + " Bold";
         placeholder_text = "<i>🔒 Enter Password</i>";
         hide_input = false;
-        position = "0, -220";
+        position = "0, -250";
         halign = "center";
         valign = "center";
       };

@@ -73,6 +73,7 @@ in {
           clickfinger_behavior = true;
         };
       };
+
       env = [
         "XDG_SESSION_TYPE,wayland"
         "XDG_SESSION_DESKTOP,Hyprland"
@@ -95,7 +96,7 @@ in {
         "XWAYLAND_SCALE,2"
         "XCURSOR_SIZE=24"
         "XCURSOR_THEME,phinger-cursors-light"
-        # "GDK_SCALE,2"
+        "GDK_SCALE,2"
       ];
 
       general = {
@@ -117,6 +118,7 @@ in {
         "systemctl --user enable --now hyprpaper.service &"
         "systemctl --user enable --now hypridle.service &"
       ];
+
       misc = {
         vfr = true;
         disable_hyprland_logo = true;
@@ -125,6 +127,7 @@ in {
         focus_on_activate = true;
         new_window_takes_over_fullscreen = 2;
       };
+
       decoration = {
         active_opacity = active-opacity;
         inactive_opacity = inactive-opacity;
@@ -142,6 +145,7 @@ in {
           size = 18;
         };
       };
+
       windowrulev2 = [
         "float, tag:modal"
         "pin, tag:modal"
@@ -165,13 +169,13 @@ in {
         "workspace 4, class:^(com.github.th_ch.youtube_music)$"
         "workspace 5, class:^(discord)$"
       ];
+
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
+
       monitor = [
         "DP-2,3440x1440@144,0x0,1"
         "eDP-1,2880x1800@60,3440x0,2"
       ];
-
-      xwayland.force_zero_scaling = true;
     };
   };
 }
