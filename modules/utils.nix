@@ -145,8 +145,14 @@ in {
     ];
   };
 
-  services.logind.extraConfig = ''
-    # don’t shutdown when power button is short-pressed
-    HandlePowerKey=ignore
-  '';
+  # services.logind.extraConfig = ''
+  #   # don’t shutdown when power button is short-pressed
+  #   HandlePowerKey=ignore
+  # '';
+
+  # services.logind = {
+  #   lidSwitch = "ignore";
+  #   lidSwitchDocked = "ignore";
+  #   lidSwitchExternalPower = "ignore";
+  # };
 }

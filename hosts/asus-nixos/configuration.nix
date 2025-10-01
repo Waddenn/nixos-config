@@ -27,6 +27,7 @@
     just
     inputs.alejandra.defaultPackage.x86_64-linux
     inputs.plex-client.packages.${system}.plex-minimal
+    inputs.hayase.packages.${pkgs.system}.default
     swayosd
     vscode
     obsidian
@@ -49,7 +50,6 @@
     nextcloud-client
     sshfs
     ungoogled-chromium
-    miru
     plex-desktop
     code-cursor
   ];
@@ -77,4 +77,6 @@
   steam.enable = true;
   # environment.sessionVariables.NIXOS_OZONE_WL = "1";
   home-manager.users.tom = import ./home.nix;
+  networking.firewall.allowedTCPPorts = [49160];
+  networking.firewall.allowedUDPPorts = [49160];
 }

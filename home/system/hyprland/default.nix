@@ -53,7 +53,7 @@ in {
     enable = true;
     xwayland.enable = true;
     systemd = {
-      enable = false;
+      enable = true;
       variables = [
         "--all"
       ];
@@ -107,16 +107,16 @@ in {
         layout = "dwindle";
         "col.inactive_border" = lib.mkForce background;
       };
-      gestures = {
-        workspace_swipe = true;
-        workspace_swipe_fingers = 3;
-      };
+      # gestures = {
+      #   workspace_swipe = true;
+      #   workspace_swipe_fingers = 3;
+      # };
       exec-once = [
-        "systemctl --user enable --now hyprpaper.service &"
-        "swayosd-server"
-        "dbus-update-activation-environment --systemd --all &"
-        "systemctl --user enable --now hyprpaper.service &"
-        "systemctl --user enable --now hypridle.service &"
+        # "systemctl --user enable --now hyprpaper.service &"
+        # "swayosd-server"
+        # "dbus-update-activation-environment --systemd --all &"
+        # "systemctl --user enable --now hyprpaper.service &"
+        # "systemctl --user enable --now hypridle.service &"
       ];
 
       misc = {
@@ -172,10 +172,10 @@ in {
 
       layerrule = ["noanim, launcher" "noanim, ^ags-.*"];
 
-      monitor = [
-        "DP-2,3440x1440@144,0x0,1"
-        "eDP-1,2880x1800@60,3440x0,2"
-      ];
+      # monitor = [
+      #   "DP-2,3440x1440@144,0x0,1"
+      #   "eDP-1,2880x1800@60,3440x0,2"
+      # ];
     };
   };
 }

@@ -32,6 +32,7 @@ in {
     # ../../home/programs/zen
     ../../home/programs/fish
     ../../home/programs/git
+    ../../home/programs/kanshi
     ../../home/programs/mpv
     ../../home/programs/chromium
     ../../home/programs/plex-desktop
