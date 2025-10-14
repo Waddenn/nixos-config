@@ -29,7 +29,7 @@
   environment.systemPackages = with pkgs; [
     git
     just
-    python3Full
+    python3
   ];
 
   tailscale-server.enable = true;
