@@ -36,13 +36,18 @@
   gitAutoPull.enable = true;
   autoUpgrade.enable = true;
   openssh.enable = true;
-  allowUnfree.enable = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
   fish.enable = true;
   documentation.man.enable = false;
   beszel-agent.enable = true;
   time.timeZone = "Europe/Paris";
   system.stateVersion = "25.05";
+
+  nixpkgs = {
+    config = {
+      allowUnfree = true;
+    };
+  };
 
   nix.gc = {
     automatic = true;
