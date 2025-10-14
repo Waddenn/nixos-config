@@ -47,11 +47,18 @@ in {
           extraConfig =
             securityHeaders
             + ''
-              # Override pour Nextcloud : SAMEORIGIN au lieu de DENY
+              # Re-apply headers explicitly for this vhost, after proxy
               header {
                 -X-Frame-Options
                 defer
+                Server "Secure-Proxy"
+                -X-Powered-By
+                Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
                 X-Frame-Options "SAMEORIGIN"
+                X-Content-Type-Options "nosniff"
+                X-XSS-Protection "1; mode=block"
+                Referrer-Policy "strict-origin-when-cross-origin"
+                Permissions-Policy "geolocation=(), microphone=(), camera=()"
               }
 
               reverse_proxy http://192.168.40.116:80 {
