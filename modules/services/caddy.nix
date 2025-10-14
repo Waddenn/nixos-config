@@ -41,12 +41,17 @@ in {
           per_host
         }
       '';
-
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
           extraConfig =
             securityHeaders
             + ''
+              # Override X-Frame-Options pour Nextcloud
+              header {
+                -X-Frame-Options
+                X-Frame-Options "SAMEORIGIN"
+              }
+
               reverse_proxy http://192.168.40.116:80 {
               }
 
