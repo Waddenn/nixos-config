@@ -47,24 +47,36 @@ in {
           extraConfig =
             securityHeaders
             + ''
-              # Re-apply headers explicitly for this vhost, after proxy
-              header {
-                -X-Frame-Options
-                defer
-                Server "Secure-Proxy"
-                -X-Powered-By
-                Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-                X-Frame-Options "SAMEORIGIN"
-                X-Content-Type-Options "nosniff"
-                X-XSS-Protection "1; mode=block"
-                Referrer-Policy "strict-origin-when-cross-origin"
-                Permissions-Policy "geolocation=(), microphone=(), camera=()"
-              }
+              route {
+                reverse_proxy http://192.168.40.116:80 {
+                  header_up X-Forwarded-Proto {scheme}
+                  header_up X-Forwarded-Host  {host}
+                  header_up X-Forwarded-For   {remote}
+                }
 
-              reverse_proxy http://192.168.40.116:80 {
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Forwarded-Host  {host}
-                header_up X-Forwarded-For   {remote}
+                # Re-applique les entêtes en DERNIER (après le proxy)
+                header {
+                  defer
+
+                  # HSTS >= 15552000 (ici 1 an) — requis par Nextcloud
+                  Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+                  # Nextcloud demande SAMEORIGIN (pas DENY)
+                  -X-Frame-Options
+                  X-Frame-Options "SAMEORIGIN"
+
+                  # Nextcloud vérifie encore cette entête
+                  -X-XSS-Protection
+                  X-XSS-Protection "1; mode=block"
+
+                  # On garde le reste cohérent
+                  -Server
+                  Server "Secure-Proxy"
+                  -X-Powered-By
+                  X-Content-Type-Options "nosniff"
+                  Referrer-Policy "strict-origin-when-cross-origin"
+                  Permissions-Policy "geolocation=(), microphone=(), camera=()"
+                }
               }
 
               tls {
@@ -72,6 +84,7 @@ in {
               }
             '';
         };
+
         "gitea.hexaflare.net" = {
           extraConfig =
             securityHeaders
