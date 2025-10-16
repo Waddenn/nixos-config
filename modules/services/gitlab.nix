@@ -57,6 +57,9 @@
         secretFile = "/var/keys/gitlab/secret";
         otpFile = "/var/keys/gitlab/otp";
         jwsFile = "/var/keys/gitlab/jws";
+        activeRecordPrimaryKeyFile        = "/var/keys/gitlab/ar_primary_key";
+        activeRecordDeterministicKeyFile  = "/var/keys/gitlab/ar_deterministic_key";
+        activeRecordSaltFile              = "/var/keys/gitlab/ar_salt";
       };
 
       extraConfig = {
@@ -69,6 +72,6 @@
       };
     };
 
-    networking.firewall.allowedTCPPorts = [443];
+    networking.firewall.allowedTCPPorts = [443 80];
   };
 }
