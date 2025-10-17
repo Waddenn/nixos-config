@@ -8,7 +8,7 @@
     environment.etc."secrets/github-runner.token" = {
       # Remplace par ta vraie source (sops, age, bind-mount, etc.)
       # ex: source = /var/keys/github-runner.token;
-      source = /var/keys/github-runner.token;
+      source = /etc/secrets/github-runner.token;
       user = "root";
       group = "root";
       mode = "0400";
