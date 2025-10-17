@@ -191,7 +191,9 @@
       ];
 
       grafana = mkServer "grafana" "nixos" [
-        {grafana.enable = true;}
+        {grafana.enable = true;
+          prometheus.enableServer = true;
+          prometheus.enableClient = true;}
       ];
 
       prometheus = mkServer "prometheus" "nixos" [
