@@ -31,8 +31,8 @@
       recommendedProxySettings = true;
       recommendedTlsSettings = true;
       virtualHosts."git.hexaflare.net" = {
-        enableACME = true;
-        forceSSL = true;
+        enableACME = false;
+        forceSSL = false;
         locations."/".proxyPass = "http://unix:/run/gitlab/gitlab-workhorse.socket";
       };
     };
@@ -41,7 +41,7 @@
       enable = true;
       databasePasswordFile = "/var/keys/gitlab/db_password";
       initialRootPasswordFile = "/var/keys/gitlab/root_password";
-      https = true;
+      https = false;
       host = "git.hexaflare.net";
       port = 443;
       user = "git";
