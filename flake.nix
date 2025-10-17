@@ -235,6 +235,8 @@
 
       kubernetes = mkServer "kubernetes" "nixos" [];
 
+      dev-nixos = mkServer "dev-nixos" "nixos" [];
+      
       onlyoffice = mkServer "onlyoffice" "nixos" [
         {onlyoffice.enable = true;}
       ];
