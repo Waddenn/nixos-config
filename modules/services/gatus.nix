@@ -89,18 +89,7 @@
               }
             ];
           }
-          {
-            name = "linkwarden";
-            url = "https://linkwarden.hexaflare.net";
-            conditions = ["[STATUS] == 200"];
-            alerts = [
-              {
-                type = "discord";
-                description = "linkwarden healthcheck failed";
-                send-on-resolved = true;
-              }
-            ];
-          }
+
           {
             name = "jellyseerr";
             url = "https://jellyseerr.hexaflare.net";
