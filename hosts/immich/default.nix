@@ -1,0 +1,3 @@
+{ ... }: {
+  immich.enable = true;
+}

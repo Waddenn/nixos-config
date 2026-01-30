@@ -1,0 +1,3 @@
+{ ... }: {
+  gotify.enable = true;
+}

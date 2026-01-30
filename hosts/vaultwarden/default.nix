@@ -1,0 +1,3 @@
+{ ... }: {
+  vaultwarden.enable = true;
+}

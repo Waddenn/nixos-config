@@ -1,0 +1,3 @@
+{ ... }: {
+  ansible.enable = true;
+}

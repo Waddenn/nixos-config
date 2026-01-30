@@ -1,0 +1,3 @@
+{ ... }: {
+  gatus.enable = true;
+}

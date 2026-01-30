@@ -1,0 +1,3 @@
+{ ... }: {
+  ethtool.enable = true;
+}

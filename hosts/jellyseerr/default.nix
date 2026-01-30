@@ -1,0 +1,3 @@
+{ ... }: {
+  jellyseerr.enable = true;
+}

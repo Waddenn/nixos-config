@@ -1,0 +1,3 @@
+{ ... }: {
+  gitea.enable = true;
+}

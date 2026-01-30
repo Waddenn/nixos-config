@@ -1,0 +1,3 @@
+{ ... }: {
+  onlyoffice.enable = true;
+}
