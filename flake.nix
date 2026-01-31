@@ -30,8 +30,7 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = {
-      __schema = "v0.5";
+    colmena = let
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
@@ -39,6 +38,10 @@
           username = "nixos";
         };
       };
+    in {
+      __schema = "v0.5";
+      inherit meta;
+      metaConfig = meta;
     } // builtins.mapAttrs (name: value: {
       deployment = {
         targetHost = name;
