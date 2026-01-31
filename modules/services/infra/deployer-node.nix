@@ -48,7 +48,7 @@
           echo -e "''${B}----------------------------------------------------------''${NC}"
 
           # Run deployment
-          if colmena apply --color always --build-on-target --parallel 1 --keep-result; then
+          if colmena apply --color always --parallel 1 --keep-result; then
               echo -e "\n''${B}🏠 Self-updating dev-nixos...''${NC}"
               if sudo colmena apply-local --color always --node dev-nixos; then
                  echo -e "\n''${G}✅ DEPLOYMENT SUCCESSFUL''${NC}"
