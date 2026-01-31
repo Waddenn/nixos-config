@@ -26,6 +26,12 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    formatter.${system} = pkgs.alejandra;
+    formatter.${system} = pkgs.writeShellApplication {
+      name = "nix-fmt";
+      runtimeInputs = [pkgs.alejandra];
+      text = ''
+        alejandra "$@" .
+      '';
+    };
   };
 }
