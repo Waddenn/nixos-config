@@ -116,6 +116,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   fi
   
   # Send Fleet Notification
+  echo -e "\n${B}📡 Debug: DISCORD_WEBHOOK exists? $([ -n "$DISCORD_WEBHOOK" ] && echo "YES" || echo "NO")${NC}"
   if [ -n "$DISCORD_WEBHOOK" ]; then
     echo -e "${B}📡 Sending Discord notification...${NC}"
     if [[ $DISCORD_WEBHOOK == discord://* ]]; then
@@ -146,11 +147,11 @@ if [ "$LOCAL" != "$REMOTE" ]; then
 
   # 5. Self-update dev-nixos (Fully detached)
   echo -e "\n${B}🏠 Triggering self-update for dev-nixos...${NC}"
-  # We use systemd-run WITHOUT --wait to truly detach the process.
-  # Otherwise, activation might kill the caller and the transient unit together.
+  # We use COLMENA_BIN to ensure the command is found in the detached process.
+  # We remove --wait to truly detach it.
   sudo systemd-run --unit=dev-nixos-self-update --description="GitOps Self-Update" \
        --property="Type=oneshot" --property="RemainAfterExit=no" \
-       colmena apply-local --color always --node dev-nixos
+       ${COLMENA_BIN:-colmena} apply-local --color always --node dev-nixos
 
 else
   echo -e "${G}😴 No changes found. System is up to date.${NC}"

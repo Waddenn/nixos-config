@@ -25,6 +25,7 @@
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
       deployScript = pkgs.writeShellScript "deploy-fleet-wrapper" ''
         export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
+        export COLMENA_BIN="${colmenaPkg}/bin/colmena"
         exec ${pkgs.bash}/bin/bash ${../../../scripts/deploy-fleet.sh}
       '';
     in {
