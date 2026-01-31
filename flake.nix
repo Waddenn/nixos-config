@@ -30,22 +30,24 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = {
+    colmena = inputs.colmena.lib.makeHive {
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
+          # Only pass necessary inputs to avoid circularity and large JSON objects
           inputs = builtins.removeAttrs inputs ["self"];
           username = "nixos";
         };
       };
-    } // builtins.mapAttrs (name: value: {
-      deployment = {
-        targetHost = name;
-        targetUser = "root";
-        tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
-      };
-      imports = value._module.args.modules;
-    }) self.nixosConfigurations;
+      nodes = builtins.mapAttrs (name: value: {
+        deployment = {
+          targetHost = name;
+          targetUser = "root";
+          tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
+        };
+        imports = value._module.args.modules;
+      }) self.nixosConfigurations;
+    };
 
     colmenaHive = self.colmena;
 
