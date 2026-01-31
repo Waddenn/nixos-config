@@ -19,6 +19,9 @@
     sops.secrets.discord-webhook = {
       sopsFile = ../../../secrets/secrets.yaml;
     };
+    sops.templates."discord-gitops.env".content = ''
+      DISCORD_WEBHOOK=''${config.sops.placeholder.discord-webhook}
+    '';
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
     in {
@@ -30,7 +33,7 @@
       serviceConfig = {
         EnvironmentFile = [
           config.sops.secrets.gh-token.path
-          config.sops.secrets.discord-webhook.path
+          config.sops.templates."discord-gitops.env".path
         ];
         User = "nixos";
         Type = "oneshot";
