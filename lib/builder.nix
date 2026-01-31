@@ -12,12 +12,14 @@
     extraModules ? [],
   }:
     lib.nixosSystem {
-      inherit system;
       specialArgs = {
         inherit inputs nixpkgs username;
       };
       modules =
         [
+          # Set host platform
+          { nixpkgs.hostPlatform = system; }
+
           # Auto-import all modules
           ../modules
 
