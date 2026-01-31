@@ -14,6 +14,9 @@
     ];
 
     systemd.services.internal-gitops = let
+      colmenaPkg = inputs.colmena.packages.${pkgs.system}.colmena;
+    in {
+      description = "Internal GitOps: Pull and Deploy";
       path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.sudo];
       script = ''
         set -e
