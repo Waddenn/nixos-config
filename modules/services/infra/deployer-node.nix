@@ -31,6 +31,7 @@
       description = "Internal GitOps: Pull and Deploy";
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
+      restartIfChanged = false;
       path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
       serviceConfig = {
         EnvironmentFile = [

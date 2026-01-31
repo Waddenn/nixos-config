@@ -13,4 +13,5 @@
 - [2026-01-31] Création des workflows standards : `/start_task`, `/create_pr`, `/ci_status`.
 - [2026-01-31] Résolution en urgence de 5 erreurs de configuration héritées (conflict Nginx, Stylix manquant, options obsolètes, structure des checks).
 
-- [2026-01-31] Réparation du service GitOps (`internal-gitops`) sur `dev-nixos` : correction du PATH pour inclure `sudo` (/run/wrappers/bin) et confirmation de l'automatisation via Colmena.
+- [2026-02-01] Refactorisation complète du déploiement GitOps : extraction dans `scripts/deploy-fleet.sh`, utilisation de `git reset --hard` pour l'atomicité, et ajout de notifications Discord avec métriques (durée).
+- [2026-02-01] Sécurisation des secrets : migration vers un wrapper bash pour l'injection des secrets SOPS, correction des permissions (`owner = "nixos"`) et mise à jour des clés hôtes (notamment `caddy`).
