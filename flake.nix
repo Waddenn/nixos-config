@@ -30,23 +30,14 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = let
-      # Sanitize inputs to avoid circularity (self) and reduce JSON size
-      # This prevents the "invalid response" error in Colmena 0.5
-      safeInputs = builtins.removeAttrs inputs ["self"];
-      
+    colmena = {
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
-          inputs = safeInputs;
+          inherit inputs;
           username = "nixos";
         };
       };
-    in {
-      __schema = "v0.5";
-      inherit meta;
-      # Colmena 0.5 specifically looks for metaConfig
-      metaConfig = meta;
     } // builtins.mapAttrs (name: value: {
       deployment = {
         targetHost = name;
@@ -55,13 +46,6 @@
       };
       imports = value._module.args.modules;
     }) self.nixosConfigurations;
-
-    colmenaHive = self.colmena;
-
-    apps.${system} = {
-      colmena = inputs.colmena.apps.${system}.colmena;
-      default = self.apps.${system}.colmena;
-    };
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";

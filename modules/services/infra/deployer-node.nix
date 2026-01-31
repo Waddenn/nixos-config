@@ -13,9 +13,11 @@
       inputs.colmena.packages.${pkgs.system}.colmena or pkgs.colmena
     ];
 
-    systemd.services.internal-gitops = {
+    systemd.services.internal-gitops = let
+      colmenaPkg = inputs.colmena.packages.${pkgs.system}.colmena;
+    in {
       description = "Internal GitOps: Pull and Deploy";
-      path = [pkgs.git pkgs.openssh inputs.colmena.packages.${pkgs.system}.colmena or pkgs.colmena pkgs.nix];
+      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix];
       script = ''
         set -e
         # Navigate to repo
@@ -36,9 +38,8 @@
           git merge origin/main
           
           echo "Deploying with Colmena..."
-          # Force use of Colmena 0.4.0 from nixpkgs as it is stable and verified
-          # Version 0.5.0-pre on dev-nixos is causing evaluation issues
-          nix shell nixpkgs#colmena --command colmena apply --build-on-target --parallel 2 --keep-result
+          # We use the colmena binary specifically provided in the service path
+          colmena apply --build-on-target --parallel 2 --keep-result
         else
           echo "No changes."
         fi
@@ -46,6 +47,8 @@
       serviceConfig = {
         User = "nixos"; # Run as user who has the SSH keys
         Type = "oneshot";
+        # Ensure we don't pick up the system colmena (0.5-pre)
+        Environment = "PATH=${lib.makeBinPath [ pkgs.git pkgs.openssh colmenaPkg pkgs.nix ]}";
       };
     };
 
