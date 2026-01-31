@@ -30,22 +30,25 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = {
+    colmena = inputs.colmena.lib.makeHive {
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
-          inherit inputs; # Still needed for some modules, but let's hope pkgs is enough
+          inherit inputs;
           username = "nixos";
         };
       };
-    } // builtins.mapAttrs (name: value: {
-      deployment = {
-        targetHost = name;
-        targetUser = "root";
-        tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
-      };
-      imports = value._module.args.modules;
-    }) self.nixosConfigurations;
+      nodes = builtins.mapAttrs (name: value: {
+        deployment = {
+          targetHost = name;
+          targetUser = "root";
+          tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
+        };
+        imports = value._module.args.modules;
+      }) self.nixosConfigurations;
+    };
+
+    colmenaHive = self.colmena;
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
