@@ -19,7 +19,7 @@
       description = "Internal GitOps: Pull and Deploy";
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
-      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.sudo];
+      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq "/run/wrappers"];
       script = ''
         set -e
         # Colors & Emojis
@@ -52,7 +52,7 @@
 
           # 1. Run Fleet Deployment (Allow partial failure)
           set +e
-          colmena apply --color always --parallel 1 --keep-result
+          colmena apply --color always --parallel 2 --keep-result --on @remote
           FLEET_EXIT=$?
           set -e
 
