@@ -47,6 +47,14 @@
       imports = value._module.args.modules;
     }) self.nixosConfigurations;
 
+    # Also provide colmenaHive for 0.5 compatibility just in case
+    colmenaHive = self.colmena;
+
+    apps.${system} = {
+      colmena = inputs.colmena.apps.${system}.colmena;
+      default = self.apps.${system}.colmena;
+    };
+
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
       runtimeInputs = [pkgs.alejandra];
