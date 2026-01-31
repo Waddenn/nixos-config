@@ -33,7 +33,6 @@
     colmena = let
       hostNames = builtins.attrNames self.nixosConfigurations;
       meta = {
-        nixpkgs = pkgs;
         nodeNixpkgs = lib.genAttrs hostNames (name: pkgs);
         specialArgs = {
           inherit inputs;
