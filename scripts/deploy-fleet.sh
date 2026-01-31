@@ -57,7 +57,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   set +e
   # Pipe stdout/stderr to tee to show in journal AND save to file
   colmena apply --color always --parallel 3 --keep-result --on @remote 2>&1 | tee "$LOGFILE"
-  FLEET_EXIT=$?
+  FLEET_EXIT=${PIPESTATUS[0]}
   set -e
 
   # Parse logs for status
@@ -65,10 +65,10 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   CLEAN_LOG=$(sed 's/\x1b\[[0-9;]*m//g' "$LOGFILE")
   
   # Extract successes (host | Activation successful)
-  SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{print $1}' | sort | tr '\n' ', ' | sed 's/, $//')
+  SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' | sort | tr '\n' ',' | sed 's/,$//; s/,/, /g')
   
   # Extract failures (heuristic: [ERROR] Failed to push system closure to <host>)
-  FAILED_LIST=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{print $NF}' | sort | uniq | tr '\n' ', ' | sed 's/, $//')
+  FAILED_LIST=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{gsub(/^[ \t]+|[ \t]+$/, "", $NF); print $NF}' | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g')
   
   # Fallback for failures if specific pattern not found but FLEET_EXIT != 0
   if [ $FLEET_EXIT -ne 0 ] && [ -z "$FAILED_LIST" ]; then
