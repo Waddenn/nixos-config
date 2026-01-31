@@ -50,6 +50,8 @@
       imports = value._module.args.modules;
     }) self.nixosConfigurations;
 
+    colmenaHive = self.colmena;
+
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
       runtimeInputs = [pkgs.alejandra];
