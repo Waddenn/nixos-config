@@ -42,7 +42,10 @@
       }
       // builtins.mapAttrs (name: value: {
         deployment = {
-          targetHost = name;
+          targetHost =
+            if name == "dev-nixos"
+            then null
+            else name;
           targetUser = "root";
           tags = [
             (

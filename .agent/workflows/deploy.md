@@ -11,7 +11,8 @@ To trigger an immediate update and rollout of the configuration across the fleet
 ssh nixos@dev-nixos "sudo systemctl start internal-gitops"
 ```
 
-3. (Optional) To follow the logs and verify the deployment progress:
+3. (Optional) To follow the logs and witness the new **Visual Dashboard**:
 ```bash
 ssh nixos@dev-nixos "journalctl -u internal-gitops -f"
 ```
+

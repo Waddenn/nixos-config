@@ -48,7 +48,7 @@
           echo -e "''${B}----------------------------------------------------------''${NC}"
 
           # Run deployment
-          if colmena apply --color always --build-on-target --parallel 2 --keep-result; then
+          if colmena apply --color always --build-on-target --parallel 1 --keep-result; then
              echo -e "\n''${G}✅ DEPLOYMENT SUCCESSFUL''${NC}"
              if [ -f /var/lib/internal-gitops/gotify_token ]; then
                TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
