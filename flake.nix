@@ -42,6 +42,11 @@
       deployment = {
         targetHost = name;
         targetUser = "root";
+        # Add tags based on directory or specific traits
+        tags = [
+          (if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")
+          (if lib.hasInfix "media" (toString value._module.args.modules) then "media" else "other")
+        ];
       };
       imports = value._module.args.modules;
     }) self.nixosConfigurations;

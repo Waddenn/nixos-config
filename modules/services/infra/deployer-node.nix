@@ -33,9 +33,8 @@
           git merge origin/main
           
           echo "Deploying with Colmena..."
-          # Deploy to all *except* self first (to avoid cutting branch) or just all in parallel?
-          # colmena apply handles self-update usually fine but let's be careful.
-          colmena apply --build-on-target
+          # Limit parallelism to avoid overloading dev-nixos
+          colmena apply --build-on-target --parallel 2 --keep-result
         else
           echo "No changes."
         fi
