@@ -36,6 +36,7 @@
           git merge origin/main
           
           echo "Deploying with Colmena..."
+          nix run .#colmena -- --version
           # Use colmena from the flake to ensure version compatibility with the schema
           nix run .#colmena -- apply --build-on-target --parallel 2 --keep-result
         else

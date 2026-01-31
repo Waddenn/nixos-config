@@ -30,18 +30,14 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = let
+    colmena = {
       meta = {
-        nixpkgs = inputs.nixpkgs;
+        nixpkgs = pkgs;
         specialArgs = {
-          inherit inputs;
+          inherit inputs; # Still needed for some modules, but let's hope pkgs is enough
           username = "nixos";
         };
       };
-    in {
-      __schema = "v0.5";
-      inherit meta;
-      metaConfig = meta;
     } // builtins.mapAttrs (name: value: {
       deployment = {
         targetHost = name;
@@ -50,8 +46,6 @@
       };
       imports = value._module.args.modules;
     }) self.nixosConfigurations;
-
-    colmenaHive = self.colmena;
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
