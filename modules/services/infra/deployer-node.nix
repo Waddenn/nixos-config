@@ -36,8 +36,9 @@
           git merge origin/main
           
           echo "Deploying with Colmena..."
-          # Use colmena from the flake to ensure version compatibility with the schema
-          nix run .#colmena -- apply --build-on-target --parallel 2 --keep-result
+          # Force use of Colmena 0.4.0 from nixpkgs as it is stable and verified
+          # Version 0.5.0-pre on dev-nixos is causing evaluation issues
+          nix shell nixpkgs#colmena --command colmena apply --build-on-target --parallel 2 --keep-result
         else
           echo "No changes."
         fi

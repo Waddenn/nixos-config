@@ -31,10 +31,12 @@
     );
 
     colmena = {
+      __schema = "v0.5";
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
-          inherit inputs;
+          # Only pass necessary inputs to avoid circularity and large JSON objects
+          inputs = builtins.removeAttrs inputs ["self"];
           username = "nixos";
         };
       };
@@ -47,7 +49,6 @@
       imports = value._module.args.modules;
     }) self.nixosConfigurations;
 
-    # Also provide colmenaHive for 0.5 compatibility just in case
     colmenaHive = self.colmena;
 
     apps.${system} = {
