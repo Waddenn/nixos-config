@@ -6,3 +6,4 @@
   my-services.containers.beszel.enable = true;
   deploymentTarget.enable = true;
 }
+# Final verification of the internal GitOps flow
