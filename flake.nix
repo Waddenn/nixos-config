@@ -26,12 +26,8 @@
       inherit lib inputs nixpkgs system;
     };
 
-    checks = lib.genAttrs ["beszel"] (
-      name: let
-        sys = self.nixosConfigurations.${name}.config.system.build.toplevel;
-      in {
-        "${name}" = sys;
-      }
+    checks.${system} = lib.genAttrs ["beszel"] (
+      name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
     formatter.x86_64-linux = alejandra.defaultPackage.x86_64-linux;
