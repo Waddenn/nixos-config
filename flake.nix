@@ -33,7 +33,10 @@
     colmena = {
       meta = {
         nixpkgs = pkgs;
-        specialArgs = {inherit inputs;};
+        specialArgs = {
+          inherit inputs;
+          username = "nixos";
+        };
       };
     } // builtins.mapAttrs (name: value: {
       deployment = {
