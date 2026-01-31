@@ -99,7 +99,6 @@
         User = "nixos";
         Type = "oneshot";
         StateDirectory = "internal-gitops";
-        Environment = "PATH=${lib.makeBinPath [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq]}";
       };
     };
 
