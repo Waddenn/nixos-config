@@ -19,24 +19,24 @@
     sops.secrets.discord-webhook = {
       sopsFile = ../../../secrets/secrets.yaml;
     };
-    sops.templates."discord-gitops.env".content = ''
-      DISCORD_WEBHOOK=''${config.sops.placeholder.discord-webhook}
-    '';
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
+      deployScript = pkgs.writeShellScript "deploy-fleet-wrapper" ''
+        export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
+        exec ${pkgs.bash}/bin/bash ${../../../scripts/deploy-fleet.sh}
+      '';
     in {
       description = "Internal GitOps: Pull and Deploy";
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
       path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
-      script = builtins.readFile ../../../scripts/deploy-fleet.sh;
       serviceConfig = {
         EnvironmentFile = [
           config.sops.secrets.gh-token.path
-          config.sops.templates."discord-gitops.env".path
         ];
         User = "nixos";
         Type = "oneshot";
+        ExecStart = "${deployScript}";
         StateDirectory = "internal-gitops";
       };
     };
