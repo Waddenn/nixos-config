@@ -49,14 +49,20 @@
 
           # Run deployment
           if colmena apply --color always --build-on-target --parallel 1 --keep-result; then
-             echo -e "\n''${G}✅ DEPLOYMENT SUCCESSFUL''${NC}"
-             if [ -f /var/lib/internal-gitops/gotify_token ]; then
-               TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
-               curl -s -S -X POST "http://gotify:8080/message?token=$TOKEN" \
-                 -F "title=🚀 Deployment Success" \
-                 -F "message=Fleet successfully updated to $(git rev-parse --short HEAD)" \
-                 -F "priority=5" > /dev/null
-             fi
+              echo -e "\n''${B}🏠 Self-updating dev-nixos...''${NC}"
+              if sudo colmena apply-local --color always --node dev-nixos; then
+                 echo -e "\n''${G}✅ DEPLOYMENT SUCCESSFUL''${NC}"
+                 if [ -f /var/lib/internal-gitops/gotify_token ]; then
+                   TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
+                   curl -s -S -X POST "http://gotify:8080/message?token=$TOKEN" \
+                     -F "title=🚀 Deployment Success" \
+                     -F "message=Fleet and local node successfully updated to $(git rev-parse --short HEAD)" \
+                     -F "priority=5" > /dev/null
+                 fi
+              else
+                 echo -e "\n''${R}❌ LOCAL SELF-UPDATE FAILED''${NC}"
+                 exit 1
+              fi
           else
              echo -e "\n''${R}❌ DEPLOYMENT FAILED''${NC}"
              if [ -f /var/lib/internal-gitops/gotify_token ]; then
