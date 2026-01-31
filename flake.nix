@@ -31,6 +31,7 @@
     );
 
     colmena = {
+      __schema = "v0.5";
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
