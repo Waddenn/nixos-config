@@ -21,6 +21,9 @@
         # Navigate to repo
         cd /home/nixos/nixos-config
 
+        echo "Using Colmena version:"
+        colmena --version
+
         # Update code
         git fetch origin main
         
