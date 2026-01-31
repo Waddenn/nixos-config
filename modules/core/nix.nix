@@ -32,7 +32,11 @@
       automatic = true;
       persistent = true;
       dates = "weekly";
-      options = "--delete-older-than 7d";
+      options = "--delete-older-than 3d";
+    };
+    optimise = {
+      automatic = true;
+      dates = ["03:15"]; # Daily at 3:15 AM
     };
   };
 }

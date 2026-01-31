@@ -28,7 +28,7 @@
 
         # Update code
         git fetch origin main
-        
+
         # Check if we are behind
         LOCAL=$(git rev-parse HEAD)
         REMOTE=$(git rev-parse origin/main)
@@ -36,7 +36,7 @@
         if [ "$LOCAL" != "$REMOTE" ]; then
           echo "Changes detected. Pulling..."
           git merge origin/main
-          
+
           echo "Deploying with Colmena..."
           # We use the colmena binary specifically provided in the service path
           colmena apply --build-on-target --parallel 2 --keep-result
@@ -48,7 +48,7 @@
         User = "nixos"; # Run as user who has the SSH keys
         Type = "oneshot";
         # Ensure we don't pick up the system colmena (0.5-pre)
-        Environment = "PATH=${lib.makeBinPath [ pkgs.git pkgs.openssh colmenaPkg pkgs.nix ]}";
+        Environment = "PATH=${lib.makeBinPath [pkgs.git pkgs.openssh colmenaPkg pkgs.nix]}";
       };
     };
 

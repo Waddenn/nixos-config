@@ -24,4 +24,15 @@
     tree
     just # command runner
   ];
+
+  # Limit journald logs to prevent disk bloat
+  services.journald.extraConfig = ''
+    SystemMaxUse=500M
+    MaxRetentionSec=1month
+  '';
+
+  # Maintenance utilities
+  environment.shellAliases = {
+    nix-clean = "sudo nix-collect-garbage -d && nix-store --optimise";
+  };
 }
