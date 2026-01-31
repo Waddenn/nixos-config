@@ -80,31 +80,14 @@ if [ "$LOCAL" != "$REMOTE" ]; then
      FAILED_LIST="Unknown/General Failure (Check logs)"
   fi
 
-  rm -f "$LOGFILE"
-
-  # 3. Self-update dev-nixos
-  echo -e "\n${B}🏠 Self-updating dev-nixos...${NC}"
-  if sudo colmena apply-local --color always --node dev-nixos; then
-     LOCAL_EXIT=0
-     if [[ ! "$SUCCEEDED_LIST" =~ "dev-nixos" ]]; then
-        if [ -z "$SUCCEEDED_LIST" ]; then SUCCEEDED_LIST="dev-nixos"; else SUCCEEDED_LIST="$SUCCEEDED_LIST, dev-nixos"; fi
-     fi
-  else
-     LOCAL_EXIT=1
-     if [[ ! "$FAILED_LIST" =~ "dev-nixos" ]]; then
-        if [ -z "$FAILED_LIST" ]; then FAILED_LIST="dev-nixos"; else FAILED_LIST="$FAILED_LIST, dev-nixos"; fi
-     fi
-  fi
-
   END_TIME=$(date +%s)
   DURATION=$((END_TIME - START_TIME))
   DURATION_STR="$(($DURATION / 60))min $(($DURATION % 60))s"
 
-  # 4. Decision & Notification
+  # 4. Success/Failure Notification
   COMMIT_HASH=$(git rev-parse --short HEAD)
   COMMIT_MSG=$(git log -1 --format=%s)
   
-  # Build report with actual newlines for Discord
   REPORT_BODY="**Commit:** \`$COMMIT_HASH\` - $COMMIT_MSG
 **Duration:** $DURATION_STR"
   
@@ -120,25 +103,18 @@ if [ "$LOCAL" != "$REMOTE" ]; then
 ❌ **Failed:** $FAILED_LIST"
   fi
 
-  if [ $FLEET_EXIT -eq 0 ] && [ $LOCAL_EXIT -eq 0 ]; then
-     echo -e "\n${G}✅ FULL SUCCESS: All systems operational${NC}"
-     TITLE="🚀 Deployment Success"
-     PRIORITY=5
-  elif [ $LOCAL_EXIT -eq 0 ]; then
-     echo -e "\n${O}⚠️  PARTIAL SUCCESS: Some fleet nodes failed${NC}"
-     TITLE="⚠️ Partial Deployment"
-     PRIORITY=8
+  if [ $FLEET_EXIT -eq 0 ]; then
+     echo -e "\n${G}✅ FLEET SUCCESS: Nodes updated.${NC}"
+     TITLE="🚀 Fleet Deployment Success"
+     COLOR=3066993 # Green
   else
-     echo -e "\n${R}❌ CRITICAL: dev-nixos update failed${NC}"
-     TITLE="❌ Deployment Critical Failure"
-     PRIORITY=9
+     echo -e "\n${O}⚠️  FLEET PARTIAL: Some nodes failed.${NC}"
+     TITLE="⚠️ Fleet Partial Deployment"
+     COLOR=15105570 # Orange
   fi
   
-  MSG="$REPORT_BODY"
-  echo -e "$MSG"
-
+  # Send Fleet Notification
   if [ -n "$DISCORD_WEBHOOK" ]; then
-    # Convert discord://token@id to https://discord.com/api/webhooks/id/token
     if [[ $DISCORD_WEBHOOK == discord://* ]]; then
         ID=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/.*@(.*)/\1/')
         TOKEN=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/(.*)@.*/\1/')
@@ -147,17 +123,9 @@ if [ "$LOCAL" != "$REMOTE" ]; then
         WEBHOOK_URL="$DISCORD_WEBHOOK"
     fi
 
-    # Discord Colors (Embed)
-    case $PRIORITY in
-      5) COLOR=3066993 ;; # Green
-      8) COLOR=15105570 ;; # Orange
-      9) COLOR=15158332 ;; # Red
-      *) COLOR=3447003 ;; # Blue
-    esac
-
     PAYLOAD=$(jq -n \
       --arg title "$TITLE" \
-      --arg desc "$MSG" \
+      --arg desc "$REPORT_BODY" \
       --arg color "$COLOR" \
       '{
         embeds: [{
@@ -171,8 +139,23 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK_URL" > /dev/null
   fi
 
-  # If critical local failure, exit with error to fail the systemd unit
+  # 5. Self-update dev-nixos (Detached to survive unit restart)
+  echo -e "\n${B}🏠 Triggering self-update for dev-nixos...${NC}"
+  # We use systemd-run to run the local apply in a transient unit.
+  # This prevents the current internal-gitops.service from being killed mid-activation
+  # while still performing the update.
+  sudo systemd-run --unit=dev-nixos-self-update --description="GitOps Self-Update" \
+       --property="Type=oneshot" --property="RemainAfterExit=no" \
+       --wait colmena apply-local --color always --node dev-nixos || LOCAL_EXIT=1
+
   if [ $LOCAL_EXIT -ne 0 ]; then
+     echo -e "\n${R}❌ CRITICAL: dev-nixos self-update failed${NC}"
+     if [ -n "$DISCORD_WEBHOOK" ]; then
+       FAILURE_PAYLOAD=$(jq -n \
+         --arg desc "❌ **CRITICAL**: dev-nixos self-update failed after fleet success." \
+         '{ embeds: [{ title: "🛑 Self-Update Failure", description: $desc, color: 15158332 }] }')
+       curl -s -X POST -H "Content-Type: application/json" -d "$FAILURE_PAYLOAD" "$WEBHOOK_URL" > /dev/null
+     fi
      exit 1
   fi
 
