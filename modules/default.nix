@@ -1,52 +1,21 @@
-{...}: {
-  imports = [
-    ./networking/firewall.nix
-    ./programs/firefox.nix
-    ./system/autoUpgrade.nix
-    ./systemd/git-auto-pull.nix
-    ./services/tailscale-client.nix
-    ./services/tailscale-server.nix
-    ./programs/direnv.nix
-    ./programs/zsh.nix
-    ./programs/fish.nix
-    ./programs/terraform.nix
-    ./programs/ansible.nix
-    ./programs/python3Minimal.nix
-    ./environment/gnome/excludePackages.nix
-    ./environment/systemPackages/gnomeExtensions.nix
-    ./environment/systemPackages/ethtool.nix
-    ./services/flatpak.nix
-    ./services/printing.nix
-    ./services/fwupd.nix
-    ./services/fprintd.nix
-    ./services/xserver-xkb.nix
-    ./services/gnome.nix
-    ./services/gdm.nix
-    ./services/caddy.nix
-    ./hardware/nvidia.nix
-    ./services/openssh.nix
-    ./services/docker.nix
-    ./services/grafana.nix
-    ./services/prometheus.nix
-    ./services/gotify.nix
-    ./services/gitea.nix
-    ./services/vaultwarden.nix
-    ./services/paperless.nix
-    ./services/gitlab.nix
-    ./services/immich.nix
-    ./services/nextcloud.nix
-    ./services/kubernetes.nix
-    ./services/onlyoffice.nix
-    ./services/hyprland.nix
-    ./services/gatus.nix
-    ./services/github-runner.nix
-    ./services/adguardhome.nix
-    ./services/promtail.nix
-    ./services/loki.nix
-    ./virtualisation/oci-containers/beszel-agent.nix
-    ./services/jellyseerr.nix
-    ./services/upower.nix
-    ./services/glance.nix
-    ./hardware/amd.nix
-  ];
+{ lib, ... }: {
+  imports = let
+    # Helper to recursively find all .nix files
+    files = lib.filesystem.listFilesRecursive ./.;
+    
+    # Filter function
+    isModule = file: 
+      let 
+        pathStr = toString file;
+        name = baseNameOf pathStr;
+      in
+      lib.hasSuffix ".nix" pathStr && 
+      name != "default.nix" &&
+      name != "boot.nix" &&
+      !lib.hasInfix "modules/infra" pathStr &&
+      name != "mac-randomize.nix"; # Exclude other known non-modules if any
+
+    modules = builtins.filter isModule files;
+  in
+    modules;
 }

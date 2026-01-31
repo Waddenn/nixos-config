@@ -1,5 +1,4 @@
 { ... }: {
-  imports = [
-    ../../modules/virtualisation/oci-containers/uptime-kuma.nix
-  ];
+  imports = [ ../../modules/infra/proxmox-lxc.nix ];
+  my-services.uptime-kuma.enable = true;
 }
