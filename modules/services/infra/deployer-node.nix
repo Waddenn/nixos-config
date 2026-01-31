@@ -13,6 +13,12 @@
       inputs.colmena.packages.${pkgs.system}.colmena or pkgs.colmena
     ];
 
+    sops.secrets.gh-token = {
+      sopsFile = ../../../secrets/secrets.yaml;
+    };
+    sops.secrets.discord-webhook = {
+      sopsFile = ../../../secrets/secrets.yaml;
+    };
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.system}.colmena;
     in {
@@ -22,6 +28,10 @@
       path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
       script = builtins.readFile ../../../scripts/deploy-fleet.sh;
       serviceConfig = {
+        EnvironmentFile = [
+          config.sops.secrets.gh-token.path
+          config.sops.secrets.discord-webhook.path
+        ];
         User = "nixos";
         Type = "oneshot";
         StateDirectory = "internal-gitops";

@@ -117,13 +117,38 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   MSG="$REPORT_BODY"
   echo -e "$MSG"
 
-  if [ -f /var/lib/internal-gitops/gotify_token ]; then
-    TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
-    curl -s -S -X POST "http://gotify:8080/message?token=$TOKEN" \
-      -F "title=$TITLE" \
-      -F "message=$MSG" \
-      -F "priority=$PRIORITY" \
-      -F "extras[client::display][contentType]=text/markdown" > /dev/null
+  if [ -n "$DISCORD_WEBHOOK" ]; then
+    # Convert discord://token@id to https://discord.com/api/webhooks/id/token
+    if [[ $DISCORD_WEBHOOK == discord://* ]]; then
+        ID=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/.*@(.*)/\1/')
+        TOKEN=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/(.*)@.*/\1/')
+        WEBHOOK_URL="https://discord.com/api/webhooks/$ID/$TOKEN"
+    else
+        WEBHOOK_URL="$DISCORD_WEBHOOK"
+    fi
+
+    # Discord Colors (Embed)
+    case $PRIORITY in
+      5) COLOR=3066993 ;; # Green
+      8) COLOR=15105570 ;; # Orange
+      9) COLOR=15158332 ;; # Red
+      *) COLOR=3447003 ;; # Blue
+    esac
+
+    PAYLOAD=$(jq -n \
+      --arg title "$TITLE" \
+      --arg desc "$MSG" \
+      --arg color "$COLOR" \
+      '{
+        embeds: [{
+          title: $title,
+          description: $desc,
+          color: ($color | tonumber),
+          timestamp: (now | strftime("%Y-%m-%dT%H:%M:%SZ"))
+        }]
+      }')
+
+    curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK_URL" > /dev/null
   fi
 
   # If critical local failure, exit with error to fail the systemd unit
