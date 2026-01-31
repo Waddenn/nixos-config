@@ -15,3 +15,4 @@
 
 - [2026-02-01] Refactorisation complète du déploiement GitOps : extraction dans `scripts/deploy-fleet.sh`, utilisation de `git reset --hard` pour l'atomicité, et ajout de notifications Discord avec métriques (durée).
 - [2026-02-01] Sécurisation des secrets : migration vers un wrapper bash pour l'injection des secrets SOPS, correction des permissions (`owner = "nixos"`) et mise à jour des clés hôtes (notamment `caddy`).
+# Test self-update 1769903913
