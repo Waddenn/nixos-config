@@ -11,3 +11,5 @@
 - [2026-01-31] Refus des imports implicites de services dans les hôtes.
 - [2026-01-31] Intégration complète du MCP GitHub (Issues, PRs, Status, Search).
 - [2026-01-31] Création des workflows standards : `/start_task`, `/create_pr`, `/ci_status`.
+- [2026-01-31] Résolution en urgence de 5 erreurs de configuration héritées (conflict Nginx, Stylix manquant, options obsolètes, structure des checks).
+
