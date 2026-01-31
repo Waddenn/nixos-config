@@ -15,9 +15,11 @@
 
     sops.secrets.gh-token = {
       sopsFile = ../../../secrets/secrets.yaml;
+      owner = "nixos";
     };
     sops.secrets.discord-webhook = {
       sopsFile = ../../../secrets/secrets.yaml;
+      owner = "nixos";
     };
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
