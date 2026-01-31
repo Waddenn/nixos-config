@@ -7,6 +7,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    colmena = {
+      url = "github:zhaofengli/colmena";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -25,6 +29,19 @@
     checks.${system} = lib.genAttrs ["beszel"] (
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
+
+    colmena = {
+      meta = {
+        nixpkgs = pkgs;
+        specialArgs = {inherit inputs;};
+      };
+    } // builtins.mapAttrs (name: value: {
+      deployment = {
+        targetHost = name;
+        targetUser = "root";
+      };
+      imports = value._module.args.modules;
+    }) self.nixosConfigurations;
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
