@@ -44,6 +44,8 @@
   documentation.man.enable = false;
   beszel-agent.enable = true; # Need to standardize beszel too? Later.
   time.timeZone = "Europe/Paris";
+  sops.defaultSopsFile = ../../secrets/secrets.yaml;
+  sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
   system.stateVersion = "25.05";
 
   nixpkgs = {

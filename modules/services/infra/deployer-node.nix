@@ -10,7 +10,7 @@
   config = lib.mkIf config.deployerNode.enable {
     environment.systemPackages = [
       pkgs.git
-      inputs.colmena.packages.${pkgs.system}.colmena or pkgs.colmena
+      inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena or pkgs.colmena
     ];
 
     sops.secrets.gh-token = {
@@ -20,7 +20,7 @@
       sopsFile = ../../../secrets/secrets.yaml;
     };
     systemd.services.internal-gitops = let
-      colmenaPkg = inputs.colmena.packages.${pkgs.system}.colmena;
+      colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
     in {
       description = "Internal GitOps: Pull and Deploy";
       # Prevent the service from restarting during activation (would kill the running script)
