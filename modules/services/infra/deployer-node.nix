@@ -36,8 +36,9 @@
           git merge origin/main
           
           echo "Deploying with Colmena..."
-          # Limit parallelism to avoid overloading dev-nixos
-          colmena apply --build-on-target --parallel 2 --keep-result
+          # Use 0.4.0 specifically as it is stable for our current Flake schema
+          # nix shell nixpkgs#colmena might give 0.5 which has schema issues
+          nix shell nixpkgs#colmena --command colmena apply --build-on-target --parallel 2 --keep-result
         else
           echo "No changes."
         fi

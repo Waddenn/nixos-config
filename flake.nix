@@ -30,7 +30,7 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = let
+    colmena = {
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
@@ -38,23 +38,14 @@
           username = "nixos";
         };
       };
-    in {
-      __schema = "v0.5";
-      inherit meta;
-      metaConfig = meta;
     } // builtins.mapAttrs (name: value: {
       deployment = {
         targetHost = name;
         targetUser = "root";
-        # Add tags based on directory or specific traits
-        tags = [
-          (if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")
-        ];
+        tags = [ (if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other") ];
       };
       imports = value._module.args.modules;
     }) self.nixosConfigurations;
-
-    colmenaHive = self.colmena;
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
