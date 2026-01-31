@@ -30,30 +30,22 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = let
-      hostNames = builtins.attrNames self.nixosConfigurations;
+    colmena = {
       meta = {
-        nodeNixpkgs = lib.genAttrs hostNames (name: pkgs);
+        nixpkgs = inputs.nixpkgs;
         specialArgs = {
           inherit inputs;
           username = "nixos";
         };
       };
-    in
-      {
-        __schema = "v0.5";
-        inherit meta;
-        metaConfig = meta;
-      }
-      // builtins.mapAttrs (name: value: {
-        deployment = {
-          targetHost = name;
-          targetUser = "root";
-          tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
-        };
-        imports = value._module.args.modules;
-      })
-      self.nixosConfigurations;
+    } // builtins.mapAttrs (name: value: {
+      deployment = {
+        targetHost = name;
+        targetUser = "root";
+        tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
+      };
+      imports = value._module.args.modules;
+    }) self.nixosConfigurations;
 
     colmenaHive = self.colmena;
 
