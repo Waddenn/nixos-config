@@ -8,7 +8,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena = {
-      url = "github:zhaofengli/colmena";
+      url = "github:zhaofengli/colmena/v0.4.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -30,26 +30,22 @@
       name: self.nixosConfigurations.${name}.config.system.build.toplevel
     );
 
-    colmena = inputs.colmena.lib.makeHive {
+    colmena = {
       meta = {
         nixpkgs = pkgs;
         specialArgs = {
-          # Only pass necessary inputs to avoid circularity and large JSON objects
-          inputs = builtins.removeAttrs inputs ["self"];
+          inherit inputs;
           username = "nixos";
         };
       };
-      nodes = builtins.mapAttrs (name: value: {
-        deployment = {
-          targetHost = name;
-          targetUser = "root";
-          tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
-        };
-        imports = value._module.args.modules;
-      }) self.nixosConfigurations;
-    };
-
-    colmenaHive = self.colmena;
+    } // builtins.mapAttrs (name: value: {
+      deployment = {
+        targetHost = name;
+        targetUser = "root";
+        tags = [(if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name then "networking" else "other")];
+      };
+      imports = value._module.args.modules;
+    }) self.nixosConfigurations;
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";
