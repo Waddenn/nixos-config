@@ -17,38 +17,66 @@
       colmenaPkg = inputs.colmena.packages.${pkgs.system}.colmena;
     in {
       description = "Internal GitOps: Pull and Deploy";
-      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix];
+      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq];
       script = ''
         set -e
-        # Navigate to repo
+        # Colors & Emojis
+        G='\033[0;32m'
+        B='\033[0;34m'
+        Y='\033[1;33m'
+        R='\033[0;31m'
+        NC='\033[0m'
+
+        # Navigation
         cd /home/nixos/nixos-config
 
-        echo "Using Colmena version:"
-        colmena --version
+        echo -e "\n''${B}╔════════════════════════════════════════════════════════╗''${NC}"
+        echo -e "''${B}║           🚀 INTERNAL GITOPS: AUTO-DEPLOYER            ║''${NC}"
+        echo -e "''${B}╚════════════════════════════════════════════════════════╝''${NC}\n"
 
-        # Update code
-        git fetch origin main
+        echo -e "''${Y}🔍 Checking for updates...''${NC}"
+        git fetch origin main > /dev/null 2>&1
 
-        # Check if we are behind
         LOCAL=$(git rev-parse HEAD)
         REMOTE=$(git rev-parse origin/main)
 
         if [ "$LOCAL" != "$REMOTE" ]; then
-          echo "Changes detected. Pulling..."
-          git merge origin/main
+          echo -e "''${G}✨ New changes detected!''${NC} syncing..."
+          git merge origin/main > /dev/null 2>&1
 
-          echo "Deploying with Colmena..."
-          # We use the colmena binary specifically provided in the service path
-          colmena apply --build-on-target --parallel 2 --keep-result
+          echo -e "''${B}🏗️  Starting Fleet Deployment...''${NC}"
+          echo -e "''${B}----------------------------------------------------------''${NC}"
+
+          # Run deployment
+          if colmena apply --color always --build-on-target --parallel 2 --keep-result; then
+             echo -e "\n''${G}✅ DEPLOYMENT SUCCESSFUL''${NC}"
+             if [ -f /var/lib/internal-gitops/gotify_token ]; then
+               TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
+               curl -s -S -X POST "http://gotify:8080/message?token=$TOKEN" \
+                 -F "title=🚀 Deployment Success" \
+                 -F "message=Fleet successfully updated to $(git rev-parse --short HEAD)" \
+                 -F "priority=5" > /dev/null
+             fi
+          else
+             echo -e "\n''${R}❌ DEPLOYMENT FAILED''${NC}"
+             if [ -f /var/lib/internal-gitops/gotify_token ]; then
+               TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
+               curl -s -S -X POST "http://gotify:8080/message?token=$TOKEN" \
+                 -F "title=⚠️ Deployment Failed" \
+                 -F "message=Error during rollout to $(git rev-parse --short HEAD). Check journalctl on dev-nixos." \
+                 -F "priority=8" > /dev/null
+             fi
+             exit 1
+          fi
         else
-          echo "No changes."
+          echo -e "''${G}😴 No changes found. System is up to date.''${NC}"
         fi
       '';
       serviceConfig = {
-        User = "nixos"; # Run as user who has the SSH keys
+        User = "nixos";
         Type = "oneshot";
-        # Ensure we don't pick up the system colmena (0.5-pre)
-        Environment = "PATH=${lib.makeBinPath [pkgs.git pkgs.openssh colmenaPkg pkgs.nix]}";
+        StateDirectory = "internal-gitops";
+        Environment = "PATH=${lib.makeBinPath [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq]}";
       };
     };
 
