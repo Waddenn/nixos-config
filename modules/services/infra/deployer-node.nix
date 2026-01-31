@@ -19,7 +19,7 @@
       description = "Internal GitOps: Pull and Deploy";
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
-      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq "/run/wrappers"];
+      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk "/run/wrappers"];
       script = ''
         set -e
         # Colors & Emojis
@@ -50,45 +50,84 @@
           echo -e "''${B}🏗️  Starting Deployment...''${NC}"
           echo -e "''${B}----------------------------------------------------------''${NC}"
 
+          # Create a temporary log file
+          LOGFILE=$(mktemp)
+
           # 1. Run Fleet Deployment (Allow partial failure)
           set +e
-          colmena apply --color always --parallel 2 --keep-result --on @remote
+          # Pipe stdout/stderr to tee to show in journal AND save to file
+          colmena apply --color always --parallel 2 --keep-result --on @remote 2>&1 | tee "$LOGFILE"
           FLEET_EXIT=$?
           set -e
+
+          # Parse logs for status
+          # Remove color codes for reliable grep
+          CLEAN_LOG=$(sed 's/\x1b\[[0-9;]*m//g' "$LOGFILE")
+          
+          # Extract successes (host | Activation successful)
+          SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{print $1}' | sort | tr '\n' ', ' | sed 's/, $//')
+          
+          # Extract failures (heuristic: [ERROR] Failed to push system closure to <host>)
+          FAILED_LIST=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{print $NF}' | sort | uniq | tr '\n' ', ' | sed 's/, $//')
+          
+          # Fallback for failures if specific pattern not found but FLEET_EXIT != 0
+          if [ $FLEET_EXIT -ne 0 ] && [ -z "$FAILED_LIST" ]; then
+             FAILED_LIST="Unknown/General Failure (See logs)"
+          fi
+
+          rm -f "$LOGFILE"
 
           # 2. Self-update dev-nixos
           echo -e "\n''${B}🏠 Self-updating dev-nixos...''${NC}"
           if sudo colmena apply-local --color always --node dev-nixos; then
              LOCAL_EXIT=0
+             if [ -z "$SUCCEEDED_LIST" ]; then SUCCEEDED_LIST="dev-nixos"; else SUCCEEDED_LIST="$SUCCEEDED_LIST, dev-nixos"; fi
           else
              LOCAL_EXIT=1
+             if [ -z "$FAILED_LIST" ]; then FAILED_LIST="dev-nixos"; else FAILED_LIST="$FAILED_LIST, dev-nixos"; fi
           fi
 
           # 3. Decision & Notification
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          REPORT_BODY="Commit: $COMMIT_HASH"
+          
+          if [ -n "$SUCCEEDED_LIST" ]; then
+            REPORT_BODY="$REPORT_BODY\n\n✅ **Updated:** $SUCCEEDED_LIST"
+          fi
+          
+          if [ -n "$FAILED_LIST" ]; then
+             REPORT_BODY="$REPORT_BODY\n\n❌ **Failed:** $FAILED_LIST"
+          fi
+
           if [ $FLEET_EXIT -eq 0 ] && [ $LOCAL_EXIT -eq 0 ]; then
              echo -e "\n''${G}✅ FULL SUCCESS: All systems operational''${NC}"
              TITLE="🚀 Deployment Success"
-             MSG="All nodes updated to $(git rev-parse --short HEAD)"
              PRIORITY=5
           elif [ $LOCAL_EXIT -eq 0 ]; then
              echo -e "\n''${O}⚠️  PARTIAL SUCCESS: Some fleet nodes failed''${NC}"
              TITLE="⚠️ Partial Deployment"
-             MSG="dev-nixos updated, but some fleet nodes failed. Check logs."
              PRIORITY=8
           else
              echo -e "\n''${R}❌ CRITICAL: dev-nixos update failed''${NC}"
              TITLE="❌ Deployment Critical Failure"
-             MSG="Local monitoring node (dev-nixos) failed to update."
              PRIORITY=9
-             exit 1 # Fail the service
+             # Even if critical, we try to send notification
           fi
+          
+          MSG="$REPORT_BODY"
 
           if [ -f /var/lib/internal-gitops/gotify_token ]; then
             TOKEN=$(cat /var/lib/internal-gitops/gotify_token)
             curl -s -S -X POST "http://gotify:8080/message?token=$TOKEN" \
               -F "title=$TITLE" \
               -F "message=$MSG" \
-              -F "priority=$PRIORITY" > /dev/null
+              -F "priority=$PRIORITY" \
+              -F "extras[client::display][contentType]=text/markdown" > /dev/null
+          fi
+
+          # If critical local failure, exit with error to fail the systemd unit
+          if [ $LOCAL_EXIT -ne 0 ]; then
+             exit 1
           fi
 
         else
