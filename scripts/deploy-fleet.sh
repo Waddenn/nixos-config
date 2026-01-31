@@ -47,6 +47,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   echo -e "${B}🔄 Syncing to origin/main (Reset --hard)...${NC}"
   git reset --hard origin/main
   
+  START_TIME=$(date +%s)
   echo -e "${B}🏗️  Starting Deployment...${NC}"
   echo -e "${B}----------------------------------------------------------${NC}"
 
@@ -61,18 +62,22 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   set -e
 
   # Parse logs for status
-  # Remove color codes for reliable grep
   CLEAN_LOG=$(sed 's/\x1b\[[0-9;]*m//g' "$LOGFILE")
   
   # Extract successes (host | Activation successful)
-  SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' | sort | tr '\n' ',' | sed 's/,$//; s/,/, /g')
+  SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g')
   
-  # Extract failures (heuristic: [ERROR] Failed to push system closure to <host>)
-  FAILED_LIST=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{gsub(/^[ \t]+|[ \t]+$/, "", $NF); print $NF}' | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g')
+  # Extract failures 
+  # 1. Pushing failures
+  PUSH_FAILURES=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{gsub(/^[ \t]+|[ \t]+$/, "", $NF); print $NF}')
+  # 2. Activation failures (catch nodes that failed after successful push)
+  ACT_FAILURES=$(echo "$CLEAN_LOG" | grep "Activation failed" -B 1 | grep " | " | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}')
   
-  # Fallback for failures if specific pattern not found but FLEET_EXIT != 0
+  FAILED_LIST=$(echo -e "$PUSH_FAILURES\n$ACT_FAILURES" | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g')
+  
+  # Fallback for failures if specific patterns not found but FLEET_EXIT != 0
   if [ $FLEET_EXIT -ne 0 ] && [ -z "$FAILED_LIST" ]; then
-     FAILED_LIST="Unknown/General Failure (See logs)"
+     FAILED_LIST="Unknown/General Failure (Check logs)"
   fi
 
   rm -f "$LOGFILE"
@@ -81,22 +86,38 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   echo -e "\n${B}🏠 Self-updating dev-nixos...${NC}"
   if sudo colmena apply-local --color always --node dev-nixos; then
      LOCAL_EXIT=0
-     if [ -z "$SUCCEEDED_LIST" ]; then SUCCEEDED_LIST="dev-nixos"; else SUCCEEDED_LIST="$SUCCEEDED_LIST, dev-nixos"; fi
+     if [[ ! "$SUCCEEDED_LIST" =~ "dev-nixos" ]]; then
+        if [ -z "$SUCCEEDED_LIST" ]; then SUCCEEDED_LIST="dev-nixos"; else SUCCEEDED_LIST="$SUCCEEDED_LIST, dev-nixos"; fi
+     fi
   else
      LOCAL_EXIT=1
-     if [ -z "$FAILED_LIST" ]; then FAILED_LIST="dev-nixos"; else FAILED_LIST="$FAILED_LIST, dev-nixos"; fi
+     if [[ ! "$FAILED_LIST" =~ "dev-nixos" ]]; then
+        if [ -z "$FAILED_LIST" ]; then FAILED_LIST="dev-nixos"; else FAILED_LIST="$FAILED_LIST, dev-nixos"; fi
+     fi
   fi
+
+  END_TIME=$(date +%s)
+  DURATION=$((END_TIME - START_TIME))
+  DURATION_STR="$(($DURATION / 60))min $(($DURATION % 60))s"
 
   # 4. Decision & Notification
   COMMIT_HASH=$(git rev-parse --short HEAD)
-  REPORT_BODY="Commit: $COMMIT_HASH"
+  COMMIT_MSG=$(git log -1 --format=%s)
+  
+  # Build report with actual newlines for Discord
+  REPORT_BODY="**Commit:** \`$COMMIT_HASH\` - $COMMIT_MSG
+**Duration:** $DURATION_STR"
   
   if [ -n "$SUCCEEDED_LIST" ]; then
-    REPORT_BODY="$REPORT_BODY\n\n✅ **Updated:** $SUCCEEDED_LIST"
+    REPORT_BODY="$REPORT_BODY
+
+✅ **Updated:** $SUCCEEDED_LIST"
   fi
   
   if [ -n "$FAILED_LIST" ]; then
-     REPORT_BODY="$REPORT_BODY\n\n❌ **Failed:** $FAILED_LIST"
+     REPORT_BODY="$REPORT_BODY
+
+❌ **Failed:** $FAILED_LIST"
   fi
 
   if [ $FLEET_EXIT -eq 0 ] && [ $LOCAL_EXIT -eq 0 ]; then
@@ -111,7 +132,6 @@ if [ "$LOCAL" != "$REMOTE" ]; then
      echo -e "\n${R}❌ CRITICAL: dev-nixos update failed${NC}"
      TITLE="❌ Deployment Critical Failure"
      PRIORITY=9
-     # Even if critical, we try to send notification
   fi
   
   MSG="$REPORT_BODY"

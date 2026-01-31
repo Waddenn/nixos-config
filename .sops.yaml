@@ -2,11 +2,11 @@
 
 keys:
   - &primary age10yfuvwlr6su8u02sc9xmmvxj4aj59562dkxlpk0rl5kum8amw4zqaxrjpk 
-  - &caddy age1a36nptznjnsk4vgwc7ug9lpyzhz4uga7ye95rh38n2k0rpw9l9zsdf3vqr
+  - &caddy age1t2s42a6akm7r2vrz7p4jg9w3uvh2t0cvevjr7hreuf6mkvzad95q4kw85s
   - &github-runner age1u5n52q9kgumdt3lqvcnagga54p2ldetw6knc8paxvc43njyfjdnq87g7ff
   - &dev-nixos age13nxnv5jyymls6d9xjl47r6rmkq749gwj9u5txepcxrq7cuvtvesqms45uf
 creation_rules:
-  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)(\.enc)?$
     key_groups:
     - age: 
         - *primary
