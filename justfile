@@ -45,5 +45,3 @@ sgen:
 # Exemple: just senc cf_api_token.env
 senc file:
     sops --encrypt {{file}} > {{file}}.enc
-
-
