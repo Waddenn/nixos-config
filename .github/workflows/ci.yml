@@ -1,9 +1,12 @@
 name: "CI"
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main" ]
+    paths:
+      - '**.nix'
+      - 'flake.lock'
   pull_request:
-    branches: [ "**" ]
+  workflow_dispatch:
 
 jobs:
   check-formatting:
