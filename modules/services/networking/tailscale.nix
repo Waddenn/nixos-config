@@ -1,8 +1,12 @@
-{ config, lib, ... }: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.my-services.networking.tailscale = {
     enable = lib.mkEnableOption "Tailscale Service";
     role = lib.mkOption {
-      type = lib.types.enum [ "client" "server" ];
+      type = lib.types.enum ["client" "server"];
       default = "client";
       description = "Tailscale routing role";
     };
@@ -18,15 +22,17 @@
       enable = true;
       openFirewall = true;
       useRoutingFeatures = config.my-services.networking.tailscale.role;
-      # Conditionally set authKeyFile only if client? 
-      # Original client used it. Server didn't. 
+      # Conditionally set authKeyFile only if client?
+      # Original client used it. Server didn't.
       # Ideally we use logic here.
-      authKeyFile = if config.my-services.networking.tailscale.role == "client" 
-                    then config.my-services.networking.tailscale.authKeyFile 
-                    else null;
-      extraUpFlags = if config.my-services.networking.tailscale.role == "server" 
-                     then ["--ssh"] 
-                     else [];
+      authKeyFile =
+        if config.my-services.networking.tailscale.role == "client"
+        then config.my-services.networking.tailscale.authKeyFile
+        else null;
+      extraUpFlags =
+        if config.my-services.networking.tailscale.role == "server"
+        then ["--ssh"]
+        else [];
     };
   };
 }

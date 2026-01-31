@@ -26,9 +26,9 @@
         maintenance_window_start = 1;
         overwriteprotocol = "https";
         trusted_proxies = ["192.168.40.105"];
-          trusted_domains = [
+        trusted_domains = [
           "nextcloud.hexaflare.net"
-          "192.168.40.116"  
+          "192.168.40.116"
         ];
       };
 

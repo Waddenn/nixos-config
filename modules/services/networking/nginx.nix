@@ -1,4 +1,8 @@
-{ config, lib, ... }: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.my-services.networking.nginx.enable = lib.mkEnableOption "Nginx service";
 
   config = lib.mkIf config.my-services.networking.nginx.enable {

@@ -9,7 +9,7 @@
 
   my-services.networking.openssh.enable = true;
   my-services.dev.docker.enable = false;
-  
+
   # Bootloader (Grub replacement for old wrapper)
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda"; # Assumption for VM
@@ -26,9 +26,9 @@
     enable = true;
     role = "server";
   };
-  
+
   # zsh.enable? Assuming modules/programs/zsh.nix exists and defines it.
-  # I'll enable it via native programs.zsh.enable if wrapper is gone, 
+  # I'll enable it via native programs.zsh.enable if wrapper is gone,
   # or check zsh.nix. Assuming native for now as better practice.
   programs.zsh.enable = true;
 

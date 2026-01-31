@@ -4,7 +4,7 @@
   ...
 }: let
   # stylix dependency removed as it's not present in this flake
-  rgb-to-hsl = color: "200 50 50"; 
+  rgb-to-hsl = color: "200 50 50";
 in {
   options.glance.enable = lib.mkEnableOption "Enable the Glance dashboard";
 

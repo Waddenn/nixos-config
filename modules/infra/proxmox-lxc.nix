@@ -51,6 +51,4 @@
       allowUnfree = true;
     };
   };
-
-
 }

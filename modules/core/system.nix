@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # Network Utils
     ethtool
@@ -6,7 +6,7 @@
     ipcalc
     mtr # My Traceroute
     nmap # Security scanning
-    
+
     # System Utils
     btop # Better htop
     git
