@@ -30,5 +30,4 @@ Tu es un expert NixOS travaillant sur ce dépôt de configuration. Tu DOIS suivr
 ## 🛠 Qualité & DevOps
 
 1.  **Formatage** : Toujours lancer `nix fmt` (ou `just fmt` si dispo) après avoir modifié un fichier .nix.
-2.  **Vérification** : Avant de considérer une tâche finie, vérifier que `nix flake check` passe.
-3.  **Justfile** : Utiliser les commandes définies dans `justfile` (`just switch`, `just update`) plutôt que les commandes brutes quand c'est pertinent.
+

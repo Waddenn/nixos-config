@@ -26,14 +26,14 @@
               name = "Prometheus";
               type = "prometheus";
               access = "proxy";
-              url = "http://192.168.1.117:9090";
+              url = "http://127.0.0.1:9090";
               isDefault = true;
             }
             {
               name = "Loki";
               type = "loki";
               access = "proxy";
-              url = "http://192.168.1.117:3030";
+              url = "http://127.0.0.1:3030";
               isDefault = false;
             }
           ];
@@ -52,10 +52,10 @@
     };
 
     environment.etc."grafana/dashboards/Node-Exporter-Full.json".source =
-      /home/nixos/nixos-config/modules/services/grafana/Node-Exporter-Full.json;
+      ./grafana/Node-Exporter-Full.json;
 
     environment.etc."grafana/dashboards/Simple-System-Logs-Loki.json".source =
-      /home/nixos/nixos-config/modules/services/grafana/Simple-System-Logs-Loki.json;
+      ./grafana/Simple-System-Logs-Loki.json;
 
     networking.firewall.allowedTCPPorts = [3000];
   };
