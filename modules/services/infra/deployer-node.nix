@@ -115,6 +115,7 @@
           fi
           
           MSG="$REPORT_BODY"
+          echo -e "$MSG"
 
           if [ -f /var/lib/internal-gitops/gotify_token ]; then
             TOKEN=$(cat /var/lib/internal-gitops/gotify_token)

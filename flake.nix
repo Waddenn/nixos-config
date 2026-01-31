@@ -48,13 +48,19 @@
             then null
             else name;
           targetUser = "root";
-          tags = [
+          tags =
             (
-              if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name
-              then "networking"
-              else "other"
+              if name != "dev-nixos"
+              then ["remote"]
+              else []
             )
-          ];
+            ++ [
+              (
+                if lib.hasPrefix "adguard" name || lib.hasPrefix "caddy" name
+                then "networking"
+                else "other"
+              )
+            ];
         };
         imports = value._module.args.modules;
       })
