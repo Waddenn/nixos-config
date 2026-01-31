@@ -62,23 +62,25 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   set -e
 
   # Parse logs for status
-  CLEAN_LOG=$(sed 's/\x1b\[[0-9;]*m//g' "$LOGFILE")
+  CLEAN_LOG=$(sed 's/\x1b\[[0-9;]*m//g' "$LOGFILE" || true)
   
   # Extract successes (host | Activation successful)
-  SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g')
+  SUCCEEDED_LIST=$(echo "$CLEAN_LOG" | grep "| Activation successful" | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g' || true)
   
   # Extract failures 
   # 1. Pushing failures
-  PUSH_FAILURES=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{gsub(/^[ \t]+|[ \t]+$/, "", $NF); print $NF}')
+  PUSH_FAILURES=$(echo "$CLEAN_LOG" | grep "Failed to push system closure to" | awk '{gsub(/^[ \t]+|[ \t]+$/, "", $NF); print $NF}' || true)
   # 2. Activation failures (catch nodes that failed after successful push)
-  ACT_FAILURES=$(echo "$CLEAN_LOG" | grep "Activation failed" -B 1 | grep " | " | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}')
+  ACT_FAILURES=$(echo "$CLEAN_LOG" | grep "Activation failed" -B 1 | grep " | " | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' || true)
   
-  FAILED_LIST=$(echo -e "$PUSH_FAILURES\n$ACT_FAILURES" | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g')
+  FAILED_LIST=$(echo -e "$PUSH_FAILURES\n$ACT_FAILURES" | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//; s/,/, /g' || true)
   
   # Fallback for failures if specific patterns not found but FLEET_EXIT != 0
   if [ $FLEET_EXIT -ne 0 ] && [ -z "$FAILED_LIST" ]; then
      FAILED_LIST="Unknown/General Failure (Check logs)"
   fi
+
+  rm -f "$LOGFILE"
 
   END_TIME=$(date +%s)
   DURATION=$((END_TIME - START_TIME))
@@ -115,9 +117,10 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   
   # Send Fleet Notification
   if [ -n "$DISCORD_WEBHOOK" ]; then
+    echo -e "${B}📡 Sending Discord notification...${NC}"
     if [[ $DISCORD_WEBHOOK == discord://* ]]; then
-        ID=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/.*@(.*)/\1/')
-        TOKEN=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/(.*)@.*/\1/')
+        ID=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/.*@(.*)/\1/' || true)
+        TOKEN=$(echo "$DISCORD_WEBHOOK" | sed -E 's/discord:\/\/(.*)@.*/\1/' || true)
         WEBHOOK_URL="https://discord.com/api/webhooks/$ID/$TOKEN"
     else
         WEBHOOK_URL="$DISCORD_WEBHOOK"
@@ -136,28 +139,18 @@ if [ "$LOCAL" != "$REMOTE" ]; then
         }]
       }')
 
-    curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK_URL" > /dev/null
+    curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK_URL" > /dev/null || echo -e "${R}❌ Failed to send notification${NC}"
+  else
+    echo -e "${O}⚠️  DISCORD_WEBHOOK not set, skipping notification.${NC}"
   fi
 
-  # 5. Self-update dev-nixos (Detached to survive unit restart)
+  # 5. Self-update dev-nixos (Fully detached)
   echo -e "\n${B}🏠 Triggering self-update for dev-nixos...${NC}"
-  # We use systemd-run to run the local apply in a transient unit.
-  # This prevents the current internal-gitops.service from being killed mid-activation
-  # while still performing the update.
+  # We use systemd-run WITHOUT --wait to truly detach the process.
+  # Otherwise, activation might kill the caller and the transient unit together.
   sudo systemd-run --unit=dev-nixos-self-update --description="GitOps Self-Update" \
        --property="Type=oneshot" --property="RemainAfterExit=no" \
-       --wait colmena apply-local --color always --node dev-nixos || LOCAL_EXIT=1
-
-  if [ $LOCAL_EXIT -ne 0 ]; then
-     echo -e "\n${R}❌ CRITICAL: dev-nixos self-update failed${NC}"
-     if [ -n "$DISCORD_WEBHOOK" ]; then
-       FAILURE_PAYLOAD=$(jq -n \
-         --arg desc "❌ **CRITICAL**: dev-nixos self-update failed after fleet success." \
-         '{ embeds: [{ title: "🛑 Self-Update Failure", description: $desc, color: 15158332 }] }')
-       curl -s -X POST -H "Content-Type: application/json" -d "$FAILURE_PAYLOAD" "$WEBHOOK_URL" > /dev/null
-     fi
-     exit 1
-  fi
+       colmena apply-local --color always --node dev-nixos
 
 else
   echo -e "${G}😴 No changes found. System is up to date.${NC}"
