@@ -20,43 +20,25 @@ jobs:
     - name: Check Formatting
       run: nix fmt -- --check
 
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      hosts: ${{ steps.set-matrix.outputs.hosts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v25
+      - id: set-matrix
+        run: |
+          HOSTS=$(nix eval --json .#nixosConfigurations --apply 'builtins.attrNames')
+          echo "hosts=$HOSTS" >> "$GITHUB_OUTPUT"
+
   flake-check:
+    needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        host:
-          - adguardhome
-          - ansible
-          - authentik
-          - beszel
-          - bourse-dashboard
-          - caddy
-          - calibre
-          - dev-nixos
-          - gatus
-          - gitea
-          - github-runner
-          - gitlab
-          - glance
-          - gotify
-          - grafana
-          - homeassistant
-          - immich
-          - jellyseerr
-          - kubernetes
-          - linkwarden
-          - myspeed
-          - nextcloud-pgsql
-          - onlyoffice
-          - paperless
-          - prometheus
-          - tailscale-exit-node
-          - tailscale-subnet
-          - terraform
-          - uptime-kuma
-          - valheim
-          - vaultwarden
+        host: ${{ fromJson(needs.generate-matrix.outputs.hosts) }}
     steps:
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@v25

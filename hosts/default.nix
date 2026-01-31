@@ -13,7 +13,7 @@
   entries = builtins.readDir ./.;
   # validAndDirectories = name: type: type == "directory"; # Simple filter
 
-  hostNames = lib.attrNames (lib.filterAttrs (n: v: v == "directory") entries);
+  hostNames = lib.attrNames (lib.filterAttrs (n: v: v == "directory" && !(lib.hasPrefix "_" n)) entries);
 
   configGen = name:
     builder.mkServer {
