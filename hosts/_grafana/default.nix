@@ -1,6 +1,6 @@
 {...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  grafana.enable = true;
+  my-services.monitoring.grafana.enable = true;
   prometheus.enableServer = true;
   prometheus.enableClient = true;
 }

@@ -16,9 +16,9 @@
   lib,
   ...
 }: {
-  options.gitlab.enable = lib.mkEnableOption "Enable gitlab";
+  options.my-services.dev.gitlab.enable = lib.mkEnableOption "Enable gitlab";
 
-  config = lib.mkIf config.gitlab.enable {
+  config = lib.mkIf config.my-services.dev.gitlab.enable {
     security.acme = {
       acceptTerms = true;
       defaults.email = "tom@patelas.com";

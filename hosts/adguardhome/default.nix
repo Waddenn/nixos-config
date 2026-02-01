@@ -1,4 +1,4 @@
 {...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  adguardhome.enable = true;
+  my-services.networking.adguardhome.enable = true;
 }

@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.jellyseerr.enable = lib.mkEnableOption "Enable Jellyseerr service";
+  options.my-services.media.jellyseerr.enable = lib.mkEnableOption "Enable Jellyseerr service";
 
-  config = lib.mkIf config.jellyseerr.enable {
+  config = lib.mkIf config.my-services.media.jellyseerr.enable {
     services.jellyseerr = {
       enable = true;
       port = 5055;

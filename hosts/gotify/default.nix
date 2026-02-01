@@ -1,4 +1,4 @@
 {...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  gotify.enable = true;
+  my-services.messaging.gotify.enable = true;
 }

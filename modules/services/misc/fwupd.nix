@@ -3,9 +3,9 @@
   lib,
   ...
 }: {
-  options.fwupd.enable = lib.mkEnableOption "Enable fwupd";
+  options.my-services.misc.fwupd.enable = lib.mkEnableOption "Enable fwupd";
 
-  config = lib.mkIf config.fwupd.enable {
+  config = lib.mkIf config.my-services.misc.fwupd.enable {
     services.fwupd.enable = true;
   };
 }

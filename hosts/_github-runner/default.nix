@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  githubRunner.enable = true;
+  my-services.dev.github-runner.enable = true;
   environment.systemPackages = [
     pkgs.alejandra
   ];

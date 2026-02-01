@@ -6,9 +6,9 @@
   # stylix dependency removed as it's not present in this flake
   rgb-to-hsl = color: "200 50 50";
 in {
-  options.glance.enable = lib.mkEnableOption "Enable the Glance dashboard";
+  options.my-services.monitoring.glance.enable = lib.mkEnableOption "Enable the Glance dashboard";
 
-  config = lib.mkIf config.glance.enable {
+  config = lib.mkIf config.my-services.monitoring.glance.enable {
     services.glance = {
       enable = true;
       settings = {

@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.gitea.enable = lib.mkEnableOption "Enable gitea";
+  options.my-services.dev.gitea.enable = lib.mkEnableOption "Enable gitea";
 
-  config = lib.mkIf config.gitea.enable {
+  config = lib.mkIf config.my-services.dev.gitea.enable {
     services.gitea = {
       enable = true;
       package = pkgs.gitea;

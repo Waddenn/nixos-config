@@ -5,9 +5,9 @@
   inputs,
   ...
 }: {
-  options.deployerNode.enable = lib.mkEnableOption "Enable internal GitOps controller";
+  options.my-services.infra.deployer-node.enable = lib.mkEnableOption "Enable internal GitOps controller";
 
-  config = lib.mkIf config.deployerNode.enable {
+  config = lib.mkIf config.my-services.infra.deployer-node.enable {
     environment.systemPackages = [
       pkgs.git
       inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena or pkgs.colmena

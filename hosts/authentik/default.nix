@@ -1,5 +1,5 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
+  profiles.lxc-base.enable = true;
   networking.firewall.allowedUDPPorts = [443 80];
-  deploymentTarget.enable = true;
+  my-services.infra.deployment-target.enable = true;
 }

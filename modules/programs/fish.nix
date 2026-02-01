@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.fish.enable = lib.mkEnableOption "Enable fish shell";
+  options.my-services.programs.fish.enable = lib.mkEnableOption "Enable fish shell";
 
-  config = lib.mkIf config.fish.enable {
+  config = lib.mkIf config.my-services.programs.fish.enable {
     programs.fish = {
       enable = true;
 

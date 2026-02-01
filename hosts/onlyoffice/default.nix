@@ -1,4 +1,4 @@
 {...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  onlyoffice.enable = true;
+  my-services.misc.onlyoffice.enable = true;
 }
