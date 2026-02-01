@@ -149,7 +149,9 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   echo -e "\n${B}🏠 Triggering self-update for dev-nixos...${NC}"
   # We use bash -c to wrap colmena and ensure proper environment setup.
   # This guarantees PATH and other env vars are available for nix/colmena.
-  sudo systemd-run --unit=dev-nixos-self-update --description="GitOps Self-Update" \
+  # Use timestamp in unit name to prevent collisions from previous runs.
+  TIMESTAMP=$(date +%s)
+  sudo systemd-run --unit="dev-nixos-self-update-${TIMESTAMP}" --description="GitOps Self-Update" \
        --working-directory=/home/nixos/nixos-config \
        --property="Type=oneshot" --property="RemainAfterExit=no" \
        /run/current-system/sw/bin/bash -c "export PATH=/run/current-system/sw/bin:\$PATH; ${COLMENA_BIN:-colmena} apply-local --color always --node dev-nixos"
