@@ -33,7 +33,6 @@
     environment.systemPackages = with pkgs; [
       git
       just
-      python3
     ];
 
     my-services.networking.tailscale = {

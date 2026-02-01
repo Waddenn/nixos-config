@@ -21,7 +21,7 @@
       description = "Beszel Agent Monitoring Service";
       wantedBy = ["multi-user.target"];
       after = ["network.target"];
-      
+
       environment = {
         "KEY" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAC4vj5e821FKLnoBsMgHQvqOKbg7A/ACWMA8hUzQzy6";
         "PORT" = "45876";

@@ -6,7 +6,7 @@
 }: let
   # Import centralized domain configuration
   domainsConfig = import ../../../lib/domains.nix;
-  
+
   # Generate Gatus endpoints from centralized domains
   generateEndpoints = domains:
     lib.mapAttrsToList (domain: domainConfig:

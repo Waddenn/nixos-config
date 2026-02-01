@@ -1,0 +1,6 @@
+{
+    "nix.formatterPath": "nixfmt",
+    "editor.formatOnPaste": false,
+    "editor.defaultFormatter": "jnoortheen.nix-ide",
+    "editor.formatOnSave": true
+}

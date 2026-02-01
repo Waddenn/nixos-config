@@ -18,7 +18,7 @@
       modules =
         [
           # Set host platform
-          { nixpkgs.hostPlatform = system; }
+          {nixpkgs.hostPlatform = system;}
 
           # Auto-import all modules
           ../modules
