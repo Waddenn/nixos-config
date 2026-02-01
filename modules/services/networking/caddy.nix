@@ -30,6 +30,7 @@ in {
     sops.secrets.cf_api_token = {
       format = "dotenv";
       sopsFile = ../../../secrets/cf_api_token.env.enc;
+      owner = config.services.caddy.user;
     };
 
     services.caddy = {
