@@ -126,7 +126,7 @@ in {
           extraConfig =
             commonConfig
             + ''
-              reverse_proxy http://192.168.40.120:5678
+              reverse_proxy http://glance:5678
             '';
         };
       };
