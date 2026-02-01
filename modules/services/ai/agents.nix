@@ -131,5 +131,11 @@
 
     # Ensure the main user can use docker
     users.users.nixos.extraGroups = ["docker"];
+
+    # Configuration Zellij pour terminal web (évite conflits avec raccourcis navigateur)
+    environment.etc."zellij/config.kdl".source = ../../data/zellij-config.kdl;
+    environment.sessionVariables = {
+      ZELLIJ_CONFIG_DIR = "/etc/zellij";
+    };
   };
 }

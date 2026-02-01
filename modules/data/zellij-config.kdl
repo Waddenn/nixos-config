@@ -1,0 +1,98 @@
+// Configuration Zellij pour terminal web
+// Évite les conflits avec les raccourcis navigateur
+
+keybinds {
+    normal {
+        // Navigation entre panes (Alt au lieu de Ctrl)
+        bind "Alt h" { MoveFocus "Left"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+        bind "Alt l" { MoveFocus "Right"; }
+        
+        // Mode tabs: Alt+t au lieu de Ctrl+t
+        bind "Alt t" { SwitchToMode "tab"; }
+        
+        // Mode panes: Alt+p au lieu de Ctrl+p
+        bind "Alt p" { SwitchToMode "pane"; }
+        
+        // Mode resize: Alt+r
+        bind "Alt r" { SwitchToMode "resize"; }
+        
+        // Mode scroll: Alt+s
+        bind "Alt s" { SwitchToMode "scroll"; }
+        
+        // Quit: Alt+q
+        bind "Alt q" { Quit; }
+    }
+    
+    tab {
+        bind "n" { NewTab; SwitchToMode "normal"; }
+        bind "x" { CloseTab; SwitchToMode "normal"; }
+        bind "h" "Left" { GoToPreviousTab; }
+        bind "l" "Right" { GoToNextTab; }
+        bind "r" { SwitchToMode "RenameTab"; TabNameInput 0; }
+        bind "Esc" { SwitchToMode "normal"; }
+    }
+    
+    pane {
+        bind "n" { NewPane; SwitchToMode "normal"; }
+        bind "d" { NewPane "Down"; SwitchToMode "normal"; }
+        bind "r" { NewPane "Right"; SwitchToMode "normal"; }
+        bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
+        bind "Esc" { SwitchToMode "normal"; }
+    }
+    
+    resize {
+        bind "h" "Left" { Resize "Increase Left"; }
+        bind "j" "Down" { Resize "Increase Down"; }
+        bind "k" "Up" { Resize "Increase Up"; }
+        bind "l" "Right" { Resize "Increase Right"; }
+        bind "H" { Resize "Decrease Left"; }
+        bind "J" { Resize "Decrease Down"; }
+        bind "K" { Resize "Decrease Up"; }
+        bind "L" { Resize "Decrease Right"; }
+        bind "=" { Resize "Increase"; }
+        bind "-" { Resize "Decrease"; }
+        bind "Esc" { SwitchToMode "normal"; }
+    }
+    
+    scroll {
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+        bind "s" { SwitchToMode "entersearch"; SearchInput 0; }
+        bind "j" "Down" { ScrollDown; }
+        bind "k" "Up" { ScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "Esc" { ScrollToBottom; SwitchToMode "normal"; }
+    }
+}
+
+// Thème moderne et lisible
+themes {
+    default {
+        fg "#D8DEE9"
+        bg "#2E3440"
+        black "#3B4252"
+        red "#BF616A"
+        green "#A3BE8C"
+        yellow "#EBCB8B"
+        blue "#81A1C1"
+        magenta "#B48EAD"
+        cyan "#88C0D0"
+        white "#E5E9F0"
+        orange "#D08770"
+    }
+}
+
+// UI configuration
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
+
+// Copier vers clipboard système
+copy_command "wl-copy"  // Pour Wayland
+// copy_command "xclip -selection clipboard"  // Pour X11
