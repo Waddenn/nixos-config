@@ -139,7 +139,7 @@
     };
 
     # Configuration Tmux (évite conflits avec raccourcis navigateur - Prefix: Ctrl+Space)
-    environment.etc."tmux.conf".source = ../../data/tmux.conf;
+    environment.etc."tmux.conf".text = builtins.readFile ../../data/tmux.conf;
     programs.tmux = {
       enable = true;
       extraConfig = ''
