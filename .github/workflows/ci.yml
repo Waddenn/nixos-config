@@ -1,10 +1,5 @@
 name: "CI"
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - '**.nix'
-      - 'flake.lock'
   pull_request:
   workflow_dispatch:
 
