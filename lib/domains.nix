@@ -41,5 +41,9 @@
       backend = "http://192.168.40.121:5055";
       monitoring = true;
     };
+    "immich.hexaflare.net" = {
+      backend = "http://192.168.40.115:2283";
+      monitoring = true;
+    };
   };
 }

@@ -117,6 +117,16 @@ in {
               reverse_proxy http://192.168.40.121:5055
             '';
         };
+        "immich.hexaflare.net" = {
+          extraConfig =
+            securityHeaders
+            + ''
+              reverse_proxy http://192.168.40.115:2283
+              tls {
+                dns cloudflare {env.CF_API_TOKEN}
+              }
+            '';
+        };
       };
     };
 
