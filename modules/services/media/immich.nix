@@ -8,11 +8,12 @@
   };
 
   config = lib.mkIf config.immich.enable {
-    # Immich is only accessible via the Caddy reverse proxy
-    # This ensures all traffic goes through HTTPS with security headers
+    # Immich is only accessible via the Caddy reverse proxy on the internal network
+    # This ensures all public traffic goes through HTTPS with security headers
+    # Caddy connects via internal IP (192.168.40.115:2283)
     services.immich.enable = true;
     services.immich.port = 2283;
-    services.immich.host = "127.0.0.1"; # Only accessible via localhost reverse proxy
-    # openFirewall not needed: Immich is accessed via Caddy (port 443) only
+    services.immich.host = "0.0.0.0"; # Listen on internal network for Caddy reverse proxy
+    # Note: Firewall configured in host to allow only internal network access
   };
 }
