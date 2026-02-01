@@ -100,6 +100,7 @@
       bat
       eza
       fzf
+      zellij  # Multiplexeur moderne (recommandé)
       tmux
       screen
       htop
