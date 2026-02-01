@@ -8,17 +8,110 @@
 
   config = lib.mkIf config.my-services.ai.infra-agents.enable {
     environment.systemPackages = with pkgs; [
+      # === Base Development ===
       git
-      colmena
+      vim
       jq
-      python3
+      yq
+      tree
+      wget
       curl
-      gh
+      
+      # === Infrastructure as Code ===
+      colmena
+
+      # === Languages & Runtimes ===
+      python3
       python3Packages.pip
+      python3Packages.virtualenv
       nodejs_22
-      corepack 
+      corepack
       rustc
       cargo
+      go
+      
+      # === GitHub CLI & Tools ===
+      gh
+      github-copilot-cli  # GitHub Copilot CLI
+      
+      # === Cybersecurity & Pentesting ===
+      nmap
+      masscan
+      rustscan
+      nikto
+      sqlmap
+      metasploit
+      burpsuite
+      wireshark
+      tcpdump
+      aircrack-ng
+      hydra
+      john
+      hashcat
+      ffuf
+      gobuster
+      feroxbuster
+      wfuzz
+      
+      # === Network Analysis ===
+      netcat
+      socat
+      iperf3
+      mtr
+      bind.dnsutils  # dig, nslookup, host
+      ldns  # drill
+      whois
+      
+      # === Security Scanning ===
+      trivy
+      grype
+      syft
+      prowler
+      nuclei
+      
+      # === Container Security ===
+      hadolint
+      dive
+      
+      # === OSINT ===
+      theharvester
+      recon-ng
+      sherlock
+      
+      # === Forensics & Analysis ===
+      binwalk
+      foremost
+      volatility3
+      sleuthkit
+      
+      # === Web Tools ===
+      httpie
+      curlie
+      xh
+      
+      # === Cloud CLI ===
+      awscli2
+      google-cloud-sdk
+      azure-cli
+      
+      # === Utilities ===
+      ripgrep
+      fd
+      bat
+      eza
+      fzf
+      tmux
+      screen
+      htop
+      btop
+      ncdu
+      
+      # === Compression ===
+      p7zip
+      unzip
+      gzip
+      bzip2
+      xz
     ];
 
     # Configuration pour permettre l'installation de packages npm non disponibles dans nixpkgs

@@ -49,8 +49,8 @@ in {
     # Créer le répertoire de données et copier le config généré
     system.activationScripts.beszel-setup = lib.stringAfter ["users"] ''
       mkdir -p /home/nixos/beszel_data
-      cp ${configFile} /home/nixos/beszel_data/config.yml
-      chown -R nixos:nixos /home/nixos/beszel_data
+      cp -f ${configFile} /home/nixos/beszel_data/config.yml
+      chmod 644 /home/nixos/beszel_data/config.yml
     '';
 
     # Containers
