@@ -148,9 +148,11 @@ if [ "$LOCAL" != "$REMOTE" ]; then
   # 5. Self-update dev-nixos (Fully detached)
   echo -e "\n${B}🏠 Triggering self-update for dev-nixos...${NC}"
   # We use COLMENA_BIN to ensure the command is found in the detached process.
-  # We remove --wait to truly detach it and add --working-directory for flake discovery.
+  # We remove --wait to truly detach it, add --working-directory for flake discovery,
+  # and set PATH for nix binary access.
   sudo systemd-run --unit=dev-nixos-self-update --description="GitOps Self-Update" \
        --working-directory=/home/nixos/nixos-config \
+       --setenv=PATH=/run/current-system/sw/bin:/usr/bin:/bin \
        --property="Type=oneshot" --property="RemainAfterExit=no" \
        ${COLMENA_BIN:-colmena} apply-local --color always --node dev-nixos
 
