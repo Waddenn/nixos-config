@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.terraform.enable = lib.mkEnableOption "Enable terraform";
+  options.my-services.programs.terraform.enable = lib.mkEnableOption "Enable terraform";
 
-  config = lib.mkIf config.terraform.enable {
+  config = lib.mkIf config.my-services.programs.terraform.enable {
     environment.systemPackages = with pkgs; [
       terraform
     ];

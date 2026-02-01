@@ -3,9 +3,9 @@
   lib,
   ...
 }: {
-  options.adguardhome.enable = lib.mkEnableOption "Enable AdGuardHome";
+  options.my-services.networking.adguardhome.enable = lib.mkEnableOption "Enable AdGuardHome";
 
-  config = lib.mkIf config.adguardhome.enable {
+  config = lib.mkIf config.my-services.networking.adguardhome.enable {
     services.adguardhome = {
       enable = true;
       settings = {

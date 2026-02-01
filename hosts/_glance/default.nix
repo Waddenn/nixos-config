@@ -1,4 +1,4 @@
 {...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  glance.enable = true;
+  my-services.monitoring.glance.enable = true;
 }

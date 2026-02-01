@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.githubRunner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
+  options.my-services.dev.github-runner.enable = lib.mkEnableOption "Enable GitHub Actions runner";
 
-  config = lib.mkIf config.githubRunner.enable {
+  config = lib.mkIf config.my-services.dev.github-runner.enable {
     # environment.etc = {
     #   "secrets/github-runner.token" = {
     #     source = /home/nixos/github-runner.token;

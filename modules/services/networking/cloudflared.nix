@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.cloudflared.enable = lib.mkEnableOption "Enable cloudflared";
+  options.my-services.networking.cloudflared.enable = lib.mkEnableOption "Enable cloudflared";
 
-  config = lib.mkIf config.cloudflared.enable {
+  config = lib.mkIf config.my-services.networking.cloudflared.enable {
     services.cloudflared = {
       enable = true;
       tunnels = {

@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.beszel-agent.enable = lib.mkEnableOption "Enable beszel-agent service";
+  options.my-services.monitoring.beszel-agent.enable = lib.mkEnableOption "Enable beszel-agent service";
 
-  config = lib.mkIf config.beszel-agent.enable {
+  config = lib.mkIf config.my-services.monitoring.beszel-agent.enable {
     # Create a dedicated user for security
     users.users.beszel = {
       isSystemUser = true;

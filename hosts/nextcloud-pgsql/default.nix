@@ -1,4 +1,4 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
-  nextcloud.enable = true;
+  profiles.lxc-base.enable = true;
+  my-services.misc.nextcloud.enable = true;
 }

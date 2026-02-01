@@ -1,4 +1,4 @@
 {lib, ...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
-  caddy.enable = true;
+  profiles.lxc-base.enable = true;
+  my-services.networking.caddy.enable = true;
 }

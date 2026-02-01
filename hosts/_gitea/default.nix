@@ -1,4 +1,4 @@
 {...}: {
   imports = [../../modules/infra/proxmox-lxc.nix];
-  gitea.enable = true;
+  my-services.dev.gitea.enable = true;
 }

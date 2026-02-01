@@ -17,9 +17,9 @@
     }
   '';
 in {
-  options.caddy.enable = lib.mkEnableOption "Enable Caddy";
+  options.my-services.networking.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
-  config = lib.mkIf config.caddy.enable {
+  config = lib.mkIf config.my-services.networking.caddy.enable {
     sops.secrets.cf_api_token = {
       format = "dotenv";
       sopsFile = ../../../secrets/cf_api_token.env.enc;

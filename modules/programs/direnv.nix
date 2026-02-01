@@ -3,9 +3,9 @@
   lib,
   ...
 }: {
-  options.direnv.enable = lib.mkEnableOption "Enable direnv";
+  options.my-services.programs.direnv.enable = lib.mkEnableOption "Enable direnv";
 
-  config = lib.mkIf config.direnv.enable {
+  config = lib.mkIf config.my-services.programs.direnv.enable {
     programs.direnv.enable = true;
   };
 }

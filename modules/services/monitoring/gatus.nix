@@ -24,9 +24,9 @@
       })
     domains;
 in {
-  options.gatus.enable = lib.mkEnableOption "Enable gatus";
+  options.my-services.monitoring.gatus.enable = lib.mkEnableOption "Enable gatus";
 
-  config = lib.mkIf config.gatus.enable {
+  config = lib.mkIf config.my-services.monitoring.gatus.enable {
     services.gatus = {
       enable = true;
       openFirewall = true;

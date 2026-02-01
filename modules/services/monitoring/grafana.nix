@@ -3,11 +3,9 @@
   lib,
   ...
 }: {
-  options = {
-    grafana.enable = lib.mkEnableOption "Enable grafana";
-  };
+  options.my-services.monitoring.grafana.enable = lib.mkEnableOption "Enable grafana";
 
-  config = lib.mkIf config.grafana.enable {
+  config = lib.mkIf config.my-services.monitoring.grafana.enable {
     services.grafana = {
       enable = true;
 

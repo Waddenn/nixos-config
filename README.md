@@ -7,7 +7,6 @@ Mon infrastructure personnelle ("Homelab") gérée avec **NixOS**, **Flakes** et
 ## 🏗 Architecture
 
 Ce projet suit la philosophie **"Explicit Infra, Implicit Services"**.
-Pour comprendre la structure, voir : [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## 🚀 Démarrage Rapide
 
@@ -24,7 +23,3 @@ Pour comprendre la structure, voir : [ARCHITECTURE.md](./ARCHITECTURE.md).
 | **Formater** | `nix fmt` | Formate tout le code .nix (via Alejandra). |
 | **Vérifier** | `nix flake check` | Vérifie la validité du flake. |
 
-## 🤝 Contribuer
-
-Voir [CONTRIBUTING.md](./CONTRIBUTING.md) pour les règles de développement.
-En résumé : **Testez** et **Formatez** !

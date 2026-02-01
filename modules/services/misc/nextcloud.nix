@@ -7,9 +7,9 @@
   pkgs,
   ...
 }: {
-  options.nextcloud.enable = lib.mkEnableOption "Enable nextcloud";
+  options.my-services.misc.nextcloud.enable = lib.mkEnableOption "Enable nextcloud";
 
-  config = lib.mkIf config.nextcloud.enable {
+  config = lib.mkIf config.my-services.misc.nextcloud.enable {
     services.nextcloud = {
       enable = true;
       package = pkgs.nextcloud32;

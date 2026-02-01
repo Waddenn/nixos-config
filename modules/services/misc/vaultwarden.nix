@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: {
-  options.vaultwarden.enable = lib.mkEnableOption "Enable Vaultwarden";
+  options.my-services.misc.vaultwarden.enable = lib.mkEnableOption "Enable Vaultwarden";
 
-  config = lib.mkIf config.vaultwarden.enable {
+  config = lib.mkIf config.my-services.misc.vaultwarden.enable {
     services.vaultwarden = {
       enable = true;
       config = {

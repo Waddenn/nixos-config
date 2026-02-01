@@ -1,4 +1,4 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
-  vaultwarden.enable = true;
+  profiles.lxc-base.enable = true;
+  my-services.misc.vaultwarden.enable = true;
 }
