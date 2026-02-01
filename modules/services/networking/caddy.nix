@@ -58,29 +58,29 @@ in {
               reverse_proxy http://192.168.40.116:80
             '';
         };
-        "gitea.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              route {
-                reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
+        # "gitea.hexaflare.net" = {
+        #   extraConfig =
+        #     commonConfig
+        #     + ''
+        #       route {
+        #         reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
 
-                forward_auth http://192.168.40.107:80 {
-                  uri /outpost.goauthentik.io/auth/caddy
-                  copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
-                }
+        #         forward_auth http://192.168.40.107:80 {
+        #           uri /outpost.goauthentik.io/auth/caddy
+        #           copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+        #         }
 
-                reverse_proxy http://192.168.40.112:3000
-              }
-            '';
-        };
-        "linkwarden.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.108:3000
-            '';
-        };
+        #         reverse_proxy http://192.168.40.112:3000
+        #       }
+        #     '';
+        # };
+        # "linkwarden.hexaflare.net" = {
+        #   extraConfig =
+        #     commonConfig
+        #     + ''
+        #       reverse_proxy http://192.168.40.108:3000
+        #     '';
+        # };
         "bitwarden.hexaflare.net" = {
           extraConfig =
             commonConfig
@@ -88,13 +88,13 @@ in {
               reverse_proxy http://192.168.30.113:8222
             '';
         };
-        "auth.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.107:80
-            '';
-        };
+        # "auth.hexaflare.net" = {
+        #   extraConfig =
+        #     commonConfig
+        #     + ''
+        #       reverse_proxy http://192.168.40.107:80
+        #     '';
+        # };
         "homeassistant.hexaflare.net" = {
           extraConfig =
             commonConfig
@@ -102,13 +102,13 @@ in {
               reverse_proxy http://homeassistant:8123
             '';
         };
-        "bourse.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://bourse-dashboard:5000
-            '';
-        };
+        # "bourse.hexaflare.net" = {
+        #   extraConfig =
+        #     commonConfig
+        #     + ''
+        #       reverse_proxy http://bourse-dashboard:5000
+        #     '';
+        # };
         "jellyseerr.hexaflare.net" = {
           extraConfig =
             commonConfig
@@ -123,13 +123,13 @@ in {
               reverse_proxy http://immich:2283
             '';
         };
-        "glance.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://glance:5678
-            '';
-        };
+        # "glance.hexaflare.net" = {
+        #   extraConfig =
+        #     commonConfig
+        #     + ''
+        #       reverse_proxy http://glance:5678
+        #     '';
+        # };
       };
     };
 
