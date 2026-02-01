@@ -16,6 +16,13 @@
       Permissions-Policy "geolocation=(), microphone=(), camera=()"
     }
   '';
+  commonConfig =
+    securityHeaders
+    + ''
+      tls {
+        dns cloudflare {env.CF_API_TOKEN}
+      }
+    '';
 in {
   options.my-services.networking.caddy.enable = lib.mkEnableOption "Enable Caddy";
 
@@ -45,19 +52,14 @@ in {
       virtualHosts = {
         "nextcloud.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
-              reverse_proxy http://192.168.40.116:80 {
-              }
-
-              tls {
-                dns cloudflare {env.CF_API_TOKEN}
-              }
+              reverse_proxy http://192.168.40.116:80
             '';
         };
         "gitea.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               route {
                 reverse_proxy /outpost.goauthentik.io/* http://192.168.40.107:80
@@ -69,62 +71,62 @@ in {
 
                 reverse_proxy http://192.168.40.112:3000
               }
-
-              tls {
-                dns cloudflare {env.CF_API_TOKEN}
-              }
             '';
         };
         "linkwarden.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               reverse_proxy http://192.168.40.108:3000
             '';
         };
         "bitwarden.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               reverse_proxy http://192.168.30.113:8222
             '';
         };
         "auth.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               reverse_proxy http://192.168.40.107:80
             '';
         };
         "homeassistant.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               reverse_proxy http://homeassistant:8123
             '';
         };
         "bourse.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               reverse_proxy http://bourse-dashboard:5000
             '';
         };
         "jellyseerr.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
               reverse_proxy http://192.168.40.121:5055
             '';
         };
         "immich.hexaflare.net" = {
           extraConfig =
-            securityHeaders
+            commonConfig
             + ''
-              reverse_proxy http://192.168.40.115:2283
-              tls {
-                dns cloudflare {env.CF_API_TOKEN}
-              }
+              reverse_proxy http://immich:2283
+            '';
+        };
+        "glance.hexaflare.net" = {
+          extraConfig =
+            commonConfig
+            + ''
+              reverse_proxy http://192.168.40.120:5678
             '';
         };
       };

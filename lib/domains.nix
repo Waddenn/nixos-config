@@ -45,5 +45,9 @@
       backend = "http://192.168.40.115:2283";
       monitoring = true;
     };
+    "glance.hexaflare.net" = {
+      backend = "http://192.168.40.120:5678";
+      monitoring = true;
+    };
   };
 }
