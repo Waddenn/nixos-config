@@ -11,6 +11,6 @@
     services.immich.enable = true;
     services.immich.port = 2283;
     services.immich.host = "0.0.0.0"; # Allow access from Caddy proxy
-    services.immich.openFirewall = false; # Should be opened explicitly for the internal network or via global config
+    services.immich.openFirewall = true;
   };
 }
