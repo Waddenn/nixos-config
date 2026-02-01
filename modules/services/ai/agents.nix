@@ -143,8 +143,7 @@
     programs.tmux = {
       enable = true;
       extraConfig = ''
-        # Source la configuration système
-        source-file /etc/tmux.conf
+        # Configuration chargée via /etc/tmux.conf
       '';
     };
   };
