@@ -137,5 +137,15 @@
     environment.sessionVariables = {
       ZELLIJ_CONFIG_DIR = "/etc/zellij";
     };
+
+    # Configuration Tmux (évite conflits avec raccourcis navigateur - Prefix: Ctrl+Space)
+    environment.etc."tmux.conf".source = ../../data/tmux.conf;
+    programs.tmux = {
+      enable = true;
+      extraConfig = ''
+        # Source la configuration système
+        source-file /etc/tmux.conf
+      '';
+    };
   };
 }
