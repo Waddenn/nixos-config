@@ -17,3 +17,4 @@
 - [2026-02-01] Sécurisation des secrets : migration vers un wrapper bash pour l'injection des secrets SOPS, correction des permissions (`owner = "nixos"`) et mise à jour des clés hôtes (notamment `caddy`).
 # Test self-update 1769903913
 # Final test 1769904564
+# PATH fix test 1769904838
