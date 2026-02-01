@@ -20,3 +20,4 @@
 # PATH fix test 1769904838
 # Final complete test 1769905387
 # Bash wrapper test 1769905605
+# Git safe.directory test 1769905830
