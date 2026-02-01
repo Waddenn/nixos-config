@@ -120,7 +120,7 @@ in {
           extraConfig =
             commonConfig
             + ''
-              reverse_proxy http://immich:2283
+              reverse_proxy http://192.168.40.115:2283
             '';
         };
         # "glance.hexaflare.net" = {
