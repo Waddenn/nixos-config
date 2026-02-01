@@ -5,7 +5,7 @@
   ...
 }: let
   # Import la liste centralisée des hosts
-  beszelConfig = import ../configs/beszel-hosts.nix;
+  beszelConfig = import ../data/beszel-hosts.nix;
 
   # Génère la configuration YAML pour Beszel
   generateBeszelConfig = hosts: port: users: let
@@ -34,7 +34,7 @@
     pkgs.writeText "beszel-config.yml" yamlContent;
 
   # Génère le fichier de configuration
-  configFile = generateBeszelConfig beszelConfig.hosts beszelConfig.port beszelConfig.users;
+  configFile = generateBeszelConfig beszelConfig.hosts beszelConfig.port beszelConfig.beszelUsers;
 in {
   options.my-services.monitoring.beszel-server.enable = lib.mkEnableOption "Beszel monitoring server";
 

@@ -25,5 +25,5 @@
 
   # Configuration commune pour tous les hosts
   port = 45876;
-  users = ["tom@patelas.com"];
+  beszelUsers = ["tom@patelas.com"];
 }
