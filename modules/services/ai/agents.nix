@@ -16,10 +16,21 @@
       gh
       python3Packages.pip
       nodejs_22
-      corepack # provides npm, yarn, pnpm
+      corepack 
       rustc
       cargo
     ];
+
+    # Configuration pour permettre l'installation de packages npm non disponibles dans nixpkgs
+    # (exemple: codex-cli, etc.)
+    environment.variables = {
+      NPM_CONFIG_PREFIX = "$HOME/.npm-global";
+    };
+    
+    # Ajouter le bin path de npm global au PATH
+    environment.sessionVariables = {
+      PATH = "$HOME/.npm-global/bin:$PATH";
+    };
 
     # Enable Docker for agent container operations
     my-services.dev.docker.enable = true;
