@@ -133,6 +133,6 @@ in {
       };
     };
 
-    networking.firewall.allowedTCPPorts = [443 2019];
+    networking.firewall.allowedTCPPorts = [80 443 2019];
   };
 }
