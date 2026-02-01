@@ -142,5 +142,12 @@ in {
     # Port 443 (HTTPS) exposed publicly
     # Port 2019 (Caddy metrics) is only accessible locally for monitoring
     networking.firewall.allowedTCPPorts = [443];
+
+    # Increase UDP buffer sizes for QUIC performance
+    # https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes
+    boot.kernel.sysctl = {
+      "net.core.rmem_max" = 7500000;
+      "net.core.wmem_max" = 7500000;
+    };
   };
 }
