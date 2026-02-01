@@ -16,7 +16,7 @@
       tree
       wget
       curl
-      
+
       # === Infrastructure as Code ===
       colmena
 
@@ -29,11 +29,11 @@
       rustc
       cargo
       go
-      
+
       # === GitHub CLI & Tools ===
       gh
-      github-copilot-cli  # GitHub Copilot CLI
-      
+      github-copilot-cli # GitHub Copilot CLI
+
       # === Cybersecurity & Pentesting ===
       nmap
       masscan
@@ -52,61 +52,61 @@
       gobuster
       feroxbuster
       wfuzz
-      
+
       # === Network Analysis ===
       netcat
       socat
       iperf3
       mtr
-      bind.dnsutils  # dig, nslookup, host
-      ldns  # drill
+      bind.dnsutils # dig, nslookup, host
+      ldns # drill
       whois
-      
+
       # === Security Scanning ===
       trivy
       grype
       syft
       prowler
       nuclei
-      
+
       # === Container Security ===
       hadolint
       dive
-      
+
       # === OSINT ===
       theharvester
       recon-ng
       sherlock
-      
+
       # === Forensics & Analysis ===
       binwalk
       foremost
       volatility3
       sleuthkit
-      
+
       # === Web Tools ===
       httpie
       curlie
       xh
-      
+
       # === Cloud CLI ===
       awscli2
       google-cloud-sdk
       azure-cli
-      
+
       # === Utilities ===
       ripgrep
       fd
       bat
       eza
       fzf
-      zellij  # Multiplexeur moderne (recommandé)
+      zellij # Multiplexeur moderne (recommandé)
       tmux
       screen
       htop
       btop
       ncdu
-      
+
       # === Compression ===
       p7zip
       unzip
@@ -120,7 +120,7 @@
     environment.variables = {
       NPM_CONFIG_PREFIX = "$HOME/.npm-global";
     };
-    
+
     # Ajouter le bin path de npm global au PATH
     environment.sessionVariables = {
       PATH = "$HOME/.npm-global/bin:$PATH";

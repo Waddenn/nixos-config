@@ -12,7 +12,7 @@
       && name != "default.nix"
       && name != "boot.nix"
       && !lib.hasInfix "modules/infra" pathStr
-      && !lib.hasInfix "modules/data" pathStr  # Exclude data files
+      && !lib.hasInfix "modules/data" pathStr # Exclude data files
       && name != "mac-randomize.nix"; # Exclude other known non-modules if any
 
     modules = builtins.filter isModule files;
