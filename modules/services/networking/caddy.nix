@@ -122,13 +122,13 @@ in {
               reverse_proxy http://192.168.40.121:5055
             '';
         };
-        "immich.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.115:2283
-            '';
-        };
+        # "immich.hexaflare.net" = {
+        #   extraConfig =
+        #     commonConfig
+        #     + ''
+        #       reverse_proxy http://192.168.40.115:2283
+        #     '';
+        # };
         # "glance.hexaflare.net" = {
         #   extraConfig =
         #     commonConfig

@@ -34,6 +34,9 @@
       gh
       github-copilot-cli # GitHub Copilot CLI
 
+      # === AI Tools ===
+      claude-code
+
       # === Cybersecurity & Pentesting ===
       nmap
       masscan
