@@ -36,18 +36,24 @@
       # ============================================
       # Services CRITIQUES - 2FA OBLIGATOIRE
       # ============================================
-      # Admin uniquement avec 2FA
-      # {
-      #   domain = ["grafana.hexaflare.net" "portainer.hexaflare.net"];
-      #   policy = "two_factor";
-      #   subject = ["group:admins"];
-      # }
+      # Bitwarden - 2FA obligatoire pour tous (service critique)
+      {
+        domain = ["bitwarden.hexaflare.net"];
+        policy = "two_factor";
+      }
 
-      # Tous les utilisateurs mais 2FA requis
-      # {
-      #   domain = ["bitwarden.hexaflare.net" "nextcloud.hexaflare.net"];
-      #   policy = "two_factor";
-      # }
+      # Nextcloud - 2FA pour les admins
+      {
+        domain = ["nextcloud.hexaflare.net"];
+        policy = "two_factor";
+        subject = ["group:admins"];
+      }
+
+      # Nextcloud - 1FA pour les autres utilisateurs
+      {
+        domain = ["nextcloud.hexaflare.net"];
+        policy = "one_factor";
+      }
 
       # ============================================
       # Services STANDARDS - 1FA
