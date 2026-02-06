@@ -5,6 +5,14 @@
   ...
 }: let
   cfg = config.my-services.auth.authelia;
+  hasDeclarativeUsers = (builtins.length (builtins.attrNames cfg.declarativeUsers)) > 0;
+  usersDatabaseFile =
+    if hasDeclarativeUsers
+    then
+      (pkgs.formats.yaml {}).generate "authelia-users-database.yml" {
+        users = cfg.declarativeUsers;
+      }
+    else cfg.usersFile;
 
   # Configuration Authelia base (sans secrets)
   autheliaConfigBase = {
@@ -41,7 +49,7 @@
     authentication_backend = {
       password_reset.disable = true;
       file = {
-        path = cfg.usersFile;
+        path = usersDatabaseFile;
         watch = true;
         password = {
           algorithm = "argon2";
@@ -182,7 +190,46 @@ in {
     usersFile = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/authelia/users_database.yml";
-      description = "Path to users database file";
+      description = "Path to users database file when declarativeUsers is empty";
+    };
+
+    declarativeUsers = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          disabled = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether this user is disabled";
+          };
+          displayname = lib.mkOption {
+            type = lib.types.str;
+            description = "Display name";
+          };
+          password = lib.mkOption {
+            type = lib.types.str;
+            description = "Argon2id password hash (e.g. generated with authelia crypto hash generate argon2)";
+          };
+          email = lib.mkOption {
+            type = lib.types.str;
+            description = "User email";
+          };
+          groups = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            description = "Authelia groups";
+          };
+        };
+      });
+      default = {};
+      example = {
+        "tom" = {
+          displayname = "Tom";
+          password = "$argon2id$v=19$m=65536,t=3,p=4$...";
+          email = "tom@example.com";
+          groups = ["admins"];
+        };
+      };
+      description = "Declarative Authelia file-backend users (replaces manual users_database.yml management)";
     };
 
     database = {
@@ -347,31 +394,62 @@ in {
         RemainAfterExit = true;
       };
 
-      script = ''
-        authelia_jwt_secret=$(cat ${config.sops.secrets.authelia_jwt_secret.path})
-        authelia_session_secret=$(cat ${config.sops.secrets.authelia_session_secret.path})
-        authelia_storage_encryption_key=$(cat ${config.sops.secrets.authelia_storage_encryption_key.path})
-        ${lib.optionalString (cfg.database.type == "postgres") "authelia_db_password=$(cat ${config.sops.secrets.authelia_db_password.path})"}
-
+      script = let
+        secretsEnv =
+          ''
+            AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=$(cat ${config.sops.secrets.authelia_jwt_secret.path})
+            AUTHELIA_SESSION_SECRET=$(cat ${config.sops.secrets.authelia_session_secret.path})
+            AUTHELIA_STORAGE_ENCRYPTION_KEY=$(cat ${config.sops.secrets.authelia_storage_encryption_key.path})
+          ''
+          + lib.optionalString (cfg.database.type == "postgres") ''
+            AUTHELIA_STORAGE_POSTGRES_PASSWORD=$(cat ${config.sops.secrets.authelia_db_password.path})
+          '';
+      in ''
         oidc_hmac_secret=$(cat ${config.sops.secrets.authelia_oidc_hmac_secret.path})
-        oidc_jwk_private_key=$(awk '{printf "%s\\n", $0}' ${config.sops.secrets.authelia_oidc_jwk_private_key.path} | sed 's/\\n$//')
         immich_oidc_client_secret_digest=$(cat ${config.sops.secrets.authelia_immich_oidc_client_secret_digest.path})
-
-        oidc_json=$(cat <<EOF
-        {"hmac_secret":"$oidc_hmac_secret","jwks":[{"key_id":"main-rs256","algorithm":"RS256","use":"sig","key":"$oidc_jwk_private_key"}],"clients":[{"client_id":"immich","client_name":"immich","client_secret":"$immich_oidc_client_secret_digest","public":false,"authorization_policy":"two_factor","require_pkce":false,"pkce_challenge_method":"","redirect_uris":["https://immich.hexaflare.net/auth/login","https://immich.hexaflare.net/user-settings","app.immich:///oauth-callback"],"scopes":["openid","profile","email"],"response_types":["code"],"grant_types":["authorization_code"],"access_token_signed_response_alg":"none","userinfo_signed_response_alg":"none","token_endpoint_auth_method":"client_secret_post"}]}
-        EOF
-        )
+        oidc_jwk_private_key_indented=$(sed 's/^/          /' ${config.sops.secrets.authelia_oidc_jwk_private_key.path})
 
         mkdir -p /run/authelia
-        cat > /run/authelia/env <<EOF
-        AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=$authelia_jwt_secret
-        AUTHELIA_SESSION_SECRET=$authelia_session_secret
-        AUTHELIA_STORAGE_ENCRYPTION_KEY=$authelia_storage_encryption_key
-        ${lib.optionalString (cfg.database.type == "postgres") "AUTHELIA_STORAGE_POSTGRES_PASSWORD=$authelia_db_password"}
-        AUTHELIA_IDENTITY_PROVIDERS_OIDC=$oidc_json
-        EOF
+        printf '%s\n' '${secretsEnv}' > /run/authelia/env
+
+        {
+          echo "identity_providers:"
+          echo "  oidc:"
+          echo "    hmac_secret: '$oidc_hmac_secret'"
+          echo "    jwks:"
+          echo "      - key_id: 'main-rs256'"
+          echo "        algorithm: 'RS256'"
+          echo "        use: 'sig'"
+          echo "        key: |"
+          echo "$oidc_jwk_private_key_indented"
+          echo "    clients:"
+          echo "      - client_id: 'immich'"
+          echo "        client_name: 'immich'"
+          echo "        client_secret: '$immich_oidc_client_secret_digest'"
+          echo "        public: false"
+          echo "        authorization_policy: 'two_factor'"
+          echo "        require_pkce: false"
+          echo "        pkce_challenge_method: \"\""
+          echo "        redirect_uris:"
+          echo "          - 'https://immich.hexaflare.net/auth/login'"
+          echo "          - 'https://immich.hexaflare.net/user-settings'"
+          echo "          - 'app.immich:///oauth-callback'"
+          echo "        scopes:"
+          echo "          - 'openid'"
+          echo "          - 'profile'"
+          echo "          - 'email'"
+          echo "        response_types:"
+          echo "          - 'code'"
+          echo "        grant_types:"
+          echo "          - 'authorization_code'"
+          echo "        access_token_signed_response_alg: 'none'"
+          echo "        userinfo_signed_response_alg: 'none'"
+          echo "        token_endpoint_auth_method: 'client_secret_post'"
+        } > /run/authelia/oidc.yml
+
         chmod 600 /run/authelia/env
-        chown authelia:authelia /run/authelia/env
+        chmod 600 /run/authelia/oidc.yml
+        chown authelia:authelia /run/authelia/env /run/authelia/oidc.yml
       '';
     };
 
@@ -390,7 +468,7 @@ in {
         User = "authelia";
         Group = "authelia";
         EnvironmentFile = "/run/authelia/env";
-        ExecStart = "${pkgs.authelia}/bin/authelia --config ${configFile}";
+        ExecStart = "${pkgs.authelia}/bin/authelia --config ${configFile} --config /run/authelia/oidc.yml";
         Restart = "on-failure";
         RestartSec = "5s";
 
@@ -414,11 +492,12 @@ in {
     };
 
     # Créer le fichier users_database.yml par défaut s'il n'existe pas
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0700 authelia authelia -"
-      "f ${cfg.usersFile} 0600 authelia authelia -"
-      "d /run/authelia 0700 authelia authelia -"
-    ];
+    systemd.tmpfiles.rules =
+      [
+        "d ${cfg.dataDir} 0700 authelia authelia -"
+        "d /run/authelia 0700 authelia authelia -"
+      ]
+      ++ lib.optional (!hasDeclarativeUsers) "f ${cfg.usersFile} 0600 authelia authelia -";
 
     # Ouvrir les ports firewall
     networking.firewall.allowedTCPPorts = [cfg.port];

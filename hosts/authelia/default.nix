@@ -53,6 +53,28 @@
     defaultPolicy = "deny";
 
     # ========================================================================
+    # UTILISATEURS DÉCLARATIFS (NixOS)
+    # ========================================================================
+    # Décommentez et adaptez pour gérer les utilisateurs sans édition manuelle
+    # du users_database.yml sur le serveur.
+    #
+    declarativeUsers = {
+      admin = {
+        displayname = "Administrator";
+        # Historical admin recovered from /var/lib/authelia/users_database.yml on nixos@authelia
+        password = "$argon2id$v=19$m=65536,t=3,p=4$4s35/aEJqYmtockM3IeP2Q$GDovC8sBqyINWJeTuudFExK40AE1oulZYVqs9rZLsV8";
+        email = "admin@hexaflare.net";
+        groups = ["admins"];
+      };
+      tom = {
+        displayname = "Tom";
+        password = "$argon2id$v=19$m=65536,t=3,p=4$gg0JzWFg2I+WSVLMlWD/uw$jBq0VdD4UpyYlQ/CEsGBTyDcapJzrH/BAJdroODwFqc";
+        email = "tom@patelas.com";
+        groups = ["users"];
+      };
+    };
+
+    # ========================================================================
     # RÈGLES D'ACCÈS
     # ========================================================================
     # ⚠️ ORDRE IMPORTANT : Première règle qui match = règle appliquée
@@ -232,7 +254,11 @@
 # GUIDE RAPIDE - GROUPES D'UTILISATEURS
 # ==============================================================================
 #
-# Définissez vos groupes dans /var/lib/authelia/users_database.yml :
+# Définissez vos groupes directement en Nix avec:
+#   my-services.auth.authelia.declarativeUsers = { ... };
+#
+# Si declarativeUsers est vide, Authelia continue d'utiliser:
+#   /var/lib/authelia/users_database.yml
 #
 # users:
 #   admin:
@@ -303,4 +329,3 @@
 #   ssh nixos@authelia 'cd ~/nixos-config && git pull && sudo nixos-rebuild switch --flake .#authelia'
 #
 # ==============================================================================
-

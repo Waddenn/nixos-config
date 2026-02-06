@@ -25,13 +25,11 @@
         clientSecret._secret = config.sops.secrets.immich_oauth_client_secret.path;
         scope = "openid email profile";
         tokenEndpointAuthMethod = "client_secret_post";
-        mobileOverrideEnabled = true;
-        mobileRedirectUri = "app.immich:///oauth-callback";
         buttonText = "Se connecter avec Authelia";
       };
 
-      # Keep local login as fallback during rollout.
-      passwordLogin.enabled = true;
+      # Force SSO via Authelia only (hide local email/password login).
+      passwordLogin.enabled = false;
     };
 
     sops.secrets.immich_oauth_client_secret = {
