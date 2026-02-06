@@ -22,11 +22,19 @@ POLL_INTERVAL_SECONDS="${POLL_INTERVAL_SECONDS:-5}"
 CACHIX_CACHE_NAME="${CACHIX_CACHE_NAME:-waddenn-nixos}"
 CANARY_HOSTS="${CANARY_HOSTS:-authelia,caddy}"
 SELF_UPDATE_NODE="${SELF_UPDATE_NODE:-dev-nixos}"
+FORCE_UPDATE="${FORCE_UPDATE:-0}"
 
 log_info() { echo -e "${B}$*${NC}"; }
 log_warn() { echo -e "${O}$*${NC}"; }
 log_ok() { echo -e "${G}$*${NC}"; }
 log_err() { echo -e "${R}$*${NC}"; }
+
+is_truthy() {
+  case "${1:-}" in
+    1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 require_cmd() {
   local cmd="$1"
@@ -178,6 +186,10 @@ push_cache_paths() {
       export CACHIX_AUTH_TOKEN
     fi
   fi
+  if [[ -z "${CACHIX_AUTH_TOKEN:-}" && -f /run/secrets/cachix-auth-token ]]; then
+    CACHIX_AUTH_TOKEN="$(cat /run/secrets/cachix-auth-token)"
+    export CACHIX_AUTH_TOKEN
+  fi
 
   if [[ -z "${CACHIX_AUTH_TOKEN:-}" ]]; then
     log_warn "⚠️ CACHIX_AUTH_TOKEN not set, skipping cache push."
@@ -209,7 +221,7 @@ trigger_host_update() {
     log_warn "⚠️ ${host}: pull-updater unit missing, running bootstrap rebuild."
     ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
       "root@${host}" \
-      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'path:${REPO_DIR}#${host}'\" >/dev/null"
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git config --system --add safe.directory '${REPO_DIR}' >/dev/null 2>&1 || true; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'path:${REPO_DIR}#${host}'\" >/dev/null"
     BOOTSTRAP_LIST="$(merge_csv_lists "$BOOTSTRAP_LIST" "$host")"
     return 0
   fi
@@ -429,12 +441,16 @@ main() {
   local_sha="$(git rev-parse HEAD)"
   remote_sha="$(git rev-parse "${GIT_REMOTE}/${GIT_BRANCH}")"
 
-  if [[ "$local_sha" == "$remote_sha" ]]; then
+  if [[ "$local_sha" == "$remote_sha" ]] && ! is_truthy "$FORCE_UPDATE"; then
     log_ok "😴 No changes found. System is up to date."
     exit 0
   fi
 
-  log_ok "✨ New changes detected!"
+  if [[ "$local_sha" == "$remote_sha" ]]; then
+    log_warn "⚠️ Force update enabled: proceeding even though local == remote."
+  else
+    log_ok "✨ New changes detected!"
+  fi
   sync_repo_to_remote
 
   local start_time end_time duration

@@ -24,6 +24,7 @@ start_ts="$(date +%s)"
 echo "[pull-update] host=${host} repo=${REPO_DIR} remote=${GIT_REMOTE}/${GIT_BRANCH}"
 
 # Service runs as root while repo is owned by nixos user.
+git config --system --add safe.directory "$REPO_DIR" >/dev/null 2>&1 || true
 git_safe=(git -c "safe.directory=${REPO_DIR}")
 
 "${git_safe[@]}" fetch "$GIT_REMOTE" "$GIT_BRANCH" --prune

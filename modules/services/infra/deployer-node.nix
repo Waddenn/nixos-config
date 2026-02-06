@@ -30,6 +30,12 @@
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
       deployScript = pkgs.writeShellScript "deploy-fleet-wrapper" ''
+        # Allow a "force run" without having to rewind git:
+        # create /var/lib/internal-gitops/force then start internal-gitops.
+        if [ -f /var/lib/internal-gitops/force ]; then
+          export FORCE_UPDATE=1
+          rm -f /var/lib/internal-gitops/force || true
+        fi
         export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
         export COLMENA_BIN="${colmenaPkg}/bin/colmena"
         if [ -f /run/secrets/cachix-auth-token ]; then
