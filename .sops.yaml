@@ -6,6 +6,7 @@ keys:
   - &github-runner age1u5n52q9kgumdt3lqvcnagga54p2ldetw6knc8paxvc43njyfjdnq87g7ff
   - &dev-nixos age13nxnv5jyymls6d9xjl47r6rmkq749gwj9u5txepcxrq7cuvtvesqms45uf
   - &authelia age1ktmlt86xq8jzaxvc7zmy9y32urqydurvwcmz3m7gx7jljhca5pjql4jlds
+  - &immich age1ssppsf2v0grlhq5n8ssny65gk26fm504q85x20pt86ytaxemdecq64a37g
 creation_rules:
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)(\.enc)?$
     key_groups:
@@ -15,3 +16,4 @@ creation_rules:
         - *github-runner
         - *dev-nixos
         - *authelia
+        - *immich
