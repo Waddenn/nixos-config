@@ -5,6 +5,10 @@ on:
     - cron: '0 0 * * 0' # Weekly on Sunday
   workflow_dispatch: # Allow manual trigger
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-flake:
     runs-on: ubuntu-latest

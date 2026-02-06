@@ -51,6 +51,12 @@
       file = {
         path = usersDatabaseFile;
         watch = true;
+        # Allow users to authenticate with email and case-insensitive usernames.
+        # Requires lowercase usernames in the file backend.
+        search = {
+          email = true;
+          case_insensitive = true;
+        };
         password = {
           algorithm = "argon2";
           argon2 = {
@@ -427,7 +433,7 @@ in {
           echo "        client_name: 'immich'"
           echo "        client_secret: '$immich_oidc_client_secret_digest'"
           echo "        public: false"
-          echo "        authorization_policy: 'two_factor'"
+          echo "        authorization_policy: 'one_factor'"
           echo "        require_pkce: false"
           echo "        pkce_challenge_method: \"\""
           echo "        redirect_uris:"
