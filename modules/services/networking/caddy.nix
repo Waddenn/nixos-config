@@ -120,28 +120,32 @@ in {
               reverse_proxy http://192.168.30.113:8222
             '';
         };
+        # Portail Authelia via MagicDNS Tailscale (recommandé pour admin)
+        "caddy" = {
+          extraConfig = ''
+            # Pas de TLS, utilise HTTP depuis Tailscale
+            # MagicDNS dans Tailscale gère déjà la résolution
+
+            reverse_proxy http://192.168.40.123:9091 {
+              header_up X-Forwarded-Proto {scheme}
+              header_up X-Forwarded-Host {host}
+              header_up X-Forwarded-Uri {uri}
+              header_up X-Forwarded-For {remote_host}
+            }
+          '';
+        };
+
+        # Portail Authelia public (pour redirections depuis apps)
         "auth.hexaflare.net" = {
           extraConfig =
             commonConfig
             + ''
-              # Autoriser uniquement les connexions depuis Tailscale
-              # Utiliser client_ip car on est derrière Cloudflare (trusted_proxies configuré)
-              @tailscale client_ip 100.64.0.0/10
-
-              # Bloquer tout le reste
-              @not_tailscale not client_ip 100.64.0.0/10
-              handle @not_tailscale {
-                respond "Access Denied: Authelia portal is only accessible via Tailscale" 403
-              }
-
-              # Proxy pour Tailscale
-              handle @tailscale {
-                reverse_proxy http://192.168.40.123:9091 {
-                  header_up X-Forwarded-Proto {scheme}
-                  header_up X-Forwarded-Host {host}
-                  header_up X-Forwarded-Uri {uri}
-                  header_up X-Forwarded-For {remote_host}
-                }
+              # Accessible publiquement pour les redirections depuis les apps
+              reverse_proxy http://192.168.40.123:9091 {
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-Uri {uri}
+                header_up X-Forwarded-For {remote_host}
               }
             '';
         };
