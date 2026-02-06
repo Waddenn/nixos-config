@@ -156,6 +156,12 @@ in {
               forward_auth http://192.168.40.123:9091 {
                 uri /api/authz/forward-auth
                 copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+
+                # Headers nécessaires pour Authelia
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-Uri {uri}
+                header_up X-Forwarded-For {remote_host}
               }
 
               reverse_proxy http://192.168.40.115:2283
