@@ -41,6 +41,10 @@
       // builtins.mapAttrs (name: value: {
         deployment = {
           allowLocalDeployment = name == "dev-nixos";
+          tags =
+            if name == "dev-nixos"
+            then ["local"]
+            else ["remote"];
           targetHost =
             if name == "dev-nixos"
             then null
