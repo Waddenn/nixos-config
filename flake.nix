@@ -38,13 +38,16 @@
           };
         };
       }
-      // builtins.mapAttrs (name: value: {
+      // builtins.mapAttrs (name: value: let
+        isDeploymentTarget =
+          lib.attrByPath ["config" "my-services" "infra" "deployment-target" "enable"] false value;
+      in {
         deployment = {
           allowLocalDeployment = name == "dev-nixos";
           tags =
             if name == "dev-nixos"
             then ["local"]
-            else ["remote"];
+            else lib.optional isDeploymentTarget "remote";
           targetHost =
             if name == "dev-nixos"
             then null

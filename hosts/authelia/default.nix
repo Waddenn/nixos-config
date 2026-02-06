@@ -244,6 +244,7 @@
   # ==========================================================================
 
   my-services.infra.deployment-target.enable = true;
+  my-services.infra.pull-updater.canary = true;
 
   networking.firewall = {
     allowedTCPPorts = [9091]; # Authelia

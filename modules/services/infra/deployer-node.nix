@@ -10,6 +10,7 @@
   config = lib.mkIf config.my-services.infra.deployer-node.enable {
     environment.systemPackages = [
       pkgs.git
+      pkgs.cachix
       inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena or pkgs.colmena
     ];
 
@@ -21,11 +22,19 @@
       sopsFile = ../../../secrets/secrets.yaml;
       owner = "nixos";
     };
+    sops.secrets.cachix-auth-token = {
+      sopsFile = ../../../secrets/secrets.yaml;
+      owner = "nixos";
+      mode = "0400";
+    };
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
       deployScript = pkgs.writeShellScript "deploy-fleet-wrapper" ''
         export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
         export COLMENA_BIN="${colmenaPkg}/bin/colmena"
+        if [ -f /run/secrets/cachix-auth-token ]; then
+          export CACHIX_AUTH_TOKEN=$(cat /run/secrets/cachix-auth-token)
+        fi
         exec ${pkgs.bash}/bin/bash ${../../../scripts/deploy-fleet.sh}
       '';
     in {
@@ -33,7 +42,7 @@
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
       restartIfChanged = false;
-      path = [pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
+      path = [pkgs.git pkgs.openssh pkgs.cachix colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
       serviceConfig = {
         EnvironmentFile = [
           config.sops.secrets.gh-token.path
