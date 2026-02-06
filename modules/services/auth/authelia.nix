@@ -16,6 +16,7 @@
         authz = {
           forward-auth = {
             implementation = "ForwardAuth";
+            address = "https://auth.${cfg.domain}";
             authn_strategies = [
               {
                 name = "HeaderProxyAuthorization";
