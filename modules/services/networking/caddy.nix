@@ -125,10 +125,11 @@ in {
             commonConfig
             + ''
               # Autoriser uniquement les connexions depuis Tailscale
-              @tailscale remote_ip 100.64.0.0/10
+              # Utiliser client_ip car on est derrière Cloudflare (trusted_proxies configuré)
+              @tailscale client_ip 100.64.0.0/10
 
               # Bloquer tout le reste
-              @not_tailscale not remote_ip 100.64.0.0/10
+              @not_tailscale not client_ip 100.64.0.0/10
               handle @not_tailscale {
                 respond "Access Denied: Authelia portal is only accessible via Tailscale" 403
               }
