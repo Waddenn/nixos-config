@@ -15,6 +15,7 @@ GIT_REMOTE="${GIT_REMOTE:-origin}"
 GIT_BRANCH="${GIT_BRANCH:-main}"
 COLMENA_BIN="${COLMENA_BIN:-colmena}"
 LOCK_FILE="${LOCK_FILE:-/tmp/deploy-fleet.lock}"
+LOCK_DIR="${LOCK_DIR:-/tmp/deploy-fleet.lockdir}"
 MAX_FETCH_RETRIES="${MAX_FETCH_RETRIES:-3}"
 SELF_UPDATE_NODE="${SELF_UPDATE_NODE:-dev-nixos}"
 
@@ -40,11 +41,21 @@ require_cmd() {
 }
 
 acquire_lock() {
-  exec 9>"$LOCK_FILE"
-  if ! flock -n 9; then
-    log_warn "⚠️ Another deployment is already running. Exiting."
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK_FILE"
+    if ! flock -n 9; then
+      log_warn "⚠️ Another deployment is already running. Exiting."
+      exit 0
+    fi
+    return 0
+  fi
+
+  # Fallback when flock is unavailable in the unit PATH.
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    log_warn "⚠️ Another deployment is already running (lockdir). Exiting."
     exit 0
   fi
+  trap 'rmdir "$LOCK_DIR" 2>/dev/null || true; cleanup' EXIT
 }
 
 fetch_with_retry() {
@@ -286,7 +297,6 @@ trigger_self_update() {
 
 main() {
   require_cmd git
-  require_cmd flock
   require_cmd "$COLMENA_BIN"
 
   cd "$REPO_DIR"
