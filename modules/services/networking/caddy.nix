@@ -124,11 +124,23 @@ in {
           extraConfig =
             commonConfig
             + ''
-              reverse_proxy http://192.168.40.123:9091 {
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Forwarded-Host {host}
-                header_up X-Forwarded-Uri {uri}
-                header_up X-Forwarded-For {remote_host}
+              # Autoriser uniquement les connexions depuis Tailscale
+              @tailscale remote_ip 100.64.0.0/10
+
+              # Bloquer tout le reste
+              @not_tailscale not remote_ip 100.64.0.0/10
+              handle @not_tailscale {
+                respond "Access Denied: Authelia portal is only accessible via Tailscale" 403
+              }
+
+              # Proxy pour Tailscale
+              handle @tailscale {
+                reverse_proxy http://192.168.40.123:9091 {
+                  header_up X-Forwarded-Proto {scheme}
+                  header_up X-Forwarded-Host {host}
+                  header_up X-Forwarded-Uri {uri}
+                  header_up X-Forwarded-For {remote_host}
+                }
               }
             '';
         };
