@@ -59,11 +59,18 @@
 
     session = {
       name = "authelia_session";
-      domain = cfg.domain;
       expiration = "1h";
       inactivity = "5m";
       remember_me = "1M";
       # secret sera lu depuis AUTHELIA_SESSION_SECRET env var
+
+      cookies = [
+        {
+          domain = cfg.domain;
+          authelia_url = "https://auth.${cfg.domain}";
+          default_redirection_url = "https://${cfg.domain}";
+        }
+      ];
 
       redis = {
         host = cfg.redis.host;

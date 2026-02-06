@@ -124,7 +124,12 @@ in {
           extraConfig =
             commonConfig
             + ''
-              reverse_proxy http://192.168.40.123:9091
+              reverse_proxy http://192.168.40.123:9091 {
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-Uri {uri}
+                header_up X-Forwarded-For {remote_host}
+              }
             '';
         };
         "homeassistant.hexaflare.net" = {
