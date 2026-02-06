@@ -18,11 +18,53 @@ LOCK_FILE="${LOCK_FILE:-/tmp/deploy-fleet.lock}"
 LOCK_DIR="${LOCK_DIR:-/tmp/deploy-fleet.lockdir}"
 MAX_FETCH_RETRIES="${MAX_FETCH_RETRIES:-3}"
 SELF_UPDATE_NODE="${SELF_UPDATE_NODE:-dev-nixos}"
+RETRY_FAILED_ONCE="${RETRY_FAILED_ONCE:-1}"
+RETRY_DELAY_SECONDS="${RETRY_DELAY_SECONDS:-8}"
 
 log_info() { echo -e "${B}$*${NC}"; }
 log_warn() { echo -e "${O}$*${NC}"; }
 log_ok() { echo -e "${G}$*${NC}"; }
 log_err() { echo -e "${R}$*${NC}"; }
+
+csv_to_lines() {
+  printf '%s\n' "${1:-}" \
+    | tr ',' '\n' \
+    | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
+    | grep -v '^$' \
+    | sort -u
+}
+
+lines_to_csv() {
+  tr '\n' ',' | sed 's/,$//; s/,/, /g'
+}
+
+merge_csv_lists() {
+  local a="${1:-}" b="${2:-}"
+  printf '%s\n%s\n' "$a" "$b" \
+    | tr ',' '\n' \
+    | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
+    | grep -v '^$' \
+    | sort -u \
+    | lines_to_csv
+}
+
+subtract_csv_lists() {
+  local base="${1:-}" remove="${2:-}"
+  local base_lines remove_lines
+  base_lines="$(csv_to_lines "$base" || true)"
+  remove_lines="$(csv_to_lines "$remove" || true)"
+
+  if [[ -z "$base_lines" ]]; then
+    return 0
+  fi
+
+  if [[ -z "$remove_lines" ]]; then
+    printf '%s\n' "$base_lines" | lines_to_csv
+    return 0
+  fi
+
+  comm -23 <(printf '%s\n' "$base_lines") <(printf '%s\n' "$remove_lines") | lines_to_csv
+}
 
 LOGFILE=""
 cleanup() {
@@ -165,6 +207,18 @@ parse_hosts() {
     | awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}' \
     || true)"
 
+  PUSH_FAILED_LIST="$(printf '%s\n' "$push_failures" \
+    | grep -v '^$' \
+    | sort -u \
+    | lines_to_csv \
+    || true)"
+
+  ACT_FAILED_LIST="$(printf '%s\n' "$act_failures" \
+    | grep -v '^$' \
+    | sort -u \
+    | lines_to_csv \
+    || true)"
+
   FAILED_LIST="$(printf '%s\n%s\n' "$push_failures" "$act_failures" \
     | grep -v '^$' \
     | sort -u \
@@ -190,6 +244,61 @@ run_fleet_deploy() {
   local clean_log
   clean_log="$(sed 's/\x1b\[[0-9;]*m//g' "$LOGFILE" || true)"
   parse_hosts "$clean_log"
+
+  local first_exit first_succeeded first_failed first_act_failed
+  first_exit=$FLEET_EXIT
+  first_succeeded="${SUCCEEDED_LIST:-}"
+  first_failed="${FAILED_LIST:-}"
+  first_act_failed="${ACT_FAILED_LIST:-}"
+  RECOVERED_LIST=""
+
+  # Retry once for transient SSH drops during switch (service/network restarts).
+  # We only retry activation failures, not push/connectivity failures.
+  if [[ "${RETRY_FAILED_ONCE}" == "1" && $first_exit -ne 0 && -n "$first_act_failed" ]]; then
+    local retry_nodes retry_log retry_clean retry_exit retry_succeeded retry_failed recovered
+    retry_nodes="$(printf '%s\n' "$first_act_failed" | tr -d ' ')"
+
+    log_warn "⚠️  Retrying activation-failed hosts once (possible transient SSH disconnects): $first_act_failed"
+    sleep "$RETRY_DELAY_SECONDS"
+
+    retry_log="$(mktemp)"
+    set +e
+    "$COLMENA_BIN" apply --color always --parallel 1 --keep-result --on "$retry_nodes" 2>&1 | tee "$retry_log"
+    retry_exit=${PIPESTATUS[0]}
+    set -e
+
+    retry_clean="$(sed 's/\x1b\[[0-9;]*m//g' "$retry_log" || true)"
+    parse_hosts "$retry_clean"
+    retry_succeeded="${SUCCEEDED_LIST:-}"
+    retry_failed="${FAILED_LIST:-}"
+    rm -f "$retry_log"
+
+    # Merge initial and retry successes.
+    SUCCEEDED_LIST="$(merge_csv_lists "$first_succeeded" "$retry_succeeded")"
+    FAILED_LIST="$first_failed"
+
+    if [[ $retry_exit -eq 0 ]]; then
+      # Retry fully recovered all previously failed nodes.
+      SUCCEEDED_LIST="$(merge_csv_lists "$SUCCEEDED_LIST" "$first_act_failed")"
+      RECOVERED_LIST="$first_act_failed"
+      FAILED_LIST="$(subtract_csv_lists "$FAILED_LIST" "$first_act_failed")"
+      if [[ -z "${FAILED_LIST:-}" ]]; then
+        FLEET_EXIT=0
+      else
+        FLEET_EXIT=1
+      fi
+    else
+      if [[ -n "$retry_failed" ]]; then
+        recovered="$(subtract_csv_lists "$first_act_failed" "$retry_failed")"
+        RECOVERED_LIST="$recovered"
+        SUCCEEDED_LIST="$(merge_csv_lists "$SUCCEEDED_LIST" "$recovered")"
+        FAILED_LIST="$(subtract_csv_lists "$FAILED_LIST" "$recovered")"
+      else
+        FAILED_LIST="$first_failed"
+      fi
+      FLEET_EXIT=$retry_exit
+    fi
+  fi
 
   if [[ $FLEET_EXIT -ne 0 && -z "${FAILED_LIST:-}" ]]; then
     FAILED_LIST="Unknown/General Failure (check logs)"
@@ -218,6 +327,12 @@ build_report() {
     REPORT_BODY+="
 
 ❌ **Failed:** ${FAILED_LIST}"
+  fi
+
+  if [[ -n "${RECOVERED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+↻ **Recovered after retry:** ${RECOVERED_LIST}"
   fi
 
   if [[ $FLEET_EXIT -eq 0 ]]; then
