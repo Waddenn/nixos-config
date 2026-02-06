@@ -70,7 +70,7 @@
         displayname = "Tom";
         password = "$argon2id$v=19$m=65536,t=3,p=4$gg0JzWFg2I+WSVLMlWD/uw$jBq0VdD4UpyYlQ/CEsGBTyDcapJzrH/BAJdroODwFqc";
         email = "tom@patelas.com";
-        groups = ["users"];
+        groups = ["users" "family"];
       };
     };
 
