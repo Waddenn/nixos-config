@@ -6,8 +6,8 @@
 }: let
   cfg = config.my-services.auth.authelia;
 
-  # Configuration Authelia
-  autheliaConfig = {
+  # Configuration Authelia base (sans secrets)
+  autheliaConfigBase = {
     theme = "auto";
 
     server = {
@@ -63,6 +63,7 @@
       expiration = "1h";
       inactivity = "5m";
       remember_me = "1M";
+      # secret sera lu depuis AUTHELIA_SESSION_SECRET env var
 
       redis = {
         host = cfg.redis.host;
@@ -71,20 +72,24 @@
       };
     };
 
-    storage = {
-      encryption_key = {_secret = "/run/secrets/authelia_storage_encryption_key";};
-
-      postgres = lib.mkIf (cfg.database.type == "postgres") {
-        address = "tcp://${cfg.database.host}:${toString cfg.database.port}";
-        database = cfg.database.name;
-        username = cfg.database.user;
-        password = {_secret = "/run/secrets/authelia_db_password";};
+    # Storage configuré selon le type
+    storage =
+      if cfg.database.type == "postgres"
+      then {
+        postgres = {
+          address = "tcp://${cfg.database.host}:${toString cfg.database.port}";
+          database = cfg.database.name;
+          username = cfg.database.user;
+          # password sera lu depuis AUTHELIA_STORAGE_POSTGRES_PASSWORD env var
+        };
+        # encryption_key sera lu depuis AUTHELIA_STORAGE_ENCRYPTION_KEY env var
+      }
+      else {
+        local = {
+          path = "${cfg.dataDir}/db.sqlite3";
+        };
+        # encryption_key sera lu depuis AUTHELIA_STORAGE_ENCRYPTION_KEY env var
       };
-
-      local = lib.mkIf (cfg.database.type == "sqlite") {
-        path = "${cfg.dataDir}/db.sqlite3";
-      };
-    };
 
     notifier = {
       disable_startup_check = true;
@@ -94,16 +99,21 @@
     };
 
     access_control = {
-      default_policy = cfg.defaultPolicy;
+      # Utiliser one_factor par défaut si pas de règles (deny nécessite des règles)
+      default_policy =
+        if cfg.accessControlRules == []
+        then "one_factor"
+        else cfg.defaultPolicy;
 
       rules = cfg.accessControlRules;
     };
 
-    identity_validation.reset_password.jwt_secret = {_secret = "/run/secrets/authelia_jwt_secret";};
+    # jwt_secret sera lu depuis AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET env var
+    identity_validation.reset_password = {};
   };
 
   configFormat = pkgs.formats.yaml {};
-  configFile = configFormat.generate "authelia-config.yml" autheliaConfig;
+  configFile = configFormat.generate "authelia-config.yml" autheliaConfigBase;
 in {
   options.my-services.auth.authelia = {
     enable = lib.mkEnableOption "Enable Authelia";
@@ -260,6 +270,13 @@ in {
         mode = "0400";
         restartUnits = ["authelia.service"];
       };
+      authelia_session_secret = {
+        sopsFile = ../../../secrets/secrets.yaml;
+        owner = "authelia";
+        group = "authelia";
+        mode = "0400";
+        restartUnits = ["authelia.service"];
+      };
       authelia_storage_encryption_key = {
         sopsFile = ../../../secrets/secrets.yaml;
         owner = "authelia";
@@ -277,18 +294,50 @@ in {
       };
     };
 
+    # Script pour générer le fichier d'environnement avec les secrets
+    systemd.services.authelia-env-setup = {
+      description = "Setup Authelia environment file with secrets";
+      before = ["authelia.service"];
+      wantedBy = ["multi-user.target"];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script = let
+        secretsEnv = ''
+          AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=$(cat ${config.sops.secrets.authelia_jwt_secret.path})
+          AUTHELIA_SESSION_SECRET=$(cat ${config.sops.secrets.authelia_session_secret.path})
+          AUTHELIA_STORAGE_ENCRYPTION_KEY=$(cat ${config.sops.secrets.authelia_storage_encryption_key.path})
+        ''
+        + lib.optionalString (cfg.database.type == "postgres") ''
+          AUTHELIA_STORAGE_POSTGRES_PASSWORD=$(cat ${config.sops.secrets.authelia_db_password.path})
+        '';
+      in ''
+        mkdir -p /run/authelia
+        cat > /run/authelia/env <<'EOF'
+        ${secretsEnv}
+        EOF
+        chmod 600 /run/authelia/env
+        chown authelia:authelia /run/authelia/env
+      '';
+    };
+
     # Service systemd Authelia
     systemd.services.authelia = {
       description = "Authelia authentication and authorization server";
-      after = ["network.target"]
+      after = ["network.target" "authelia-env-setup.service"]
         ++ lib.optional (cfg.redis.host == "localhost") "redis-authelia.service"
         ++ lib.optional (cfg.database.type == "postgres" && cfg.database.host == "localhost") "postgresql.service";
+      requires = ["authelia-env-setup.service"];
       wantedBy = ["multi-user.target"];
 
       serviceConfig = {
         Type = "simple";
         User = "authelia";
         Group = "authelia";
+        EnvironmentFile = "/run/authelia/env";
         ExecStart = "${pkgs.authelia}/bin/authelia --config ${configFile}";
         Restart = "on-failure";
         RestartSec = "5s";
@@ -316,6 +365,7 @@ in {
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0700 authelia authelia -"
       "f ${cfg.usersFile} 0600 authelia authelia -"
+      "d /run/authelia 0700 authelia authelia -"
     ];
 
     # Ouvrir les ports firewall

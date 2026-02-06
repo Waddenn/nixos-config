@@ -4,15 +4,15 @@
 
 set -euo pipefail
 
-HOST="${1:-authelia}"
+HOST="192.168.40.123"
 REMOTE_FILE="/var/lib/authelia/users_database.yml"
 
 echo "🔐 Initialisation du fichier users_database.yml sur $HOST"
 echo ""
 
 # Vérifier que le host est accessible
-if ! ssh -q root@"$HOST" exit 2>/dev/null; then
-    echo "❌ Impossible de se connecter à root@$HOST"
+if ! ssh -i ~/.ssh/id_rsa -q nixos@"$HOST" exit 2>/dev/null; then
+    echo "❌ Impossible de se connecter à nixos@$HOST"
     echo "Vérifiez que le host est déployé et SSH est configuré."
     exit 1
 fi
@@ -91,17 +91,26 @@ EOF
 
 echo "📤 Déploiement du fichier sur $HOST..."
 
-# Copier le fichier sur le serveur
-scp "$TMP_FILE" "root@$HOST:$REMOTE_FILE"
+# Copier le fichier dans /tmp d'abord
+REMOTE_TMP="/tmp/users_database.yml"
+scp "$TMP_FILE" "nixos@$HOST:$REMOTE_TMP"
 
-# Corriger les permissions
-ssh "root@$HOST" << REMOTE_COMMANDS
-    chown authelia:authelia $REMOTE_FILE
-    chmod 600 $REMOTE_FILE
+# Créer le répertoire et déplacer le fichier avec les bonnes permissions
+ssh "nixos@$HOST" << REMOTE_COMMANDS
+    # Créer le répertoire s'il n'existe pas
+    sudo mkdir -p /var/lib/authelia
+
+    # Déplacer le fichier
+    sudo mv $REMOTE_TMP $REMOTE_FILE
+
+    # Corriger les permissions
+    sudo chown authelia:authelia $REMOTE_FILE
+    sudo chmod 600 $REMOTE_FILE
+
     echo "✅ Fichier déployé et permissions définies"
     echo ""
     echo "📋 Contenu du fichier:"
-    cat $REMOTE_FILE
+    sudo cat $REMOTE_FILE
 REMOTE_COMMANDS
 
 echo ""
