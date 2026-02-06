@@ -120,27 +120,10 @@ in {
               reverse_proxy http://192.168.30.113:8222
             '';
         };
-        # Portail Authelia via MagicDNS Tailscale (recommandé pour admin)
-        "http://caddy" = {
-          extraConfig = ''
-            # HTTP uniquement (pas de redirection HTTPS)
-            # Tailscale MagicDNS - réseau sécurisé
-
-            reverse_proxy http://192.168.40.123:9091 {
-              header_up X-Forwarded-Proto {scheme}
-              header_up X-Forwarded-Host {host}
-              header_up X-Forwarded-Uri {uri}
-              header_up X-Forwarded-For {remote_host}
-            }
-          '';
-        };
-
-        # Portail Authelia public (pour redirections depuis apps)
         "auth.hexaflare.net" = {
           extraConfig =
             commonConfig
             + ''
-              # Accessible publiquement pour les redirections depuis les apps
               reverse_proxy http://192.168.40.123:9091 {
                 header_up X-Forwarded-Proto {scheme}
                 header_up X-Forwarded-Host {host}
