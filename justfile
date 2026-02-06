@@ -34,7 +34,6 @@ secrets-view:
 secrets-rekey:
     @echo "🔄 Re-encrypting all secrets..."
     nix shell nixpkgs#sops --command sops updatekeys -y secrets/secrets.yaml
-    nix shell nixpkgs#sops --command sops updatekeys -y secrets/cf_api_token.env.enc
     @echo "✅ All secrets re-encrypted"
 
 # Add a new host to SOPS (usage: just secrets-add-host hostname)

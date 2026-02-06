@@ -28,10 +28,36 @@ in {
 
   config = lib.mkIf config.my-services.networking.caddy.enable {
     sops.secrets.cf_api_token = {
-      format = "dotenv";
-      sopsFile = ../../../secrets/cf_api_token.env.enc;
+      sopsFile = ../../../secrets/secrets.yaml;
       owner = config.services.caddy.user;
+      mode = "0400";
     };
+
+    # Script pour générer le fichier d'environnement Caddy
+    systemd.services.caddy-env-setup = {
+      description = "Setup Caddy environment file with CF API token";
+      before = ["caddy.service"];
+      wantedBy = ["multi-user.target"];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script = ''
+        mkdir -p /run/caddy
+        cat > /run/caddy/env <<EOF
+        CF_API_TOKEN=$(cat ${config.sops.secrets.cf_api_token.path})
+        EOF
+        chmod 600 /run/caddy/env
+        chown ${config.services.caddy.user}:${config.services.caddy.group} /run/caddy/env
+      '';
+    };
+
+    # Créer le répertoire /run/caddy
+    systemd.tmpfiles.rules = [
+      "d /run/caddy 0700 ${config.services.caddy.user} ${config.services.caddy.group} -"
+    ];
 
     services.caddy = {
       enable = true;
@@ -42,7 +68,7 @@ in {
 
       logDir = "/var/log/caddy";
       dataDir = "/var/lib/caddy";
-      environmentFile = config.sops.secrets.cf_api_token.path;
+      environmentFile = "/run/caddy/env";
 
       globalConfig = ''
         # Cloudflare IP ranges for trusted_proxies
@@ -148,6 +174,12 @@ in {
     boot.kernel.sysctl = {
       "net.core.rmem_max" = 7500000;
       "net.core.wmem_max" = 7500000;
+    };
+
+    # Make Caddy wait for environment setup
+    systemd.services.caddy = {
+      after = ["caddy-env-setup.service"];
+      requires = ["caddy-env-setup.service"];
     };
   };
 }
