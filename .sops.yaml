@@ -1,15 +1,17 @@
 # .sops.yaml
 
 keys:
-  - &primary age10yfuvwlr6su8u02sc9xmmvxj4aj59562dkxlpk0rl5kum8amw4zqaxrjpk 
+  - &primary age10yfuvwlr6su8u02sc9xmmvxj4aj59562dkxlpk0rl5kum8amw4zqaxrjpk
   - &caddy age1t2s42a6akm7r2vrz7p4jg9w3uvh2t0cvevjr7hreuf6mkvzad95q4kw85s
   - &github-runner age1u5n52q9kgumdt3lqvcnagga54p2ldetw6knc8paxvc43njyfjdnq87g7ff
   - &dev-nixos age13nxnv5jyymls6d9xjl47r6rmkq749gwj9u5txepcxrq7cuvtvesqms45uf
+  - &authelia age1ktmlt86xq8jzaxvc7zmy9y32urqydurvwcmz3m7gx7jljhca5pjql4jlds
 creation_rules:
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)(\.enc)?$
     key_groups:
-    - age: 
+    - age:
         - *primary
         - *caddy
         - *github-runner
         - *dev-nixos
+        - *authelia
