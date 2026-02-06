@@ -120,13 +120,13 @@ in {
               reverse_proxy http://192.168.30.113:8222
             '';
         };
-        # "auth.hexaflare.net" = {
-        #   extraConfig =
-        #     commonConfig
-        #     + ''
-        #       reverse_proxy http://192.168.40.107:80
-        #     '';
-        # };
+        "auth.hexaflare.net" = {
+          extraConfig =
+            commonConfig
+            + ''
+              reverse_proxy http://192.168.40.123:9091
+            '';
+        };
         "homeassistant.hexaflare.net" = {
           extraConfig =
             commonConfig
