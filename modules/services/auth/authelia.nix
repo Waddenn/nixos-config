@@ -39,7 +39,7 @@
     };
 
     authentication_backend = {
-      password_reset.disable = false;
+      password_reset.disable = true;
       file = {
         path = cfg.usersFile;
         watch = true;
