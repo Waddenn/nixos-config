@@ -121,10 +121,10 @@ in {
             '';
         };
         # Portail Authelia via MagicDNS Tailscale (recommandé pour admin)
-        "caddy" = {
+        "http://caddy" = {
           extraConfig = ''
-            # Pas de TLS, utilise HTTP depuis Tailscale
-            # MagicDNS dans Tailscale gère déjà la résolution
+            # HTTP uniquement (pas de redirection HTTPS)
+            # Tailscale MagicDNS - réseau sécurisé
 
             reverse_proxy http://192.168.40.123:9091 {
               header_up X-Forwarded-Proto {scheme}
