@@ -148,13 +148,19 @@ in {
               reverse_proxy http://192.168.40.121:5055
             '';
         };
-        # "immich.hexaflare.net" = {
-        #   extraConfig =
-        #     commonConfig
-        #     + ''
-        #       reverse_proxy http://192.168.40.115:2283
-        #     '';
-        # };
+        "immich.hexaflare.net" = {
+          extraConfig =
+            commonConfig
+            + ''
+              # Protection Authelia
+              forward_auth http://192.168.40.123:9091 {
+                uri /api/authz/forward-auth
+                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+              }
+
+              reverse_proxy http://192.168.40.115:2283
+            '';
+        };
         # "glance.hexaflare.net" = {
         #   extraConfig =
         #     commonConfig

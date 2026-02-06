@@ -17,6 +17,13 @@
 
     # Règles d'accès par défaut
     accessControlRules = [
+      # Immich - Photos de famille (authentification simple)
+      {
+        domain = ["immich.hexaflare.net"];
+        policy = "one_factor";
+        subject = ["group:family" "group:admins"];
+      }
+
       # Exemple: protéger Gitea avec authentification à 1 facteur
       # {
       #   domain = ["gitea.hexaflare.net"];
