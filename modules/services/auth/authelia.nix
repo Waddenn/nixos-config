@@ -105,6 +105,16 @@
       };
     };
 
+    # Configuration TOTP pour l'authentification à deux facteurs
+    totp = {
+      disable = false;
+      issuer = "Hexaflare";
+      algorithm = "sha1"; # sha1 (recommandé pour compatibilité), sha256, ou sha512
+      digits = 6; # Nombre de chiffres (6 recommandé, supporté par toutes les apps)
+      period = 30; # Secondes entre chaque code (30 recommandé)
+      skew = 1; # Tolérance de décalage temporel
+    };
+
     access_control = {
       # Utiliser one_factor par défaut si pas de règles (deny nécessite des règles)
       default_policy =
