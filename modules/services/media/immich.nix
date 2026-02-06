@@ -14,6 +14,32 @@
     services.immich.enable = true;
     services.immich.port = 2283;
     services.immich.host = "0.0.0.0"; # Listen on internal network for Caddy reverse proxy
+    services.immich.settings = {
+      server.externalDomain = "https://immich.hexaflare.net";
+
+      # OIDC with Authelia for web and mobile clients.
+      oauth = {
+        enabled = true;
+        issuerUrl = "https://auth.hexaflare.net/.well-known/openid-configuration";
+        clientId = "immich";
+        clientSecret._secret = config.sops.secrets.immich_oauth_client_secret.path;
+        scope = "openid email profile";
+        tokenEndpointAuthMethod = "client_secret_post";
+        mobileOverrideEnabled = true;
+        mobileRedirectUri = "app.immich:///oauth-callback";
+        buttonText = "Se connecter avec Authelia";
+      };
+
+      # Keep local login as fallback during rollout.
+      passwordLogin.enabled = true;
+    };
+
+    sops.secrets.immich_oauth_client_secret = {
+      sopsFile = ../../../secrets/secrets.yaml;
+      owner = "immich";
+      group = "immich";
+      restartUnits = ["immich-server.service"];
+    };
     # Note: Firewall configured in host to allow only internal network access
   };
 }

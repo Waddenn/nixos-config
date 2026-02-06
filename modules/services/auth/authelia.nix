@@ -281,37 +281,60 @@ in {
     };
 
     # Secrets SOPS
-    sops.secrets = {
-      authelia_jwt_secret = {
-        sopsFile = ../../../secrets/secrets.yaml;
-        owner = "authelia";
-        group = "authelia";
-        mode = "0400";
-        restartUnits = ["authelia.service"];
+    sops.secrets =
+      {
+        authelia_jwt_secret = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
+        authelia_session_secret = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
+        authelia_storage_encryption_key = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
+        authelia_oidc_hmac_secret = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
+        authelia_oidc_jwk_private_key = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
+        authelia_immich_oidc_client_secret_digest = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
+      }
+      // lib.optionalAttrs (cfg.database.type == "postgres") {
+        authelia_db_password = {
+          sopsFile = ../../../secrets/secrets.yaml;
+          owner = "authelia";
+          group = "authelia";
+          mode = "0400";
+          restartUnits = ["authelia.service"];
+        };
       };
-      authelia_session_secret = {
-        sopsFile = ../../../secrets/secrets.yaml;
-        owner = "authelia";
-        group = "authelia";
-        mode = "0400";
-        restartUnits = ["authelia.service"];
-      };
-      authelia_storage_encryption_key = {
-        sopsFile = ../../../secrets/secrets.yaml;
-        owner = "authelia";
-        group = "authelia";
-        mode = "0400";
-        restartUnits = ["authelia.service"];
-      };
-    } // lib.optionalAttrs (cfg.database.type == "postgres") {
-      authelia_db_password = {
-        sopsFile = ../../../secrets/secrets.yaml;
-        owner = "authelia";
-        group = "authelia";
-        mode = "0400";
-        restartUnits = ["authelia.service"];
-      };
-    };
 
     # Script pour générer le fichier d'environnement avec les secrets
     systemd.services.authelia-env-setup = {
@@ -324,19 +347,28 @@ in {
         RemainAfterExit = true;
       };
 
-      script = let
-        secretsEnv = ''
-          AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=$(cat ${config.sops.secrets.authelia_jwt_secret.path})
-          AUTHELIA_SESSION_SECRET=$(cat ${config.sops.secrets.authelia_session_secret.path})
-          AUTHELIA_STORAGE_ENCRYPTION_KEY=$(cat ${config.sops.secrets.authelia_storage_encryption_key.path})
-        ''
-        + lib.optionalString (cfg.database.type == "postgres") ''
-          AUTHELIA_STORAGE_POSTGRES_PASSWORD=$(cat ${config.sops.secrets.authelia_db_password.path})
-        '';
-      in ''
+      script = ''
+        authelia_jwt_secret=$(cat ${config.sops.secrets.authelia_jwt_secret.path})
+        authelia_session_secret=$(cat ${config.sops.secrets.authelia_session_secret.path})
+        authelia_storage_encryption_key=$(cat ${config.sops.secrets.authelia_storage_encryption_key.path})
+        ${lib.optionalString (cfg.database.type == "postgres") "authelia_db_password=$(cat ${config.sops.secrets.authelia_db_password.path})"}
+
+        oidc_hmac_secret=$(cat ${config.sops.secrets.authelia_oidc_hmac_secret.path})
+        oidc_jwk_private_key=$(awk '{printf "%s\\n", $0}' ${config.sops.secrets.authelia_oidc_jwk_private_key.path} | sed 's/\\n$//')
+        immich_oidc_client_secret_digest=$(cat ${config.sops.secrets.authelia_immich_oidc_client_secret_digest.path})
+
+        oidc_json=$(cat <<EOF
+        {"hmac_secret":"$oidc_hmac_secret","jwks":[{"key_id":"main-rs256","algorithm":"RS256","use":"sig","key":"$oidc_jwk_private_key"}],"clients":[{"client_id":"immich","client_name":"immich","client_secret":"$immich_oidc_client_secret_digest","public":false,"authorization_policy":"two_factor","require_pkce":false,"pkce_challenge_method":"","redirect_uris":["https://immich.hexaflare.net/auth/login","https://immich.hexaflare.net/user-settings","app.immich:///oauth-callback"],"scopes":["openid","profile","email"],"response_types":["code"],"grant_types":["authorization_code"],"access_token_signed_response_alg":"none","userinfo_signed_response_alg":"none","token_endpoint_auth_method":"client_secret_post"}]}
+        EOF
+        )
+
         mkdir -p /run/authelia
-        cat > /run/authelia/env <<'EOF'
-        ${secretsEnv}
+        cat > /run/authelia/env <<EOF
+        AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=$authelia_jwt_secret
+        AUTHELIA_SESSION_SECRET=$authelia_session_secret
+        AUTHELIA_STORAGE_ENCRYPTION_KEY=$authelia_storage_encryption_key
+        ${lib.optionalString (cfg.database.type == "postgres") "AUTHELIA_STORAGE_POSTGRES_PASSWORD=$authelia_db_password"}
+        AUTHELIA_IDENTITY_PROVIDERS_OIDC=$oidc_json
         EOF
         chmod 600 /run/authelia/env
         chown authelia:authelia /run/authelia/env
@@ -346,7 +378,8 @@ in {
     # Service systemd Authelia
     systemd.services.authelia = {
       description = "Authelia authentication and authorization server";
-      after = ["network.target" "authelia-env-setup.service"]
+      after =
+        ["network.target" "authelia-env-setup.service"]
         ++ lib.optional (cfg.redis.host == "localhost") "redis-authelia.service"
         ++ lib.optional (cfg.database.type == "postgres" && cfg.database.host == "localhost") "postgresql.service";
       requires = ["authelia-env-setup.service"];
