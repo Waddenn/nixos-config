@@ -32,7 +32,7 @@ new_head="$(git rev-parse --short "${GIT_REMOTE}/${GIT_BRANCH}")"
 git reset --hard "${GIT_REMOTE}/${GIT_BRANCH}" >/dev/null
 
 echo "[pull-update] git ${old_head:-unknown} -> ${new_head}"
-nixos-rebuild switch --flake ".#${host}"
+nixos-rebuild switch --flake "path:${REPO_DIR}#${host}"
 
 current_system="$(readlink -f /run/current-system 2>/dev/null || true)"
 duration="$(( $(date +%s) - start_ts ))"

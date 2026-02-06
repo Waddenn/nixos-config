@@ -84,6 +84,11 @@ merge_csv_lists() {
     | lines_to_csv
 }
 
+csv_contains() {
+  local list_csv="${1:-}" needle="${2:-}"
+  csv_to_lines "$list_csv" | grep -Fxq "$needle"
+}
+
 acquire_lock() {
   if command -v flock >/dev/null 2>&1; then
     exec 9>"$LOCK_FILE"
@@ -189,15 +194,39 @@ push_cache_paths() {
 
 trigger_host_update() {
   local host="$1"
-  ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
-    "root@${host}" "systemctl start internal-pull-update.service"
+  local out rc
+  set +e
+  out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
+    "root@${host}" "systemctl start internal-pull-update.service" 2>&1)"
+  rc=$?
+  set -e
+
+  if [[ $rc -eq 0 ]]; then
+    return 0
+  fi
+
+  if echo "$out" | grep -q "Unit internal-pull-update.service not found"; then
+    log_warn "⚠️ ${host}: pull-updater unit missing, running bootstrap rebuild."
+    ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
+      "root@${host}" \
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"git config --global --add safe.directory '${REPO_DIR}' || true; cd '${REPO_DIR}'; git fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'path:${REPO_DIR}#${host}'\" >/dev/null"
+    BOOTSTRAP_LIST="$(merge_csv_lists "$BOOTSTRAP_LIST" "$host")"
+    return 0
+  fi
+
+  printf '%s\n' "$out" >&2
+  return "$rc"
 }
 
 wait_host_update_done() {
   local host="$1"
   local waited=0 state
+  local unit_name="internal-pull-update.service"
+  if csv_contains "${BOOTSTRAP_LIST:-}" "$host"; then
+    unit_name="internal-pull-bootstrap.service"
+  fi
   while (( waited < HOST_UPDATE_TIMEOUT )); do
-    state="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl is-active internal-pull-update.service || true" 2>/dev/null || true)"
+    state="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl is-active ${unit_name} || true" 2>/dev/null || true)"
     if [[ "$state" != "active" && "$state" != "activating" ]]; then
       return 0
     fi
@@ -215,9 +244,13 @@ collect_host_result() {
     return 0
   fi
 
-  local current result
+  local current result unit_name
+  unit_name="internal-pull-update.service"
+  if csv_contains "${BOOTSTRAP_LIST:-}" "$host"; then
+    unit_name="internal-pull-bootstrap.service"
+  fi
   current="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "readlink -f /run/current-system" 2>/dev/null || true)"
-  result="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl show -p Result --value internal-pull-update.service" 2>/dev/null || true)"
+  result="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl show -p Result --value ${unit_name}" 2>/dev/null || true)"
 
   if [[ -n "$expected" && "$current" == "$expected" ]]; then
     UPDATED_LIST="$(merge_csv_lists "$UPDATED_LIST" "$host")"
@@ -362,6 +395,11 @@ trigger_self_update() {
     return 0
   fi
 
+  if ! systemctl list-unit-files internal-pull-update.service >/dev/null 2>&1; then
+    log_warn "⚠️  Local self-update unit not installed on ${SELF_UPDATE_NODE}, skipping."
+    return 0
+  fi
+
   log_info "\n🏠 Triggering self-update for ${SELF_UPDATE_NODE}..."
   if ! sudo systemctl start internal-pull-update.service; then
     log_warn "⚠️  Failed to start local self-update service."
@@ -406,6 +444,7 @@ main() {
   FAILED_LIST=""
   UNREACHABLE_LIST=""
   SKIPPED_LIST=""
+  BOOTSTRAP_LIST=""
 
   local all_targets
   all_targets="$(discover_pull_hosts)"
