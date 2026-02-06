@@ -69,7 +69,8 @@
         {
           domain = cfg.domain;
           authelia_url = "https://auth.${cfg.domain}";
-          default_redirection_url = "https://${cfg.domain}";
+          # Rediriger vers la page de paramètres utilisateur après connexion
+          default_redirection_url = "https://auth.${cfg.domain}/settings";
         }
       ];
 
