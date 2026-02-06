@@ -61,7 +61,7 @@
       # Immich - Photos de famille
       {
         domain = ["immich.hexaflare.net"];
-        policy = "one_factor";
+        policy = "two_factor";
         subject = ["group:family" "group:admins"];
       }
 
