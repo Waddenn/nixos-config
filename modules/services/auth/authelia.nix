@@ -65,10 +65,17 @@
       # secret sera lu depuis AUTHELIA_SESSION_SECRET env var
 
       cookies = [
+        # Configuration pour le domaine public hexaflare.net
         {
           domain = cfg.domain;
           authelia_url = "https://auth.${cfg.domain}";
           default_redirection_url = "https://${cfg.domain}";
+        }
+        # Configuration pour l'accès via MagicDNS Tailscale
+        {
+          domain = "caddy";
+          authelia_url = "http://caddy";
+          default_redirection_url = "http://caddy";
         }
       ];
 
