@@ -183,7 +183,7 @@ run_fleet_deploy() {
   LOGFILE="$(mktemp)"
 
   set +e
-  "$COLMENA_BIN" apply --color always --parallel 3 --keep-result --on @remote 2>&1 | tee "$LOGFILE"
+  "$COLMENA_BIN" apply --color always --parallel 2 --keep-result --on @remote 2>&1 | tee "$LOGFILE"
   FLEET_EXIT=${PIPESTATUS[0]}
   set -e
 
