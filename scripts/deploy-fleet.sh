@@ -272,7 +272,20 @@ send_discord_notification() {
 
 trigger_self_update() {
   local current_host
-  current_host="$(hostname -s 2>/dev/null || hostname)"
+  current_host="${HOSTNAME:-}"
+  if [[ -z "$current_host" && -r /proc/sys/kernel/hostname ]]; then
+    current_host="$(cat /proc/sys/kernel/hostname 2>/dev/null || true)"
+  fi
+  if [[ -z "$current_host" ]]; then
+    current_host="$(uname -n 2>/dev/null || true)"
+  fi
+  current_host="${current_host%%.*}"
+
+  if [[ -z "$current_host" ]]; then
+    log_warn "\n🏠 Unable to determine current hostname, skipping self-update."
+    return 0
+  fi
+
   if [[ "$current_host" != "$SELF_UPDATE_NODE" ]]; then
     log_info "\n🏠 Skipping self-update on ${current_host} (target: ${SELF_UPDATE_NODE})."
     return 0
