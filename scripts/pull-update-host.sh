@@ -24,12 +24,12 @@ start_ts="$(date +%s)"
 echo "[pull-update] host=${host} repo=${REPO_DIR} remote=${GIT_REMOTE}/${GIT_BRANCH}"
 
 # Service runs as root while repo is owned by nixos user.
-git config --global --add safe.directory "$REPO_DIR" >/dev/null 2>&1 || true
+git_safe=(git -c "safe.directory=${REPO_DIR}")
 
-git fetch "$GIT_REMOTE" "$GIT_BRANCH" --prune
-old_head="$(git rev-parse --short HEAD || true)"
-new_head="$(git rev-parse --short "${GIT_REMOTE}/${GIT_BRANCH}")"
-git reset --hard "${GIT_REMOTE}/${GIT_BRANCH}" >/dev/null
+"${git_safe[@]}" fetch "$GIT_REMOTE" "$GIT_BRANCH" --prune
+old_head="$("${git_safe[@]}" rev-parse --short HEAD || true)"
+new_head="$("${git_safe[@]}" rev-parse --short "${GIT_REMOTE}/${GIT_BRANCH}")"
+"${git_safe[@]}" reset --hard "${GIT_REMOTE}/${GIT_BRANCH}" >/dev/null
 
 echo "[pull-update] git ${old_head:-unknown} -> ${new_head}"
 nixos-rebuild switch --flake "path:${REPO_DIR}#${host}"

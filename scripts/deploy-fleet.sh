@@ -209,7 +209,7 @@ trigger_host_update() {
     log_warn "⚠️ ${host}: pull-updater unit missing, running bootstrap rebuild."
     ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
       "root@${host}" \
-      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"git config --global --add safe.directory '${REPO_DIR}' || true; cd '${REPO_DIR}'; git fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'path:${REPO_DIR}#${host}'\" >/dev/null"
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'path:${REPO_DIR}#${host}'\" >/dev/null"
     BOOTSTRAP_LIST="$(merge_csv_lists "$BOOTSTRAP_LIST" "$host")"
     return 0
   fi
