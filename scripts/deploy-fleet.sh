@@ -115,6 +115,16 @@ merge_csv_lists() {
     | lines_to_csv
 }
 
+csv_count() {
+  # Count unique non-empty entries in a CSV list.
+  local list_csv="${1:-}"
+  if [[ -z "$list_csv" ]]; then
+    echo 0
+    return 0
+  fi
+  csv_to_lines "$list_csv" | wc -l | tr -d ' '
+}
+
 csv_contains() {
   local list_csv="${1:-}" needle="${2:-}"
   csv_to_lines "$list_csv" | grep -Fxq "$needle"
@@ -436,77 +446,97 @@ build_report() {
   commit_hash="$(git rev-parse --short HEAD)"
   commit_msg="$(git log -1 --format=%s)"
 
-  REPORT_BODY="**Commit:** \`${commit_hash}\` - ${commit_msg}
-**Duration:** ${DURATION_STR}
+  local total ok confirmed diverged failed unreachable skipped not_attempted dns_failed acl_denied auth_failed
+  total="$(csv_count "${all_targets:-}")"
+  ok="$(csv_count "${UPDATED_LIST:-}")"
+  confirmed="$(csv_count "${CONFIRMED_LIST:-}")"
+  diverged="$(csv_count "${DIVERGED_LIST:-}")"
+  failed="$(csv_count "${FAILED_LIST:-}")"
+  unreachable="$(csv_count "${UNREACHABLE_LIST:-}")"
+  skipped="$(csv_count "${SKIPPED_LIST:-}")"
+  not_attempted="$(csv_count "${NOT_STARTED_LIST:-}")"
+  dns_failed="$(csv_count "${DNS_FAILED_LIST:-}")"
+  acl_denied="$(csv_count "${ACL_DENIED_LIST:-}")"
+  auth_failed="$(csv_count "${AUTH_FAILED_LIST:-}")"
+
+  # Short, warm, and high-signal summary first.
+  REPORT_BODY="**Résumé:** 🟢 À jour: ${confirmed}/${total} | ✅ Succès: ${ok}/${total} | 🟡 Divergé: ${diverged} | ❌ Échec: ${failed} | 📡 Injoignable: ${unreachable}
+**Commit:** \`${commit_hash}\` - ${commit_msg}
+**Durée:** ${DURATION_STR}
 **Canary:** ${CANARY_EFFECTIVE:-none}
 **Batch:** ${BATCH_EFFECTIVE:-none}"
 
-  if [[ -n "${CONFIRMED_LIST:-}" ]]; then
-    REPORT_BODY+="
+  # Avoid repetition: if everything that succeeded is "confirmed", show only the confirmed list.
+  if [[ -n "${UPDATED_LIST:-}" ]]; then
+    if [[ "$ok" -gt 0 && "$ok" -eq "$confirmed" && "$diverged" -eq 0 ]]; then
+      REPORT_BODY+="
 
-✅ **Confirmed (expected == current):** ${CONFIRMED_LIST}"
-  fi
+🟢 **À jour (conforme):** ${CONFIRMED_LIST}"
+    else
+      REPORT_BODY+="
 
-  if [[ -n "${DIVERGED_LIST:-}" ]]; then
-    REPORT_BODY+="
+✅ **Succès:** ${UPDATED_LIST}"
+      if [[ -n "${CONFIRMED_LIST:-}" ]]; then
+        REPORT_BODY+="
 
-⚠️ **Diverged (success but expected != current):** ${DIVERGED_LIST}"
-  fi
+🟢 **Conforme (attendu == actuel):** ${CONFIRMED_LIST}"
+      fi
+      if [[ -n "${DIVERGED_LIST:-}" ]]; then
+        REPORT_BODY+="
 
-  if [[ -n "$UPDATED_LIST" ]]; then
-    REPORT_BODY+="
-
-✅ **Updated:** ${UPDATED_LIST}"
+🟡 **Divergé (succès mais attendu != actuel):** ${DIVERGED_LIST}"
+      fi
+    fi
   fi
 
   if [[ -n "${NOT_STARTED_LIST:-}" ]]; then
     REPORT_BODY+="
 
-ℹ️ **Not Attempted:** ${NOT_STARTED_LIST}"
+ℹ️ **Non tenté:** ${NOT_STARTED_LIST}"
   fi
 
   if [[ -n "$UNREACHABLE_LIST" ]]; then
     REPORT_BODY+="
 
-📡 **Unreachable:** ${UNREACHABLE_LIST}"
+📡 **Injoignable:** ${UNREACHABLE_LIST}"
   fi
 
   if [[ -n "${DNS_FAILED_LIST:-}" ]]; then
     REPORT_BODY+="
 
-🌐 **DNS Failed:** ${DNS_FAILED_LIST}"
+🌐 **DNS KO:** ${DNS_FAILED_LIST}"
   fi
 
   if [[ -n "${ACL_DENIED_LIST:-}" ]]; then
     REPORT_BODY+="
 
-🔒 **ACL Denied (Tailscale SSH):** ${ACL_DENIED_LIST}"
+🔒 **Refusé (Tailscale SSH ACL):** ${ACL_DENIED_LIST}"
   fi
 
   if [[ -n "${AUTH_FAILED_LIST:-}" ]]; then
     REPORT_BODY+="
 
-🔑 **Auth Failed (publickey):** ${AUTH_FAILED_LIST}"
+🔑 **Auth KO (publickey):** ${AUTH_FAILED_LIST}"
   fi
 
   if [[ -n "$FAILED_LIST" ]]; then
     REPORT_BODY+="
 
-❌ **Failed:** ${FAILED_LIST}"
+❌ **Échec:** ${FAILED_LIST}"
   fi
 
   if [[ -n "$SKIPPED_LIST" ]]; then
     REPORT_BODY+="
 
-⏭️ **Skipped:** ${SKIPPED_LIST}"
+⏭️ **Ignoré (suite au canary):** ${SKIPPED_LIST}"
   fi
 
   if [[ -z "$FAILED_LIST" && -z "$UNREACHABLE_LIST" && -z "${DNS_FAILED_LIST:-}" && -z "${ACL_DENIED_LIST:-}" && -z "${AUTH_FAILED_LIST:-}" ]]; then
-    TITLE="🚀 Fleet Deployment Success"
+    TITLE="✅ Déploiement terminé"
     COLOR=3066993
     log_ok "\n✅ FLEET SUCCESS: Nodes updated."
   else
-    TITLE="⚠️ Fleet Partial Deployment"
+    TITLE="⚠️ Déploiement partiel"
     COLOR=15105570
     log_warn "\n⚠️  FLEET PARTIAL: Some nodes failed/unreachable."
   fi
@@ -627,7 +657,6 @@ main() {
   ACL_DENIED_LIST=""
   AUTH_FAILED_LIST=""
 
-  local all_targets
   all_targets="$(discover_pull_hosts)"
   if [[ -z "$all_targets" ]]; then
     log_warn "⚠️ No pull-updater targets found, nothing to orchestrate."

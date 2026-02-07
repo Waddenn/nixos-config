@@ -48,7 +48,7 @@
     nix.settings.experimental-features = ["nix-command" "flakes"];
     my-services.programs.fish.enable = true;
     documentation.man.enable = false;
-    my-services.monitoring.beszel-agent.enable = true; # Need to standardize beszel too? Later.
+    my-services.monitoring.beszel-agent.enable = true; 
     time.timeZone = "Europe/Paris";
     sops.defaultSopsFile = ../../secrets/secrets.yaml;
     sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
