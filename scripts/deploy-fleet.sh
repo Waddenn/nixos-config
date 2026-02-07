@@ -311,9 +311,17 @@ run_group() {
   local group_name="$1"
   local hosts_csv="$2"
   local started_hosts=""
+  local not_started=""
 
   if [[ -z "$hosts_csv" ]]; then
     log_warn "⚠️ ${group_name}: no hosts selected."
+    return 0
+  fi
+
+  local -a hosts=()
+  mapfile -t hosts < <(csv_to_lines "$hosts_csv")
+  if [[ ${#hosts[@]} -eq 0 ]]; then
+    log_warn "⚠️ ${group_name}: no hosts selected (after parsing)."
     return 0
   fi
 
@@ -322,24 +330,29 @@ run_group() {
   push_cache_paths
 
   local host
-  while IFS= read -r host; do
-    [[ -n "$host" ]] || continue
-    log_info "▶ ${group_name}: triggering ${host}"
+  for host in "${hosts[@]}"; do
+    log_info "▶ ${group_name}: triggering $(printf '%q' "$host")"
     if ! trigger_host_update "$host"; then
       UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
       continue
     fi
     started_hosts="$(merge_csv_lists "$started_hosts" "$host")"
-  done < <(csv_to_lines "$hosts_csv")
+  done
 
-  while IFS= read -r host; do
-    [[ -n "$host" ]] || continue
+  local -a started=()
+  mapfile -t started < <(csv_to_lines "$started_hosts" || true)
+  for host in "${started[@]}"; do
     if ! wait_host_update_done "$host"; then
       FAILED_LIST="$(merge_csv_lists "$FAILED_LIST" "$host")"
       continue
     fi
     collect_host_result "$host" "$(lookup_expected "$host" || true)"
-  done < <(csv_to_lines "$started_hosts")
+  done
+
+  not_started="$(subtract_csv_lists "$hosts_csv" "$started_hosts" || true)"
+  if [[ -n "$not_started" ]]; then
+    NOT_STARTED_LIST="$(merge_csv_lists "$NOT_STARTED_LIST" "$not_started")"
+  fi
 }
 
 build_report() {
@@ -368,6 +381,12 @@ build_report() {
     REPORT_BODY+="
 
 ✅ **Updated:** ${UPDATED_LIST}"
+  fi
+
+  if [[ -n "${NOT_STARTED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+ℹ️ **Not Started (no trigger attempt):** ${NOT_STARTED_LIST}"
   fi
 
   if [[ -n "$UNREACHABLE_LIST" ]]; then
@@ -507,6 +526,7 @@ main() {
   DIVERGED_LIST=""
   FAILED_LIST=""
   UNREACHABLE_LIST=""
+  NOT_STARTED_LIST=""
   SKIPPED_LIST=""
   BOOTSTRAP_LIST=""
 
