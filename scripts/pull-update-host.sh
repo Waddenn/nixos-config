@@ -29,11 +29,12 @@ git_safe=(git -c "safe.directory=${REPO_DIR}")
 
 "${git_safe[@]}" fetch "$GIT_REMOTE" "$GIT_BRANCH" --prune
 old_head="$("${git_safe[@]}" rev-parse --short HEAD || true)"
-new_head="$("${git_safe[@]}" rev-parse --short "${GIT_REMOTE}/${GIT_BRANCH}")"
 "${git_safe[@]}" reset --hard "${GIT_REMOTE}/${GIT_BRANCH}" >/dev/null
+new_rev="$("${git_safe[@]}" rev-parse HEAD)"
+new_head="${new_rev:0:7}"
 
 echo "[pull-update] git ${old_head:-unknown} -> ${new_head}"
-nixos-rebuild switch --flake "path:${REPO_DIR}#${host}"
+nixos-rebuild switch --flake "git+file://${REPO_DIR}?rev=${new_rev}#${host}"
 
 current_system="$(readlink -f /run/current-system 2>/dev/null || true)"
 duration="$(( $(date +%s) - start_ts ))"

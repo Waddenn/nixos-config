@@ -23,6 +23,11 @@ CACHIX_CACHE_NAME="${CACHIX_CACHE_NAME:-waddenn-nixos}"
 CANARY_HOSTS="${CANARY_HOSTS:-authelia,caddy}"
 SELF_UPDATE_NODE="${SELF_UPDATE_NODE:-dev-nixos}"
 FORCE_UPDATE="${FORCE_UPDATE:-0}"
+SSH_RETRY_ATTEMPTS="${SSH_RETRY_ATTEMPTS:-30}"
+SSH_RETRY_SLEEP_SECONDS="${SSH_RETRY_SLEEP_SECONDS:-2}"
+
+# Filled once per run, after we resolve the git rev we want to deploy.
+FLEET_REV=""
 
 log_info() { echo -e "${B}$*${NC}"; }
 log_warn() { echo -e "${O}$*${NC}"; }
@@ -34,6 +39,20 @@ is_truthy() {
     1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+ssh_retry() {
+  local host="$1"; shift
+  local attempt=1
+  while (( attempt <= SSH_RETRY_ATTEMPTS )); do
+    if ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
+      "root@${host}" "$@"; then
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    sleep "$SSH_RETRY_SLEEP_SECONDS"
+  done
+  return 1
 }
 
 require_cmd() {
@@ -156,7 +175,9 @@ build_expected_for_hosts() {
   local host outpath
   while IFS= read -r host; do
     [[ -n "$host" ]] || continue
-    outpath="$(nix build --no-link --print-out-paths ".#nixosConfigurations.${host}.config.system.build.toplevel" | tail -n 1)"
+    # Use git+file to ignore untracked files (hosts may have junk/untracked in the checkout).
+    # Pin to a single rev so expected outPaths are stable and comparable.
+    outpath="$(nix build --no-link --print-out-paths "git+file://${REPO_DIR}?rev=${FLEET_REV}#nixosConfigurations.${host}.config.system.build.toplevel" | tail -n 1)"
     EXPECTED_PATHS+=("${host}=${outpath}")
     BUILT_PATHS+=("$outpath")
   done < <(csv_to_lines "$hosts_csv")
@@ -221,7 +242,7 @@ trigger_host_update() {
     log_warn "⚠️ ${host}: pull-updater unit missing, running bootstrap rebuild."
     ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
       "root@${host}" \
-      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git config --system --add safe.directory '${REPO_DIR}' >/dev/null 2>&1 || true; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'path:${REPO_DIR}#${host}'\" >/dev/null"
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git config --system --add safe.directory '${REPO_DIR}' >/dev/null 2>&1 || true; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; rev=\\$(git -c safe.directory='${REPO_DIR}' rev-parse HEAD); nixos-rebuild switch --flake 'git+file://${REPO_DIR}?rev=\\${rev}#${host}'\" >/dev/null"
     BOOTSTRAP_LIST="$(merge_csv_lists "$BOOTSTRAP_LIST" "$host")"
     return 0
   fi
@@ -232,13 +253,22 @@ trigger_host_update() {
 
 wait_host_update_done() {
   local host="$1"
-  local waited=0 state
+  local waited=0 state rc
   local unit_name="internal-pull-update.service"
   if csv_contains "${BOOTSTRAP_LIST:-}" "$host"; then
     unit_name="internal-pull-bootstrap.service"
   fi
   while (( waited < HOST_UPDATE_TIMEOUT )); do
-    state="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl is-active ${unit_name} || true" 2>/dev/null || true)"
+    set +e
+    state="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl is-active ${unit_name} || true" 2>/dev/null)"
+    rc=$?
+    set -e
+    # During switch, SSH may drop (tailscale/network restarts). Treat that as "still in progress".
+    if [[ $rc -ne 0 ]]; then
+      sleep "$POLL_INTERVAL_SECONDS"
+      waited=$((waited + POLL_INTERVAL_SECONDS))
+      continue
+    fi
     if [[ "$state" != "active" && "$state" != "activating" ]]; then
       return 0
     fi
@@ -251,7 +281,7 @@ wait_host_update_done() {
 collect_host_result() {
   local host="$1" expected="$2"
 
-  if ! ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "echo ok" >/dev/null 2>&1; then
+  if ! ssh_retry "$host" "echo ok" >/dev/null 2>&1; then
     UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
     return 0
   fi
@@ -261,16 +291,20 @@ collect_host_result() {
   if csv_contains "${BOOTSTRAP_LIST:-}" "$host"; then
     unit_name="internal-pull-bootstrap.service"
   fi
-  current="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "readlink -f /run/current-system" 2>/dev/null || true)"
-  result="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl show -p Result --value ${unit_name}" 2>/dev/null || true)"
+  current="$(ssh_retry "$host" "readlink -f /run/current-system" 2>/dev/null || true)"
+  result="$(ssh_retry "$host" "systemctl show -p Result --value ${unit_name}" 2>/dev/null || true)"
 
-  if [[ -n "$expected" && "$current" == "$expected" ]]; then
+  if [[ "$result" == "success" ]]; then
     UPDATED_LIST="$(merge_csv_lists "$UPDATED_LIST" "$host")"
-  elif [[ "$result" == "success" ]]; then
-    UPDATED_LIST="$(merge_csv_lists "$UPDATED_LIST" "$host")"
-  else
-    FAILED_LIST="$(merge_csv_lists "$FAILED_LIST" "$host")"
+    if [[ -n "$expected" && -n "$current" && "$current" == "$expected" ]]; then
+      CONFIRMED_LIST="$(merge_csv_lists "$CONFIRMED_LIST" "$host")"
+    elif [[ -n "$expected" && -n "$current" && "$current" != "$expected" ]]; then
+      DIVERGED_LIST="$(merge_csv_lists "$DIVERGED_LIST" "$host")"
+    fi
+    return 0
   fi
+
+  FAILED_LIST="$(merge_csv_lists "$FAILED_LIST" "$host")"
 }
 
 run_group() {
@@ -317,6 +351,18 @@ build_report() {
 **Duration:** ${DURATION_STR}
 **Canary:** ${CANARY_EFFECTIVE:-none}
 **Batch:** ${BATCH_EFFECTIVE:-none}"
+
+  if [[ -n "${CONFIRMED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+✅ **Confirmed (expected == current):** ${CONFIRMED_LIST}"
+  fi
+
+  if [[ -n "${DIVERGED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+⚠️ **Diverged (success but expected != current):** ${DIVERGED_LIST}"
+  fi
 
   if [[ -n "$UPDATED_LIST" ]]; then
     REPORT_BODY+="
@@ -457,6 +503,8 @@ main() {
   start_time="$(date +%s)"
 
   UPDATED_LIST=""
+  CONFIRMED_LIST=""
+  DIVERGED_LIST=""
   FAILED_LIST=""
   UNREACHABLE_LIST=""
   SKIPPED_LIST=""
@@ -474,6 +522,9 @@ main() {
 
   log_info "🎯 Pull targets: ${all_targets}"
   log_info "🧪 Canary: ${CANARY_EFFECTIVE:-none}"
+
+  # We pin expected builds to a single revision (the one we're about to deploy).
+  FLEET_REV="$remote_sha"
 
   run_group "CANARY" "$CANARY_EFFECTIVE"
 
