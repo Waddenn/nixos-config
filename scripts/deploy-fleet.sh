@@ -333,7 +333,10 @@ run_group() {
   local not_started=""
   local tmpdir
   tmpdir="$(mktemp -d -t deploy-fleet.XXXXXX)"
-  trap 'rm -rf "$tmpdir" 2>/dev/null || true' RETURN
+  # With `set -u`, a RETURN trap that references a local variable can fail because
+  # locals may be unset before the trap runs. Capture the value eagerly.
+  local cleanup_dir="$tmpdir"
+  trap "rm -rf '${cleanup_dir}' 2>/dev/null || true" RETURN
 
   if [[ -z "$hosts_csv" ]]; then
     log_warn "⚠️ ${group_name}: no hosts selected."
