@@ -8,6 +8,13 @@
   options.my-services.infra.deployer-node.enable = lib.mkEnableOption "Enable internal GitOps controller";
 
   config = lib.mkIf config.my-services.infra.deployer-node.enable {
+    environment.shellAliases = {
+      gitops-force = "sudo touch /var/lib/internal-gitops/force && sudo systemctl start internal-gitops.service";
+    };
+    programs.fish.shellAliases = {
+      gitops-force = "sudo touch /var/lib/internal-gitops/force; and sudo systemctl start internal-gitops.service";
+    };
+
     environment.systemPackages = [
       pkgs.git
       pkgs.cachix

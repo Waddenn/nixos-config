@@ -4,6 +4,7 @@ set -Eeuo pipefail
 REPO_DIR="${REPO_DIR:-/home/nixos/nixos-config}"
 GIT_REMOTE="${GIT_REMOTE:-origin}"
 GIT_BRANCH="${GIT_BRANCH:-main}"
+LOCK_FILE="${LOCK_FILE:-/run/lock/internal-pull-update.lock}"
 
 host="${HOSTNAME:-}"
 if [[ -z "$host" && -r /proc/sys/kernel/hostname ]]; then
@@ -17,6 +18,22 @@ host="${host%%.*}"
 if [[ -z "$host" ]]; then
   echo "[pull-update] unable to resolve hostname" >&2
   exit 1
+fi
+
+mkdir -p "$(dirname "$LOCK_FILE")" 2>/dev/null || true
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    echo "[pull-update] another update is already running; exiting."
+    exit 0
+  fi
+else
+  lockdir="${LOCK_FILE}.d"
+  if ! mkdir "$lockdir" 2>/dev/null; then
+    echo "[pull-update] another update is already running (lockdir); exiting."
+    exit 0
+  fi
+  trap 'rmdir "$lockdir" 2>/dev/null || true' EXIT
 fi
 
 cd "$REPO_DIR"
