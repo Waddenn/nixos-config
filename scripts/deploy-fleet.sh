@@ -25,9 +25,13 @@ SELF_UPDATE_NODE="${SELF_UPDATE_NODE:-dev-nixos}"
 FORCE_UPDATE="${FORCE_UPDATE:-0}"
 SSH_RETRY_ATTEMPTS="${SSH_RETRY_ATTEMPTS:-30}"
 SSH_RETRY_SLEEP_SECONDS="${SSH_RETRY_SLEEP_SECONDS:-2}"
+PARALLEL_HOSTS="${PARALLEL_HOSTS:-6}"
 
 # Filled once per run, after we resolve the git rev we want to deploy.
 FLEET_REV=""
+
+# Used to classify trigger_host_update failures.
+TRIGGER_LAST_OUT=""
 
 log_info() { echo -e "${B}$*${NC}"; }
 log_warn() { echo -e "${O}$*${NC}"; }
@@ -133,6 +137,18 @@ acquire_lock() {
   trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
 }
 
+wait_for_job_slot() {
+  local max="${1:-1}"
+  # Throttle background jobs. Uses wait -n when available.
+  while (( $(jobs -pr | wc -l) >= max )); do
+    wait -n 2>/dev/null || {
+      local one
+      one="$(jobs -pr | head -n 1 || true)"
+      [[ -n "$one" ]] && wait "$one" || sleep 0.2
+    }
+  done
+}
+
 fetch_with_retry() {
   local attempt=1
   while (( attempt <= MAX_FETCH_RETRIES )); do
@@ -235,6 +251,8 @@ trigger_host_update() {
   set -e
 
   if [[ $rc -eq 0 ]]; then
+    TRIGGER_LAST_OUT=""
+    printf '%s\n' "unit=internal-pull-update.service"
     return 0
   fi
 
@@ -242,22 +260,22 @@ trigger_host_update() {
     log_warn "⚠️ ${host}: pull-updater unit missing, running bootstrap rebuild."
     ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
       "root@${host}" \
-      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git config --system --add safe.directory '${REPO_DIR}' >/dev/null 2>&1 || true; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; /run/current-system/sw/bin/flock -n /run/lock/internal-pull-update.lock nixos-rebuild switch --flake 'git+file://${REPO_DIR}?rev=${FLEET_REV}#${host}'\" >/dev/null"
-    BOOTSTRAP_LIST="$(merge_csv_lists "$BOOTSTRAP_LIST" "$host")"
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git config --system --add safe.directory '${REPO_DIR}' >/dev/null 2>&1 || true; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'git+file://${REPO_DIR}?rev=${FLEET_REV}#${host}'\" >/dev/null"
+    TRIGGER_LAST_OUT=""
+    printf '%s\n' "unit=internal-pull-bootstrap.service"
     return 0
   fi
 
+  TRIGGER_LAST_OUT="$out"
   printf '%s\n' "$out" >&2
   return "$rc"
 }
 
 wait_host_update_done() {
   local host="$1"
+  local unit_name="$2"
   local waited=0 state rc
-  local unit_name="internal-pull-update.service"
-  if csv_contains "${BOOTSTRAP_LIST:-}" "$host"; then
-    unit_name="internal-pull-bootstrap.service"
-  fi
+  unit_name="${unit_name:-internal-pull-update.service}"
   while (( waited < HOST_UPDATE_TIMEOUT )); do
     set +e
     state="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" "root@${host}" "systemctl is-active ${unit_name} || true" 2>/dev/null)"
@@ -279,39 +297,43 @@ wait_host_update_done() {
 }
 
 collect_host_result() {
-  local host="$1" expected="$2"
+  local host="$1" expected="$2" unit_name="$3"
 
   if ! ssh_retry "$host" "echo ok" >/dev/null 2>&1; then
-    UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
+    printf '%s\n' "status=unreachable"
     return 0
   fi
 
-  local current result unit_name
-  unit_name="internal-pull-update.service"
-  if csv_contains "${BOOTSTRAP_LIST:-}" "$host"; then
-    unit_name="internal-pull-bootstrap.service"
-  fi
+  local current result
+  unit_name="${unit_name:-internal-pull-update.service}"
   current="$(ssh_retry "$host" "readlink -f /run/current-system" 2>/dev/null || true)"
   result="$(ssh_retry "$host" "systemctl show -p Result --value ${unit_name}" 2>/dev/null || true)"
 
   if [[ "$result" == "success" ]]; then
-    UPDATED_LIST="$(merge_csv_lists "$UPDATED_LIST" "$host")"
+    printf '%s\n' "status=success"
+    printf '%s\n' "current=${current}"
     if [[ -n "$expected" && -n "$current" && "$current" == "$expected" ]]; then
-      CONFIRMED_LIST="$(merge_csv_lists "$CONFIRMED_LIST" "$host")"
+      printf '%s\n' "compare=confirmed"
     elif [[ -n "$expected" && -n "$current" && "$current" != "$expected" ]]; then
-      DIVERGED_LIST="$(merge_csv_lists "$DIVERGED_LIST" "$host")"
+      printf '%s\n' "compare=diverged"
+    else
+      printf '%s\n' "compare=unknown"
     fi
     return 0
   fi
 
-  FAILED_LIST="$(merge_csv_lists "$FAILED_LIST" "$host")"
+  printf '%s\n' "status=failed"
 }
 
 run_group() {
   local group_name="$1"
   local hosts_csv="$2"
   local started_hosts=""
+  local attempted_hosts=""
   local not_started=""
+  local tmpdir
+  tmpdir="$(mktemp -d -t deploy-fleet.XXXXXX)"
+  trap 'rm -rf "$tmpdir" 2>/dev/null || true' RETURN
 
   if [[ -z "$hosts_csv" ]]; then
     log_warn "⚠️ ${group_name}: no hosts selected."
@@ -329,27 +351,78 @@ run_group() {
   build_expected_for_hosts "$hosts_csv"
   push_cache_paths
 
+  log_info "⚙️  Parallelism: ${PARALLEL_HOSTS}"
+
   local host
   for host in "${hosts[@]}"; do
     log_info "▶ ${group_name}: triggering $(printf '%q' "$host")"
-    if ! trigger_host_update "$host"; then
-      UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
-      continue
-    fi
-    started_hosts="$(merge_csv_lists "$started_hosts" "$host")"
+    attempted_hosts="$(merge_csv_lists "$attempted_hosts" "$host")"
+    wait_for_job_slot "$PARALLEL_HOSTS"
+    (
+      local out rc
+      out="$(trigger_host_update "$host" 2>&1)"
+      rc=$?
+      printf '%s\n' "$out" >"${tmpdir}/${host}.trigger"
+      exit "$rc"
+    ) &
   done
+  wait
 
   local -a started=()
-  mapfile -t started < <(csv_to_lines "$started_hosts" || true)
-  for host in "${started[@]}"; do
-    if ! wait_host_update_done "$host"; then
-      FAILED_LIST="$(merge_csv_lists "$FAILED_LIST" "$host")"
-      continue
+  local unit_name out
+  for host in "${hosts[@]}"; do
+    out="$(cat "${tmpdir}/${host}.trigger" 2>/dev/null || true)"
+    if echo "$out" | grep -q '^unit='; then
+      started_hosts="$(merge_csv_lists "$started_hosts" "$host")"
+      started+=("$host")
+    else
+      if echo "$out" | grep -q "Permission denied (publickey)"; then
+        AUTH_FAILED_LIST="$(merge_csv_lists "$AUTH_FAILED_LIST" "$host")"
+      elif echo "$out" | grep -q "tailnet policy does not permit"; then
+        ACL_DENIED_LIST="$(merge_csv_lists "$ACL_DENIED_LIST" "$host")"
+      elif echo "$out" | grep -q "Could not resolve hostname"; then
+        DNS_FAILED_LIST="$(merge_csv_lists "$DNS_FAILED_LIST" "$host")"
+      else
+        UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
+      fi
     fi
-    collect_host_result "$host" "$(lookup_expected "$host" || true)"
   done
 
-  not_started="$(subtract_csv_lists "$hosts_csv" "$started_hosts" || true)"
+  for host in "${started[@]}"; do
+    out="$(cat "${tmpdir}/${host}.trigger" 2>/dev/null || true)"
+    unit_name="$(printf '%s\n' "$out" | sed -n 's/^unit=//p' | head -n 1)"
+    wait_for_job_slot "$PARALLEL_HOSTS"
+    (
+      if ! wait_host_update_done "$host" "$unit_name"; then
+        printf '%s\n' "status=failed" >"${tmpdir}/${host}.result"
+        exit 0
+      fi
+      collect_host_result "$host" "$(lookup_expected "$host" || true)" "$unit_name" >"${tmpdir}/${host}.result"
+    ) &
+  done
+  wait
+
+  for host in "${started[@]}"; do
+    out="$(cat "${tmpdir}/${host}.result" 2>/dev/null || true)"
+    case "$(printf '%s\n' "$out" | sed -n 's/^status=//p' | head -n 1)" in
+      success)
+        UPDATED_LIST="$(merge_csv_lists "$UPDATED_LIST" "$host")"
+        case "$(printf '%s\n' "$out" | sed -n 's/^compare=//p' | head -n 1)" in
+          confirmed) CONFIRMED_LIST="$(merge_csv_lists "$CONFIRMED_LIST" "$host")" ;;
+          diverged) DIVERGED_LIST="$(merge_csv_lists "$DIVERGED_LIST" "$host")" ;;
+        esac
+        ;;
+      unreachable)
+        UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
+        ;;
+      *)
+        FAILED_LIST="$(merge_csv_lists "$FAILED_LIST" "$host")"
+        ;;
+    esac
+  done
+
+  # Hosts that were never attempted (e.g. empty list, future skip logic).
+  not_started="$(subtract_csv_lists "$hosts_csv" "$attempted_hosts" || true)"
   if [[ -n "$not_started" ]]; then
     NOT_STARTED_LIST="$(merge_csv_lists "$NOT_STARTED_LIST" "$not_started")"
   fi
@@ -386,13 +459,31 @@ build_report() {
   if [[ -n "${NOT_STARTED_LIST:-}" ]]; then
     REPORT_BODY+="
 
-ℹ️ **Not Started (no trigger attempt):** ${NOT_STARTED_LIST}"
+ℹ️ **Not Attempted:** ${NOT_STARTED_LIST}"
   fi
 
   if [[ -n "$UNREACHABLE_LIST" ]]; then
     REPORT_BODY+="
 
 📡 **Unreachable:** ${UNREACHABLE_LIST}"
+  fi
+
+  if [[ -n "${DNS_FAILED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+🌐 **DNS Failed:** ${DNS_FAILED_LIST}"
+  fi
+
+  if [[ -n "${ACL_DENIED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+🔒 **ACL Denied (Tailscale SSH):** ${ACL_DENIED_LIST}"
+  fi
+
+  if [[ -n "${AUTH_FAILED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+🔑 **Auth Failed (publickey):** ${AUTH_FAILED_LIST}"
   fi
 
   if [[ -n "$FAILED_LIST" ]]; then
@@ -407,7 +498,7 @@ build_report() {
 ⏭️ **Skipped:** ${SKIPPED_LIST}"
   fi
 
-  if [[ -z "$FAILED_LIST" && -z "$UNREACHABLE_LIST" ]]; then
+  if [[ -z "$FAILED_LIST" && -z "$UNREACHABLE_LIST" && -z "${DNS_FAILED_LIST:-}" && -z "${ACL_DENIED_LIST:-}" && -z "${AUTH_FAILED_LIST:-}" ]]; then
     TITLE="🚀 Fleet Deployment Success"
     COLOR=3066993
     log_ok "\n✅ FLEET SUCCESS: Nodes updated."
@@ -529,6 +620,9 @@ main() {
   NOT_STARTED_LIST=""
   SKIPPED_LIST=""
   BOOTSTRAP_LIST=""
+  DNS_FAILED_LIST=""
+  ACL_DENIED_LIST=""
+  AUTH_FAILED_LIST=""
 
   local all_targets
   all_targets="$(discover_pull_hosts)"
@@ -536,6 +630,9 @@ main() {
     log_warn "⚠️ No pull-updater targets found, nothing to orchestrate."
     exit 0
   fi
+
+  # This node updates itself locally at the end of the run.
+  all_targets="$(subtract_csv_lists "$all_targets" "$SELF_UPDATE_NODE")"
 
   CANARY_EFFECTIVE="$(intersect_csv_lists "$all_targets" "$CANARY_HOSTS")"
   BATCH_EFFECTIVE="$(subtract_csv_lists "$all_targets" "$CANARY_EFFECTIVE")"
