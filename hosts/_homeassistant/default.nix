@@ -1,6 +1,4 @@
 {...}: {
-  imports = [
-    ../../modules/infra/proxmox-lxc.nix
-  ];
+  profiles.lxc-base.enable = true;
   my-services.containers.homeassistant.enable = true;
 }

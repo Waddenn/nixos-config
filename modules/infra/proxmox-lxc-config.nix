@@ -12,6 +12,11 @@
   ];
 
   config = lib.mkIf config.my-services.infra.proxmox-lxc.enable {
+    # LXC hosts are typically managed via the internal deployment/pull-updater flow.
+    # Keep as defaults so specific hosts can override if needed.
+    my-services.infra.deployment-target.enable = lib.mkDefault true;
+    my-services.infra.pull-updater.canary = lib.mkDefault true;
+
     boot.isContainer = true;
     systemd.suppressedSystemUnits = [
       "dev-mqueue.mount"

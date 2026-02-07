@@ -1,4 +1,4 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
+  profiles.lxc-base.enable = true;
   my-services.programs.terraform.enable = true;
 }

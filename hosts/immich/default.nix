@@ -1,5 +1,5 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
+  profiles.lxc-base.enable = true;
   immich.enable = true;
 
   # Only allow access from internal network (192.168.40.0/24) where Caddy is located

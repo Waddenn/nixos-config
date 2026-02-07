@@ -1,5 +1,5 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
+  profiles.lxc-base.enable = true;
   # No extra modules currently
   my-services.infra.deployer-node.enable = true;
 }

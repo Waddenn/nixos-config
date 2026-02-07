@@ -1,6 +1,4 @@
 {...}: {
-  imports = [../../modules/infra/proxmox-lxc.nix];
+  profiles.lxc-base.enable = true;
   my-services.monitoring.gatus.enable = true;
-  my-services.infra.deployment-target.enable = true;
-  my-services.infra.pull-updater.canary = true;
 }
