@@ -16,6 +16,11 @@
     };
 
     environment.systemPackages = [
+      (pkgs.writeShellScriptBin "gitops-force" ''
+        set -euo pipefail
+        sudo touch /var/lib/internal-gitops/force
+        sudo systemctl start internal-gitops.service
+      '')
       pkgs.git
       pkgs.cachix
       inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena or pkgs.colmena
