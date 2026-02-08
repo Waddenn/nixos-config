@@ -130,6 +130,21 @@ in {
               reverse_proxy http://192.168.40.115:2283
             '';
         };
+        "codex.hexaflare.net" = {
+          extraConfig =
+            commonConfig
+            + ''
+              forward_auth http://192.168.40.123:9091 {
+                uri /api/authz/forward-auth
+                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+              }
+              reverse_proxy https://192.168.1.124:6902 {
+                transport http {
+                  tls_insecure_skip_verify
+                }
+              }
+            '';
+        };
       };
     };
 
