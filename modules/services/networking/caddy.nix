@@ -138,7 +138,7 @@ in {
                 uri /api/authz/forward-auth
                 copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
               }
-              reverse_proxy https://192.168.1.124:6902 {
+              reverse_proxy https://100.124.126.44:6902 {
                 transport http {
                   tls_insecure_skip_verify
                 }
