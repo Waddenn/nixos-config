@@ -126,6 +126,12 @@
         # subject omis = tous les utilisateurs authentifiés
       }
 
+      # Kasm - 2FA pour tous les utilisateurs
+      {
+        domain = ["codex.hexaflare.net"];
+        policy = "two_factor";
+      }
+
       # EXEMPLE : Panel admin (admins uniquement avec 2FA)
       # {
       #   domain = ["portainer.hexaflare.net" "proxmox.hexaflare.net"];
