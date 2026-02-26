@@ -2,13 +2,7 @@
 
 ![CI Status](https://github.com/Waddenn/nixos-config/actions/workflows/ci.yml/badge.svg)
 
-Mon infrastructure personnelle ("Homelab") gérée avec **NixOS**, **Flakes** et **Home Manager**.
-
-## 🏗 Architecture
-
-Ce projet suit la philosophie **"Explicit Infra, Implicit Services"**.
-
-## 🚀 Démarrage Rapide
+Mon infrastructure personnelle ("Homelab") gérée avec **NixOS** et **Flakes**.
 
 ### Pré-requis
 *   Nix avec les Flakes activés.
