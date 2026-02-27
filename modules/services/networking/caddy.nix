@@ -120,7 +120,6 @@ in {
           extraConfig =
             commonConfig
             + ''
-              header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; font-src 'self' data:; object-src 'none'; frame-ancestors 'self';"
               reverse_proxy http://192.168.40.121:5055
             '';
         };
