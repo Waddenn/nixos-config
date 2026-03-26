@@ -2,5 +2,6 @@
     "nix.formatterPath": "nixfmt",
     "editor.formatOnPaste": false,
     "editor.defaultFormatter": "jnoortheen.nix-ide",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
 }
