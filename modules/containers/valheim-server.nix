@@ -17,6 +17,10 @@
     # Containers
     virtualisation.oci-containers.containers."valheim" = {
       image = "ghcr.io/lloesche/valheim-server";
+      environment = {
+        UPDATE_CRON = "0 4 * * *";
+        UPDATE_IF_IDLE = "true";
+      };
       environmentFiles = [
         "/home/nixos/valheim/.env"
       ];
