@@ -333,3 +333,4 @@
 #   ssh nixos@authelia 'cd ~/nixos-config && git pull && sudo nixos-rebuild switch --flake .#authelia'
 #
 # ==============================================================================
+

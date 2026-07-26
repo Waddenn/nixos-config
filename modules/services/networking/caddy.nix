@@ -63,7 +63,7 @@ in {
       enable = true;
       package = pkgs.caddy.withPlugins {
         plugins = ["github.com/caddy-dns/cloudflare@v0.2.1"];
-        hash = "sha256-B5xXld1+IRUAQHm8zkHFqvRp8cqnervVL6XEos5VNkc=";
+        hash = "sha256-xz43pXTsnYmXZDAAUT+vTapoq3O/8br7igGwqZbjFdk=";
       };
 
       logDir = "/var/log/caddy";
@@ -166,4 +166,3 @@ in {
     };
   };
 }
-
