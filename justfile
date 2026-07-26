@@ -20,6 +20,14 @@ deploy-watch:
 deploy-status:
     ssh nixos@dev-nixos "sudo systemctl status internal-gitops"
 
+# Reconcile the fleet even when the Git revision did not change
+reconcile:
+    ssh nixos@dev-nixos "sudo touch /var/lib/internal-gitops/force && sudo systemctl start internal-gitops.service"
+
+# Compare repository, active system and boot profile on every deployment target
+fleet-status:
+    ./scripts/fleet-status.sh
+
 # === SOPS Secrets Management ===
 
 # Edit secrets.yaml with SOPS

@@ -26,7 +26,20 @@
       inherit lib inputs nixpkgs system;
     };
 
-    checks.${system} = lib.mapAttrs (name: host: host.config.system.build.toplevel) self.nixosConfigurations;
+    checks.${system} =
+      lib.mapAttrs (name: host: host.config.system.build.toplevel) self.nixosConfigurations
+      // {
+        deployment-scripts =
+          pkgs.runCommand "deployment-scripts-check" {
+            nativeBuildInputs = [pkgs.shellcheck];
+          } ''
+            shellcheck \
+              ${./scripts/deploy-fleet.sh} \
+              ${./scripts/fleet-status.sh} \
+              ${./scripts/pull-update-host.sh}
+            touch "$out"
+          '';
+      };
 
     colmena =
       {

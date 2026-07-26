@@ -5,7 +5,7 @@
   ...
 }: {
   options.my-services.infra.pull-updater = {
-    enable = lib.mkEnableOption "Enable local pull-based host updates";
+    enable = lib.mkEnableOption "Enable the revision-aware deployment agent";
 
     canary = lib.mkOption {
       type = lib.types.bool;
@@ -30,45 +30,25 @@
       default = "main";
       description = "Git branch used for pull updates.";
     };
-
-    timerInterval = lib.mkOption {
-      type = lib.types.str;
-      default = "60m";
-      description = "Interval between pull update runs.";
-    };
-
-    randomizedDelay = lib.mkOption {
-      type = lib.types.str;
-      default = "1m";
-      description = "Randomized delay for timer runs.";
-    };
   };
 
   config = lib.mkIf config.my-services.infra.pull-updater.enable {
-    systemd.services.internal-pull-update = {
-      description = "Internal Pull Updater";
+    systemd.services."internal-pull-update@" = {
+      description = "Apply an orchestrator-selected NixOS revision (%i)";
       stopIfChanged = false;
       restartIfChanged = false;
-      path = [pkgs.git pkgs.nixos-rebuild pkgs.gnugrep pkgs.gawk pkgs.coreutils pkgs.openssh pkgs.bash];
+      path = [pkgs.git pkgs.nixos-rebuild pkgs.gnugrep pkgs.gnused pkgs.gawk pkgs.coreutils pkgs.openssh pkgs.bash pkgs.util-linux];
       serviceConfig = {
         Type = "oneshot";
         User = "root";
         WorkingDirectory = config.my-services.infra.pull-updater.repoDir;
-        ExecStart = "${pkgs.bash}/bin/bash ${../../../scripts/pull-update-host.sh}";
+        StateDirectory = "internal-pull-update";
+        ExecStart = "${pkgs.bash}/bin/bash ${../../../scripts/pull-update-host.sh} %i";
         Environment = [
           "REPO_DIR=${config.my-services.infra.pull-updater.repoDir}"
           "GIT_REMOTE=${config.my-services.infra.pull-updater.gitRemote}"
           "GIT_BRANCH=${config.my-services.infra.pull-updater.gitBranch}"
         ];
-      };
-    };
-
-    systemd.timers.internal-pull-update = {
-      wantedBy = ["timers.target"];
-      timerConfig = {
-        OnBootSec = "5m";
-        OnUnitActiveSec = config.my-services.infra.pull-updater.timerInterval;
-        RandomizedDelaySec = config.my-services.infra.pull-updater.randomizedDelay;
       };
     };
   };

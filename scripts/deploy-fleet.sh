@@ -26,12 +26,10 @@ FORCE_UPDATE="${FORCE_UPDATE:-0}"
 SSH_RETRY_ATTEMPTS="${SSH_RETRY_ATTEMPTS:-30}"
 SSH_RETRY_SLEEP_SECONDS="${SSH_RETRY_SLEEP_SECONDS:-2}"
 PARALLEL_HOSTS="${PARALLEL_HOSTS:-6}"
+EXPECTED_CACHE_FILE="${EXPECTED_CACHE_FILE:-/var/lib/internal-gitops/expected-systems.tsv}"
 
 # Filled once per run, after we resolve the git rev we want to deploy.
 FLEET_REV=""
-
-# Used to classify trigger_host_update failures.
-TRIGGER_LAST_OUT=""
 
 log_info() { echo -e "${B}$*${NC}"; }
 log_warn() { echo -e "${O}$*${NC}"; }
@@ -154,7 +152,11 @@ wait_for_job_slot() {
     wait -n 2>/dev/null || {
       local one
       one="$(jobs -pr | head -n 1 || true)"
-      [[ -n "$one" ]] && wait "$one" || sleep 0.2
+      if [[ -n "$one" ]]; then
+        wait "$one" || true
+      else
+        sleep 0.2
+      fi
     }
   done
 }
@@ -179,6 +181,7 @@ sync_repo_to_remote() {
 }
 
 discover_pull_hosts() {
+  # shellcheck disable=SC2016
   nix eval --json --impure --expr '
 let
   flake = builtins.getFlake (toString ./.);
@@ -195,8 +198,6 @@ in
 
 build_expected_for_hosts() {
   local hosts_csv="$1"
-  EXPECTED_PATHS=()
-  BUILT_PATHS=()
 
   local host outpath
   while IFS= read -r host; do
@@ -206,6 +207,45 @@ build_expected_for_hosts() {
     outpath="$(nix build --no-link --print-out-paths "git+file://${REPO_DIR}?rev=${FLEET_REV}#nixosConfigurations.${host}.config.system.build.toplevel" | tail -n 1)"
     EXPECTED_PATHS+=("${host}=${outpath}")
     BUILT_PATHS+=("$outpath")
+  done < <(csv_to_lines "$hosts_csv")
+}
+
+load_expected_cache() {
+  local revision="$1"
+  [[ -r "$EXPECTED_CACHE_FILE" ]] || return 1
+
+  local cached_revision
+  cached_revision="$(sed -n 's/^revision	//p' "$EXPECTED_CACHE_FILE" | head -n 1)"
+  [[ "$cached_revision" == "$revision" ]] || return 1
+
+  EXPECTED_PATHS=()
+  local host outpath
+  while IFS=$'\t' read -r host outpath; do
+    [[ "$host" == "revision" || -z "$host" || -z "$outpath" ]] && continue
+    EXPECTED_PATHS+=("${host}=${outpath}")
+  done <"$EXPECTED_CACHE_FILE"
+  [[ ${#EXPECTED_PATHS[@]} -gt 0 ]]
+}
+
+save_expected_cache() {
+  local revision="$1"
+  local cache_dir tmp kv
+  cache_dir="$(dirname "$EXPECTED_CACHE_FILE")"
+  mkdir -p "$cache_dir"
+  tmp="$(mktemp "${cache_dir}/expected-systems.tsv.XXXXXX")"
+  printf 'revision\t%s\n' "$revision" >"$tmp"
+  for kv in "${EXPECTED_PATHS[@]:-}"; do
+    printf '%s\t%s\n' "${kv%%=*}" "${kv#*=}" >>"$tmp"
+  done
+  mv -f "$tmp" "$EXPECTED_CACHE_FILE"
+}
+
+cache_covers_hosts() {
+  local hosts_csv="$1"
+  local host
+  while IFS= read -r host; do
+    [[ -n "$host" ]] || continue
+    lookup_expected "$host" >/dev/null || return 1
   done < <(csv_to_lines "$hosts_csv")
 }
 
@@ -256,27 +296,42 @@ trigger_host_update() {
   local out rc
   set +e
   out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
-    "root@${host}" "systemctl start internal-pull-update.service" 2>&1)"
+    "root@${host}" "systemctl start internal-pull-update@${FLEET_REV}.service" 2>&1)"
   rc=$?
   set -e
 
   if [[ $rc -eq 0 ]]; then
-    TRIGGER_LAST_OUT=""
-    printf '%s\n' "unit=internal-pull-update.service"
+    printf '%s\n' "unit=internal-pull-update@${FLEET_REV}.service"
     return 0
   fi
 
-  if echo "$out" | grep -q "Unit internal-pull-update.service not found"; then
-    log_warn "⚠️ ${host}: pull-updater unit missing, running bootstrap rebuild."
-    ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
+  if echo "$out" | grep -q "Unit internal-pull-update@.*not found"; then
+    log_warn "⚠️ ${host}: revision-aware agent missing; trying the legacy bootstrap unit once."
+    set +e
+    out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
+      "root@${host}" "systemctl start internal-pull-update.service" 2>&1)"
+    rc=$?
+    set -e
+    if [[ $rc -eq 0 ]]; then
+      printf '%s\n' "unit=internal-pull-update.service"
+      return 0
+    fi
+
+    # A legacy `switch` may have fetched the target but stopped on a NixOS
+    # switch inhibitor. Run the revision-aware script from that checkout so it
+    # can safely prepare a boot generation instead.
+    set +e
+    out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
       "root@${host}" \
-      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap Pull Updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash -lc \"cd '${REPO_DIR}'; git config --system --add safe.directory '${REPO_DIR}' >/dev/null 2>&1 || true; git -c safe.directory='${REPO_DIR}' fetch '${GIT_REMOTE}' '${GIT_BRANCH}' --prune; git -c safe.directory='${REPO_DIR}' reset --hard '${GIT_REMOTE}/${GIT_BRANCH}'; nixos-rebuild switch --flake 'git+file://${REPO_DIR}?rev=${FLEET_REV}#${host}'\" >/dev/null"
-    TRIGGER_LAST_OUT=""
-    printf '%s\n' "unit=internal-pull-bootstrap.service"
-    return 0
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap revision-aware updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash '${REPO_DIR}/scripts/pull-update-host.sh' '${FLEET_REV}'" 2>&1)"
+    rc=$?
+    set -e
+    if [[ $rc -eq 0 ]]; then
+      printf '%s\n' "unit=internal-pull-bootstrap.service"
+      return 0
+    fi
   fi
 
-  TRIGGER_LAST_OUT="$out"
   printf '%s\n' "$out" >&2
   return "$rc"
 }
@@ -314,10 +369,18 @@ collect_host_result() {
     return 0
   fi
 
-  local current result
+  local current result agent_status agent_revision
   unit_name="${unit_name:-internal-pull-update.service}"
   current="$(ssh_retry "$host" "readlink -f /run/current-system" 2>/dev/null || true)"
   result="$(ssh_retry "$host" "systemctl show -p Result --value ${unit_name}" 2>/dev/null || true)"
+  agent_status="$(ssh_retry "$host" "sed -n 's/^STATUS=//p' /var/lib/internal-pull-update/state.env 2>/dev/null | tail -n 1" 2>/dev/null || true)"
+  agent_revision="$(ssh_retry "$host" "sed -n 's/^TARGET_REV=//p' /var/lib/internal-pull-update/state.env 2>/dev/null | tail -n 1" 2>/dev/null || true)"
+
+  if [[ "$agent_revision" == "$FLEET_REV" && "$agent_status" == "reboot-required" ]]; then
+    printf '%s\n' "status=reboot-required"
+    printf '%s\n' "current=${current}"
+    return 0
+  fi
 
   if [[ "$result" == "success" ]]; then
     printf '%s\n' "status=success"
@@ -346,6 +409,7 @@ run_group() {
   # With `set -u`, a RETURN trap that references a local variable can fail because
   # locals may be unset before the trap runs. Capture the value eagerly.
   local cleanup_dir="$tmpdir"
+  # shellcheck disable=SC2064
   trap "rm -rf '${cleanup_dir}' 2>/dev/null || true" RETURN
 
   if [[ -z "$hosts_csv" ]]; then
@@ -359,10 +423,6 @@ run_group() {
     log_warn "⚠️ ${group_name}: no hosts selected (after parsing)."
     return 0
   fi
-
-  log_info "\n🏗️  ${group_name}: building host systems..."
-  build_expected_for_hosts "$hosts_csv"
-  push_cache_paths
 
   log_info "⚙️  Parallelism: ${PARALLEL_HOSTS}"
 
@@ -379,7 +439,9 @@ run_group() {
       exit "$rc"
     ) &
   done
-  wait
+  # Individual trigger failures are classified below; do not let `set -e`
+  # abort the complete fleet report.
+  wait || true
 
   local -a started=()
   local unit_name out
@@ -413,7 +475,7 @@ run_group() {
       collect_host_result "$host" "$(lookup_expected "$host" || true)" "$unit_name" >"${tmpdir}/${host}.result"
     ) &
   done
-  wait
+  wait || true
 
   for host in "${started[@]}"; do
     out="$(cat "${tmpdir}/${host}.result" 2>/dev/null || true)"
@@ -424,6 +486,9 @@ run_group() {
           confirmed) CONFIRMED_LIST="$(merge_csv_lists "$CONFIRMED_LIST" "$host")" ;;
           diverged) DIVERGED_LIST="$(merge_csv_lists "$DIVERGED_LIST" "$host")" ;;
         esac
+        ;;
+      reboot-required)
+        REBOOT_REQUIRED_LIST="$(merge_csv_lists "$REBOOT_REQUIRED_LIST" "$host")"
         ;;
       unreachable)
         UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
@@ -446,21 +511,17 @@ build_report() {
   commit_hash="$(git rev-parse --short HEAD)"
   commit_msg="$(git log -1 --format=%s)"
 
-  local total ok confirmed diverged failed unreachable skipped not_attempted dns_failed acl_denied auth_failed
+  local total ok confirmed diverged failed unreachable reboot_required
   total="$(csv_count "${all_targets:-}")"
   ok="$(csv_count "${UPDATED_LIST:-}")"
   confirmed="$(csv_count "${CONFIRMED_LIST:-}")"
   diverged="$(csv_count "${DIVERGED_LIST:-}")"
   failed="$(csv_count "${FAILED_LIST:-}")"
   unreachable="$(csv_count "${UNREACHABLE_LIST:-}")"
-  skipped="$(csv_count "${SKIPPED_LIST:-}")"
-  not_attempted="$(csv_count "${NOT_STARTED_LIST:-}")"
-  dns_failed="$(csv_count "${DNS_FAILED_LIST:-}")"
-  acl_denied="$(csv_count "${ACL_DENIED_LIST:-}")"
-  auth_failed="$(csv_count "${AUTH_FAILED_LIST:-}")"
+  reboot_required="$(csv_count "${REBOOT_REQUIRED_LIST:-}")"
 
   # Short, warm, and high-signal summary first.
-  REPORT_BODY="**Résumé:** 🟢 À jour: ${confirmed}/${total} | ✅ Succès: ${ok}/${total} | 🟡 Divergé: ${diverged} | ❌ Échec: ${failed} | 📡 Injoignable: ${unreachable}
+  REPORT_BODY="**Résumé:** 🟢 À jour: ${confirmed}/${total} | 🔄 Reboot requis: ${reboot_required} | 🟡 Divergé: ${diverged} | ❌ Échec: ${failed} | 📡 Injoignable: ${unreachable}
 **Commit:** \`${commit_hash}\` - ${commit_msg}
 **Durée:** ${DURATION_STR}
 **Canary:** ${CANARY_EFFECTIVE:-none}
@@ -493,6 +554,12 @@ build_report() {
     REPORT_BODY+="
 
 ℹ️ **Non tenté:** ${NOT_STARTED_LIST}"
+  fi
+
+  if [[ -n "${REBOOT_REQUIRED_LIST:-}" ]]; then
+    REPORT_BODY+="
+
+🔄 **En attente de reboot:** ${REBOOT_REQUIRED_LIST}"
   fi
 
   if [[ -n "$UNREACHABLE_LIST" ]]; then
@@ -531,7 +598,7 @@ build_report() {
 ⏭️ **Ignoré (suite au canary):** ${SKIPPED_LIST}"
   fi
 
-  if [[ -z "$FAILED_LIST" && -z "$UNREACHABLE_LIST" && -z "${DNS_FAILED_LIST:-}" && -z "${ACL_DENIED_LIST:-}" && -z "${AUTH_FAILED_LIST:-}" ]]; then
+  if [[ -z "$FAILED_LIST" && -z "$UNREACHABLE_LIST" && -z "${DNS_FAILED_LIST:-}" && -z "${ACL_DENIED_LIST:-}" && -z "${AUTH_FAILED_LIST:-}" && -z "${REBOOT_REQUIRED_LIST:-}" ]]; then
     TITLE="✅ Déploiement terminé"
     COLOR=3066993
     log_ok "\n✅ FLEET SUCCESS: Nodes updated."
@@ -596,13 +663,13 @@ trigger_self_update() {
     return 0
   fi
 
-  if ! systemctl list-unit-files internal-pull-update.service >/dev/null 2>&1; then
+  if ! systemctl cat "internal-pull-update@.service" >/dev/null 2>&1; then
     log_warn "⚠️  Local self-update unit not installed on ${SELF_UPDATE_NODE}, skipping."
     return 0
   fi
 
   log_info "\n🏠 Triggering self-update for ${SELF_UPDATE_NODE}..."
-  if ! sudo systemctl start internal-pull-update.service; then
+  if ! sudo systemctl start "internal-pull-update@${FLEET_REV}.service"; then
     log_warn "⚠️  Failed to start local self-update service."
   fi
 }
@@ -630,17 +697,18 @@ main() {
   local_sha="$(git rev-parse HEAD)"
   remote_sha="$(git rev-parse "${GIT_REMOTE}/${GIT_BRANCH}")"
 
-  if [[ "$local_sha" == "$remote_sha" ]] && ! is_truthy "$FORCE_UPDATE"; then
-    log_ok "😴 No changes found. System is up to date."
-    exit 0
-  fi
-
+  local repo_changed=0
   if [[ "$local_sha" == "$remote_sha" ]]; then
-    log_warn "⚠️ Force update enabled: proceeding even though local == remote."
+    if is_truthy "$FORCE_UPDATE"; then
+      log_warn "⚠️ Force reconciliation enabled: local == remote."
+    else
+      log_info "🔎 No Git change; reconciling fleet state."
+    fi
   else
     log_ok "✨ New changes detected!"
+    repo_changed=1
+    sync_repo_to_remote
   fi
-  sync_repo_to_remote
 
   local start_time end_time duration
   start_time="$(date +%s)"
@@ -652,10 +720,12 @@ main() {
   UNREACHABLE_LIST=""
   NOT_STARTED_LIST=""
   SKIPPED_LIST=""
-  BOOTSTRAP_LIST=""
   DNS_FAILED_LIST=""
   ACL_DENIED_LIST=""
   AUTH_FAILED_LIST=""
+  REBOOT_REQUIRED_LIST=""
+  EXPECTED_PATHS=()
+  BUILT_PATHS=()
 
   all_targets="$(discover_pull_hosts)"
   if [[ -z "$all_targets" ]]; then
@@ -675,11 +745,24 @@ main() {
   # We pin expected builds to a single revision (the one we're about to deploy).
   FLEET_REV="$remote_sha"
 
+  if [[ "$repo_changed" -eq 0 ]] &&
+     load_expected_cache "$FLEET_REV" &&
+     cache_covers_hosts "$all_targets"; then
+    log_info "📌 Using cached expected system paths for ${FLEET_REV:0:7}."
+  else
+    log_info "🏗️  Building all target systems for ${FLEET_REV:0:7}..."
+    EXPECTED_PATHS=()
+    BUILT_PATHS=()
+    build_expected_for_hosts "$all_targets"
+    push_cache_paths
+    save_expected_cache "$FLEET_REV"
+  fi
+
   run_group "CANARY" "$CANARY_EFFECTIVE"
 
-  if [[ -n "$FAILED_LIST" || -n "$UNREACHABLE_LIST" ]]; then
+  if [[ -n "$FAILED_LIST" || -n "$UNREACHABLE_LIST" || -n "$REBOOT_REQUIRED_LIST" ]]; then
     SKIPPED_LIST="$BATCH_EFFECTIVE"
-    log_warn "⚠️ Canary failed/unreachable, skipping batch rollout."
+    log_warn "⚠️ Canary failed, unreachable, or waiting for reboot; skipping batch rollout."
   else
     log_info "📦 Canary passed, running batch rollout..."
     run_group "BATCH" "$BATCH_EFFECTIVE"
