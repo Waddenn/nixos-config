@@ -323,7 +323,7 @@ trigger_host_update() {
     set +e
     out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
       "root@${host}" \
-      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap revision-aware updater' --working-directory='${REPO_DIR}' /run/current-system/sw/bin/bash '${REPO_DIR}/scripts/pull-update-host.sh' '${FLEET_REV}'" 2>&1)"
+      "systemd-run --unit=internal-pull-bootstrap --description='Bootstrap revision-aware updater' --working-directory='${REPO_DIR}' --setenv=PATH=/run/current-system/sw/bin /run/current-system/sw/bin/bash '${REPO_DIR}/scripts/pull-update-host.sh' '${FLEET_REV}'" 2>&1)"
     rc=$?
     set -e
     if [[ $rc -eq 0 ]]; then
