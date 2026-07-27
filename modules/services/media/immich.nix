@@ -32,6 +32,16 @@
       passwordLogin.enabled = false;
     };
 
+    # Keep a logical database backup on proxade's independent Storage2 pool.
+    services.postgresqlBackup = {
+      enable = true;
+      backupAll = false;
+      databases = ["immich"];
+      location = "/var/backup/postgresql";
+      startAt = "*-*-* 02:15:00";
+      compression = "gzip";
+    };
+
     sops.secrets.immich_oauth_client_secret = {
       sopsFile = ../../../secrets/secrets.yaml;
       owner = "immich";
