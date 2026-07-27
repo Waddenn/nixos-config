@@ -36,7 +36,8 @@
             shellcheck \
               ${./scripts/deploy-fleet.sh} \
               ${./scripts/fleet-status.sh} \
-              ${./scripts/pull-update-host.sh}
+              ${./scripts/pull-update-host.sh} \
+              ${./scripts/update-caddy-plugin-hash.sh}
             touch "$out"
           '';
       };
