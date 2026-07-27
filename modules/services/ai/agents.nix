@@ -54,7 +54,6 @@
       ffuf
       gobuster
       feroxbuster
-      wfuzz
 
       # === Network Analysis ===
       netcat
