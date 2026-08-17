@@ -27,6 +27,7 @@ SSH_RETRY_ATTEMPTS="${SSH_RETRY_ATTEMPTS:-30}"
 SSH_RETRY_SLEEP_SECONDS="${SSH_RETRY_SLEEP_SECONDS:-2}"
 PARALLEL_HOSTS="${PARALLEL_HOSTS:-6}"
 EXPECTED_CACHE_FILE="${EXPECTED_CACHE_FILE:-/var/lib/internal-gitops/expected-systems.tsv}"
+NOTIFICATION_STATE_FILE="${NOTIFICATION_STATE_FILE:-/var/lib/internal-gitops/last-discord-notification.json}"
 
 # Filled once per run, after we resolve the git rev we want to deploy.
 FLEET_REV=""
@@ -618,6 +619,51 @@ send_discord_notification() {
   require_cmd jq
   require_cmd curl
 
+  # The reconciliation timer runs even when Git has not changed. Keep a stable
+  # signature of the fleet state so an unchanged incident is not reposted every
+  # hour. A commit change, a host changing status, or a recovery all produce a
+  # different signature and therefore a new notification.
+  local notification_state
+  notification_state="$(jq -cn \
+    --arg revision "$FLEET_REV" \
+    --arg title "$TITLE" \
+    --arg canary "${CANARY_EFFECTIVE:-}" \
+    --arg batch "${BATCH_EFFECTIVE:-}" \
+    --arg updated "${UPDATED_LIST:-}" \
+    --arg confirmed "${CONFIRMED_LIST:-}" \
+    --arg diverged "${DIVERGED_LIST:-}" \
+    --arg failed "${FAILED_LIST:-}" \
+    --arg unreachable "${UNREACHABLE_LIST:-}" \
+    --arg not_started "${NOT_STARTED_LIST:-}" \
+    --arg skipped "${SKIPPED_LIST:-}" \
+    --arg dns_failed "${DNS_FAILED_LIST:-}" \
+    --arg acl_denied "${ACL_DENIED_LIST:-}" \
+    --arg auth_failed "${AUTH_FAILED_LIST:-}" \
+    --arg reboot_required "${REBOOT_REQUIRED_LIST:-}" \
+    '{
+      revision: $revision,
+      title: $title,
+      canary: $canary,
+      batch: $batch,
+      updated: $updated,
+      confirmed: $confirmed,
+      diverged: $diverged,
+      failed: $failed,
+      unreachable: $unreachable,
+      not_started: $not_started,
+      skipped: $skipped,
+      dns_failed: $dns_failed,
+      acl_denied: $acl_denied,
+      auth_failed: $auth_failed,
+      reboot_required: $reboot_required
+    }')"
+
+  if [[ -r "$NOTIFICATION_STATE_FILE" ]] &&
+     [[ "$(cat "$NOTIFICATION_STATE_FILE")" == "$notification_state" ]]; then
+    log_info "🔕 Fleet state unchanged; skipping duplicate Discord notification."
+    return 0
+  fi
+
   log_info "📡 Sending Discord notification..."
 
   local webhook_url
@@ -644,8 +690,16 @@ send_discord_notification() {
       }]
     }')"
 
-  curl -fsS -X POST -H 'Content-Type: application/json' -d "$payload" "$webhook_url" >/dev/null \
-    || log_err "❌ Failed to send Discord notification"
+  if curl -fsS -X POST -H 'Content-Type: application/json' -d "$payload" "$webhook_url" >/dev/null; then
+    local state_tmp="${NOTIFICATION_STATE_FILE}.tmp.$$"
+    if printf '%s\n' "$notification_state" >"$state_tmp" && mv -f "$state_tmp" "$NOTIFICATION_STATE_FILE"; then
+      return 0
+    fi
+    rm -f "$state_tmp"
+    log_warn "⚠️ Discord notification sent, but its deduplication state could not be saved."
+  else
+    log_err "❌ Failed to send Discord notification"
+  fi
 }
 
 trigger_self_update() {

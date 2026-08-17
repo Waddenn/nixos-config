@@ -49,6 +49,7 @@
           rm -f /var/lib/internal-gitops/force || true
         fi
         export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
+        export NOTIFICATION_STATE_FILE=/var/lib/internal-gitops/last-discord-notification.json
         export COLMENA_BIN="${colmenaPkg}/bin/colmena"
         if [ -f /run/secrets/cachix-auth-token ]; then
           export CACHIX_AUTH_TOKEN=$(cat /run/secrets/cachix-auth-token)
