@@ -364,7 +364,7 @@ trigger_host_update() {
   local out rc
   set +e
   out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
-    "root@${host}" "systemctl start internal-pull-update@${FLEET_REV}.service" 2>&1)"
+    "root@${host}" "systemctl start --no-block internal-pull-update@${FLEET_REV}.service" 2>&1)"
   rc=$?
   set -e
 
@@ -377,7 +377,7 @@ trigger_host_update() {
     log_warn "⚠️ ${host}: revision-aware agent missing; trying the legacy bootstrap unit once."
     set +e
     out="$(ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
-      "root@${host}" "systemctl start internal-pull-update.service" 2>&1)"
+      "root@${host}" "systemctl start --no-block internal-pull-update.service" 2>&1)"
     rc=$?
     set -e
     if [[ $rc -eq 0 ]]; then
