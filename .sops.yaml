@@ -7,7 +7,14 @@ keys:
   - &dev-nixos age13nxnv5jyymls6d9xjl47r6rmkq749gwj9u5txepcxrq7cuvtvesqms45uf
   - &authelia age1ktmlt86xq8jzaxvc7zmy9y32urqydurvwcmz3m7gx7jljhca5pjql4jlds
   - &immich age1ssppsf2v0grlhq5n8ssny65gk26fm504q85x20pt86ytaxemdecq64a37g
+  - &gatus age1w3rhlgkxk2ycur82lcpswn3u8c40gg4h755mtu5dp5fhj755jajsmj96jr
 creation_rules:
+  - path_regex: secrets/gatus\.yaml$
+    key_groups:
+    - age:
+        - *primary
+        - *dev-nixos
+        - *gatus
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)(\.enc)?$
     key_groups:
     - age:

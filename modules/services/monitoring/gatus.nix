@@ -27,7 +27,7 @@ in {
 
   config = lib.mkIf config.my-services.monitoring.gatus.enable {
     sops.secrets.discord-webhook = {
-      sopsFile = ../../../secrets/secrets.yaml;
+      sopsFile = ../../../secrets/gatus.yaml;
       restartUnits = ["gatus-env.service" "gatus.service"];
     };
     systemd.services.gatus-env = {
