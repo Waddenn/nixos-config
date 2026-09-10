@@ -116,7 +116,7 @@ class PolicyTests(unittest.TestCase):
         f.systems = Mock(side_effect=["drift", "reboot-required"])
         self.assertEqual(f.deploy_host("app", host()), "reboot-required")
         self.assertEqual(run.call_args_list[1].args[0][4], "boot")
-        self.assertTrue(run.call_args_list[0].args[0][2].startswith("path:"))
+        self.assertTrue(run.call_args_list[0].args[0][2].endswith("/flake.nix"))
         self.assertFalse(any("--reboot" in c.args[0] for c in run.call_args_list))
 
     @patch.object(fleet, "run", side_effect=fleet.FleetError("activation failed", "database migration error"))
@@ -150,7 +150,7 @@ class PolicyTests(unittest.TestCase):
         f.deploy_host = Mock(side_effect=lambda *args: events.append(["canary"]) or "converged")
         f.rollout({"auth": host(True), "dev-nixos": host(local=True)})
         self.assertIn("build", events[0])
-        self.assertTrue(events[0][2].startswith("path:"))
+        self.assertTrue(events[0][2].endswith("/flake.nix"))
         self.assertIn("auth,dev-nixos", events[0])
         self.assertEqual(events[1], ["canary"])
         self.assertEqual(events[-1][0:3], ["sudo", "systemctl", "start"])

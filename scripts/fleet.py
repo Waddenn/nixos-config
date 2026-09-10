@@ -188,7 +188,7 @@ class Fleet:
                 if not self.storage(host, cfg)["safe"]:
                     return "insufficient-space"
                 print(f"{host}: activating", flush=True)
-                command = [self.colmena, "--config", "path:" + str(self.work), "apply", "switch",
+                command = [self.colmena, "--config", str(self.work / "flake.nix"), "apply", "switch",
                            "--on", host, "--parallel", "1"]
                 try:
                     run(command, timeout=1800)
@@ -295,7 +295,7 @@ class Fleet:
             raise FleetError("Required canary unreachable; rollout withheld")
         build_hosts = reachable + [n for n, c in hosts.items() if c["local"]]
         if build_hosts:
-            run([self.colmena, "--config", "path:" + str(self.work), "build", "--on", ",".join(build_hosts),
+            run([self.colmena, "--config", str(self.work / "flake.nix"), "build", "--on", ",".join(build_hosts),
                  "--parallel", str(self.parallel), "--keep-result"], capture=False, timeout=7200)
         canaries = [n for n in reachable if remote[n]["canary"]]
         # Sequential canaries avoid concurrent changes to proxy and identity provider.
