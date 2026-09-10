@@ -114,6 +114,17 @@ merge_csv_lists() {
     | lines_to_csv
 }
 
+canary_has_failures() {
+  local failures=""
+  failures="$(merge_csv_lists "$failures" "${FAILED_LIST:-}")"
+  failures="$(merge_csv_lists "$failures" "${UNREACHABLE_LIST:-}")"
+  failures="$(merge_csv_lists "$failures" "${DNS_FAILED_LIST:-}")"
+  failures="$(merge_csv_lists "$failures" "${ACL_DENIED_LIST:-}")"
+  failures="$(merge_csv_lists "$failures" "${AUTH_FAILED_LIST:-}")"
+  failures="$(merge_csv_lists "$failures" "${REBOOT_REQUIRED_LIST:-}")"
+  [[ -n "$(intersect_csv_lists "$failures" "$CANARY_HOSTS")" ]]
+}
+
 csv_count() {
   # Count unique non-empty entries in a CSV list.
   local list_csv="${1:-}"
@@ -195,6 +206,50 @@ let
 in
   builtins.filter isPull names
 ' | jq -r '.[]' | sort -u | lines_to_csv
+}
+
+preflight_targets() {
+  local hosts_csv="$1"
+  local tmpdir cleanup_dir host out
+  local -a hosts=()
+
+  REACHABLE_TARGETS=""
+  mapfile -t hosts < <(csv_to_lines "$hosts_csv")
+  [[ ${#hosts[@]} -gt 0 ]] || return 0
+
+  tmpdir="$(mktemp -d -t deploy-fleet-preflight.XXXXXX)"
+  cleanup_dir="$tmpdir"
+  # shellcheck disable=SC2064
+  trap "rm -rf '${cleanup_dir}' 2>/dev/null || true" RETURN
+
+  log_info "🔌 Checking SSH reachability before building..."
+  for host in "${hosts[@]}"; do
+    wait_for_job_slot "$PARALLEL_HOSTS"
+    (
+      if ssh -o BatchMode=yes -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" -o StrictHostKeyChecking=accept-new \
+        "root@${host}" "echo reachable" >"${tmpdir}/${host}" 2>&1; then
+        printf '%s\n' "status=reachable" >>"${tmpdir}/${host}"
+      else
+        printf '%s\n' "status=unreachable" >>"${tmpdir}/${host}"
+      fi
+    ) &
+  done
+  wait || true
+
+  for host in "${hosts[@]}"; do
+    out="$(cat "${tmpdir}/${host}" 2>/dev/null || true)"
+    if grep -q '^status=reachable$' <<<"$out"; then
+      REACHABLE_TARGETS="$(merge_csv_lists "$REACHABLE_TARGETS" "$host")"
+    elif grep -q "Permission denied (publickey)" <<<"$out"; then
+      AUTH_FAILED_LIST="$(merge_csv_lists "$AUTH_FAILED_LIST" "$host")"
+    elif grep -q "tailnet policy does not permit" <<<"$out"; then
+      ACL_DENIED_LIST="$(merge_csv_lists "$ACL_DENIED_LIST" "$host")"
+    elif grep -q "Could not resolve hostname" <<<"$out"; then
+      DNS_FAILED_LIST="$(merge_csv_lists "$DNS_FAILED_LIST" "$host")"
+    else
+      UNREACHABLE_LIST="$(merge_csv_lists "$UNREACHABLE_LIST" "$host")"
+    fi
+  done
 }
 
 build_expected_for_hosts() {
@@ -805,24 +860,26 @@ main() {
   # This node updates itself locally at the end of the run.
   all_targets="$(subtract_csv_lists "$all_targets" "$SELF_UPDATE_NODE")"
 
-  CANARY_EFFECTIVE="$(intersect_csv_lists "$all_targets" "$CANARY_HOSTS")"
-  BATCH_EFFECTIVE="$(subtract_csv_lists "$all_targets" "$CANARY_EFFECTIVE")"
-
-  log_info "🎯 Pull targets: ${all_targets}"
-  log_info "🧪 Canary: ${CANARY_EFFECTIVE:-none}"
-
   # We pin expected builds to a single revision (the one we're about to deploy).
   FLEET_REV="$remote_sha"
+  preflight_targets "$all_targets"
+
+  CANARY_EFFECTIVE="$(intersect_csv_lists "$REACHABLE_TARGETS" "$CANARY_HOSTS")"
+  BATCH_EFFECTIVE="$(subtract_csv_lists "$REACHABLE_TARGETS" "$CANARY_EFFECTIVE")"
+
+  log_info "🎯 Pull targets: ${all_targets}"
+  log_info "🔌 Reachable targets: ${REACHABLE_TARGETS:-none}"
+  log_info "🧪 Canary: ${CANARY_EFFECTIVE:-none}"
 
   if [[ "$repo_changed" -eq 0 ]] &&
      load_expected_cache "$FLEET_REV" &&
-     cache_covers_hosts "$all_targets"; then
+     cache_covers_hosts "$REACHABLE_TARGETS"; then
     log_info "📌 Using cached expected system paths for ${FLEET_REV:0:7}."
   else
     log_info "🏗️  Building all target systems for ${FLEET_REV:0:7}..."
     EXPECTED_PATHS=()
     BUILT_PATHS=()
-    if ! build_expected_for_hosts "$all_targets"; then
+    if ! build_expected_for_hosts "$REACHABLE_TARGETS"; then
       end_time="$(date +%s)"
       duration=$((end_time - start_time))
       DURATION_STR="$((duration / 60))min $((duration % 60))s"
@@ -844,7 +901,7 @@ Aucun nœud n'a été modifié."
 
   run_group "CANARY" "$CANARY_EFFECTIVE"
 
-  if [[ -n "$FAILED_LIST" || -n "$UNREACHABLE_LIST" || -n "$REBOOT_REQUIRED_LIST" ]]; then
+  if canary_has_failures; then
     SKIPPED_LIST="$BATCH_EFFECTIVE"
     log_warn "⚠️ Canary failed, unreachable, or waiting for reboot; skipping batch rollout."
   else
