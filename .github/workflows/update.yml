@@ -17,12 +17,22 @@ jobs:
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-unstable
+      - uses: DeterminateSystems/magic-nix-cache-action@v7
       
       - name: Update flake.lock
         run: nix flake update
 
       - name: Refresh Caddy plugin hash
         run: ./scripts/update-caddy-plugin-hash.sh
+
+      - name: Check formatting
+        run: nix fmt -- --check
+
+      - name: Evaluate all hosts
+        run: nix flake check --no-build --print-build-logs
+
+      - name: Check deployment scripts
+        run: nix build --no-link .#checks.x86_64-linux.deployment-scripts
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6

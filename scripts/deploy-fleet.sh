@@ -200,12 +200,24 @@ in
 build_expected_for_hosts() {
   local hosts_csv="$1"
 
-  local host outpath
+  local host outpath outpath_file
   while IFS= read -r host; do
     [[ -n "$host" ]] || continue
     # Use git+file to ignore untracked files (hosts may have junk/untracked in the checkout).
     # Pin to a single rev so expected outPaths are stable and comparable.
-    outpath="$(nix build --no-link --print-out-paths "git+file://${REPO_DIR}?rev=${FLEET_REV}#nixosConfigurations.${host}.config.system.build.toplevel" | tail -n 1)"
+    outpath_file="$(mktemp -t deploy-fleet-build.XXXXXX)"
+    if ! nix build --no-link --print-out-paths "git+file://${REPO_DIR}?rev=${FLEET_REV}#nixosConfigurations.${host}.config.system.build.toplevel" >"$outpath_file"; then
+      rm -f "$outpath_file"
+      BUILD_FAILED_HOST="$host"
+      return 1
+    fi
+    outpath="$(tail -n 1 "$outpath_file")"
+    rm -f "$outpath_file"
+    if [[ -z "$outpath" ]]; then
+      log_err "❌ Build produced no system path for ${host}."
+      BUILD_FAILED_HOST="$host"
+      return 1
+    fi
     EXPECTED_PATHS+=("${host}=${outpath}")
     BUILT_PATHS+=("$outpath")
   done < <(csv_to_lines "$hosts_csv")
@@ -640,6 +652,7 @@ send_discord_notification() {
     --arg acl_denied "${ACL_DENIED_LIST:-}" \
     --arg auth_failed "${AUTH_FAILED_LIST:-}" \
     --arg reboot_required "${REBOOT_REQUIRED_LIST:-}" \
+    --arg build_failed_host "${BUILD_FAILED_HOST:-}" \
     '{
       revision: $revision,
       title: $title,
@@ -655,7 +668,8 @@ send_discord_notification() {
       dns_failed: $dns_failed,
       acl_denied: $acl_denied,
       auth_failed: $auth_failed,
-      reboot_required: $reboot_required
+      reboot_required: $reboot_required,
+      build_failed_host: $build_failed_host
     }')"
 
   if [[ -r "$NOTIFICATION_STATE_FILE" ]] &&
@@ -778,6 +792,7 @@ main() {
   ACL_DENIED_LIST=""
   AUTH_FAILED_LIST=""
   REBOOT_REQUIRED_LIST=""
+  BUILD_FAILED_HOST=""
   EXPECTED_PATHS=()
   BUILT_PATHS=()
 
@@ -807,7 +822,22 @@ main() {
     log_info "🏗️  Building all target systems for ${FLEET_REV:0:7}..."
     EXPECTED_PATHS=()
     BUILT_PATHS=()
-    build_expected_for_hosts "$all_targets"
+    if ! build_expected_for_hosts "$all_targets"; then
+      end_time="$(date +%s)"
+      duration=$((end_time - start_time))
+      DURATION_STR="$((duration / 60))min $((duration % 60))s"
+      TITLE="❌ Construction NixOS échouée"
+      COLOR=15158332
+      REPORT_BODY="**Résumé:** la construction de la flotte a échoué avant tout déploiement.
+**Commit:** \`${FLEET_REV:0:7}\`
+**Hôte:** ${BUILD_FAILED_HOST:-inconnu}
+**Durée:** ${DURATION_STR}
+
+Aucun nœud n'a été modifié."
+      log_err "❌ Build failed for ${BUILD_FAILED_HOST:-an unknown host}; no deployment was attempted."
+      send_discord_notification || true
+      return 1
+    fi
     push_cache_paths
     save_expected_cache "$FLEET_REV"
   fi
