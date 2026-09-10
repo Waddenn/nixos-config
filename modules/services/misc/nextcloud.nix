@@ -38,13 +38,13 @@
         "memory_limit" = "512M";
       };
 
-      # PHP-FPM pool configuration optimized for 6GB RAM / 6 CPU
+      # Conservative starting limits for 6 GiB shared with PostgreSQL; tune from measured RSS.
       poolSettings = {
         "pm" = "dynamic";
-        "pm.max_children" = "150"; # Maximum concurrent workers
-        "pm.start_servers" = "30"; # Initial workers on startup
-        "pm.min_spare_servers" = "15"; # Minimum idle workers
-        "pm.max_spare_servers" = "40"; # Maximum idle workers
+        "pm.max_children" = "8"; # Maximum concurrent workers
+        "pm.start_servers" = "3"; # Initial workers on startup
+        "pm.min_spare_servers" = "2"; # Minimum idle workers
+        "pm.max_spare_servers" = "4"; # Maximum idle workers
         "pm.max_requests" = "500"; # Recycle workers to prevent memory leaks
       };
 
@@ -65,8 +65,8 @@
     # PostgreSQL performance tuning for 6GB RAM
     services.postgresql = {
       settings = {
-        max_connections = 200; # Accommodate all PHP-FPM workers + overhead
-        shared_buffers = "512MB"; # ~25% of RAM for shared buffers
+        max_connections = 50; # Accommodate all PHP-FPM workers + overhead
+        shared_buffers = "512MB"; # Shared buffers
         effective_cache_size = "3GB"; # ~50% of RAM for query planning
         work_mem = "8MB"; # Per-operation memory
         maintenance_work_mem = "128MB"; # Maintenance operations (VACUUM, CREATE INDEX)

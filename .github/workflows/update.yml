@@ -6,8 +6,13 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
+
+concurrency:
+  group: dependency-update
+  cancel-in-progress: false
 
 jobs:
   update-flake:
@@ -25,6 +30,9 @@ jobs:
       - name: Refresh Caddy plugin hash
         run: ./scripts/update-caddy-plugin-hash.sh
 
+      - name: Pin container images
+        run: nix shell nixpkgs#skopeo --command python3 scripts/update-container-images.py
+
       - name: Check formatting
         run: nix fmt -- --check
 
@@ -35,14 +43,22 @@ jobs:
         run: nix build --no-link .#checks.x86_64-linux.deployment-scripts
 
       - name: Create Pull Request
+        id: pr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update flake.lock"
           title: "Update flake.lock"
           body: |
-            Automated update of flake inputs.
+            Automated update of flake inputs and pinned container image digests.
             
             This PR was created automatically by the `update-flake` workflow.
           branch: update-flake-lock
           delete-branch: true
+
+      # GITHUB_TOKEN-created PR runs require approval; explicit dispatch does not.
+      - name: Validate update for automatic promotion
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run ci.yml --ref update-flake-lock

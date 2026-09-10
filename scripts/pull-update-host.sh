@@ -93,10 +93,11 @@ current_system="$(readlink -f /run/current-system 2>/dev/null || true)"
 profile_system="$(readlink -f /nix/var/nix/profiles/system 2>/dev/null || true)"
 state_rev="$(read_state_value TARGET_REV)"
 state_status="$(read_state_value STATUS)"
+state_expected="$(read_state_value EXPECTED_SYSTEM)"
 
 # A previous `boot` completed after the host was rebooted.
 if [[ "$state_rev" == "$TARGET_REV" && "$state_status" == "reboot-required" &&
-      -n "$current_system" && "$current_system" == "$profile_system" ]]; then
+      -n "$state_expected" && "$current_system" == "$state_expected" && "$current_system" == "$profile_system" ]]; then
   write_state "active" "$profile_system" "$current_system"
   echo "[pull-update] active after reboot system=${current_system}"
   exit 0
@@ -104,12 +105,12 @@ fi
 
 # Fast path for an already reconciled host.
 if [[ "$state_rev" == "$TARGET_REV" && "$state_status" == "active" &&
-      -n "$current_system" && "$current_system" == "$profile_system" ]]; then
+      -n "$state_expected" && "$current_system" == "$state_expected" && "$current_system" == "$profile_system" ]]; then
   echo "[pull-update] already active system=${current_system}"
   exit 0
 fi
 
-"${git_safe[@]}" reset --hard "$TARGET_REV" >/dev/null
+# The git+file revision below is immutable; no checkout reset is necessary.
 
 switch_log="$(mktemp -t internal-pull-update.XXXXXX)"
 trap 'rm -f "$switch_log"' EXIT

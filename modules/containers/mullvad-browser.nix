@@ -11,7 +11,7 @@
       backend = "docker";
       containers = {
         mullvad-browser = {
-          image = "lscr.io/linuxserver/mullvad-browser:latest";
+          image = (import ../../lib/container-images.nix)."lscr.io/linuxserver/mullvad-browser:latest";
           environment = {
             PUID = "1000";
             PGID = "1000";

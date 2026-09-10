@@ -2,9 +2,7 @@
   lib,
   inputs,
   nixpkgs,
-  home-manager ? null,
 }: {
-  # Main builder function for generic servers
   mkServer = {
     hostname,
     username ? "nixos",
@@ -12,28 +10,7 @@
     extraModules ? [],
   }:
     lib.nixosSystem {
-      specialArgs = {
-        inherit inputs nixpkgs username;
-      };
-      modules =
-        [
-          # Set host platform
-          {nixpkgs.hostPlatform = system;}
-
-          # Auto-import all modules
-          ../modules
-
-          # Host configuration
-          ../hosts/${hostname}
-
-          # Secrets
-          inputs.sops-nix.nixosModules.sops
-
-          # Hostname setup
-          {
-            networking.hostName = hostname;
-          }
-        ]
-        ++ extraModules;
+      specialArgs = {inherit inputs nixpkgs username;};
+      modules = (import ./host-modules.nix {inherit inputs hostname system;}) ++ extraModules;
     };
 }

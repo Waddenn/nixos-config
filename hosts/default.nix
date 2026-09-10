@@ -19,8 +19,7 @@
     builder.mkServer {
       hostname = name;
       username = "nixos";
+      inherit system;
     };
 in
   lib.genAttrs hostNames configGen
-# Final test rollout
-

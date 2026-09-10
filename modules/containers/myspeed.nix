@@ -16,7 +16,7 @@
 
     # Containers
     virtualisation.oci-containers.containers."MySpeed" = {
-      image = "germannewsmaker/myspeed";
+      image = (import ../../lib/container-images.nix)."germannewsmaker/myspeed";
       volumes = [
         "myspeed:/myspeed/data:rw"
       ];

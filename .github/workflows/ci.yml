@@ -6,7 +6,22 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  deployment-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v25
+      - run: nix build --no-link .#checks.x86_64-linux.deployment-scripts .#checks.x86_64-linux.fleet-inventory
+      - run: python3 scripts/check-colmena.py
+
   check-formatting:
     runs-on: ubuntu-latest
     steps:
@@ -45,3 +60,38 @@ jobs:
     - uses: DeterminateSystems/magic-nix-cache-action@v7
     - name: Flake Check ${{ matrix.host }}
       run: nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
+
+  promote-update:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/update-flake-lock'
+    needs: [deployment-tests, check-formatting, flake-check]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      actions: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const sha = context.sha;
+            const branch = 'update-flake-lock';
+            const {data: prs} = await github.rest.pulls.list({owner, repo,
+              state: 'open', base: 'main', head: `${owner}:${branch}`});
+            if (prs.length !== 1) throw new Error('Expected exactly one update PR');
+            const pr = prs[0];
+            if (pr.user.login !== 'github-actions[bot]' || pr.head.sha !== sha ||
+                pr.head.repo.full_name !== `${owner}/${repo}`) {
+              throw new Error('Update identity or tested revision changed');
+            }
+            const files = await github.paginate(github.rest.pulls.listFiles,
+              {owner, repo, pull_number: pr.number, per_page: 100});
+            const allowed = new Set(['flake.lock', 'lib/container-images.json',
+              'modules/services/networking/caddy.nix']);
+            if (!files.length || files.some(f => !allowed.has(f.filename) ||
+                f.status !== 'modified')) throw new Error('Unexpected update files');
+            // Preserve the tested SHA. A concurrent divergent main fails safely.
+            await github.rest.git.updateRef({owner, repo, ref: 'heads/main', sha, force: false});
+            // Token pushes do not trigger push workflows. Validate main explicitly.
+            await github.rest.actions.createWorkflowDispatch({owner, repo,
+              workflow_id: 'ci.yml', ref: 'main'});

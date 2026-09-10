@@ -1,7 +1,11 @@
-{inputs, ...}: {
+{
+  inputs,
+  config,
+  ...
+}: {
   nixpkgs.config = {
     allowUnfree = true;
-    allowBroken = true;
+    allowBroken = false;
   };
   nix = {
     nixPath = ["nixpkgs=${inputs.nixpkgs}"];
@@ -11,6 +15,15 @@
     '';
     settings = {
       auto-optimise-store = true;
+      # Automatic GC collects only unreferenced paths; retained generations stay protected.
+      min-free =
+        if config.my-services.infra.deployer-node.enable
+        then 5368709120
+        else 1073741824;
+      max-free =
+        if config.my-services.infra.deployer-node.enable
+        then 8589934592
+        else 3221225472;
       experimental-features = ["nix-command" "flakes"];
       substituters = [
         # high priority since it's almost always used
@@ -31,8 +44,8 @@
     gc = {
       automatic = true;
       persistent = true;
-      dates = "weekly";
-      options = "--delete-older-than 3d";
+      dates = "daily";
+      options = "--delete-older-than 14d";
     };
     optimise = {
       automatic = true;

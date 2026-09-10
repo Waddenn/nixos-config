@@ -60,7 +60,7 @@ in {
 
     # Containers
     virtualisation.oci-containers.containers."beszel" = {
-      image = "henrygd/beszel:latest";
+      image = (import ../../lib/container-images.nix)."henrygd/beszel:latest";
       volumes = [
         "/home/nixos/beszel_data:/beszel_data:rw"
       ];

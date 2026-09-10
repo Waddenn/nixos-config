@@ -8,6 +8,20 @@ fmt:
 validate:
     nix flake check
 
+# Policy tests do not contact any host
+test:
+    python3 tests/test_fleet.py
+
+# Verify that the deployment and CI produce identical systems
+check-colmena:
+    python3 scripts/check-colmena.py
+
+# Prepare a dependency update for review
+update:
+    nix flake update
+    ./scripts/update-caddy-plugin-hash.sh
+    nix shell nixpkgs#skopeo --command python3 scripts/update-container-images.py
+
 # Trigger GitOps deployment on dev-nixos
 deploy:
     ssh nixos@dev-nixos "sudo systemctl start internal-gitops"
@@ -57,22 +71,6 @@ secrets-add-host hostname:
     @echo "Then run: just secrets-rekey"
     @rm /tmp/{{hostname}}.pub
 
-# Generate Authelia password hash
-authelia-hash-password:
-    ./scripts/authelia-hash-password.sh
-
-# Generate Authelia secrets (automated)
-authelia-generate-secrets:
-    ./scripts/add-authelia-secrets.sh
-
-# Initialize users_database.yml on Authelia server with admin user
-authelia-init-users:
-    ./scripts/authelia-init-users.sh
-
-# Create a new Authelia user (interactive)
-authelia-create-user:
-    ./scripts/authelia-create-user.sh
-
-# SSH to Authelia server to manage users manually
+# SSH to Authelia for application administration
 authelia-ssh:
     ssh root@authelia

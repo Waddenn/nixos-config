@@ -16,7 +16,7 @@
 
     # Containers
     virtualisation.oci-containers.containers."linkwarden-linkwarden" = {
-      image = "ghcr.io/linkwarden/linkwarden:latest";
+      image = (import ../../lib/container-images.nix)."ghcr.io/linkwarden/linkwarden:latest";
       environmentFiles = [
         "/home/nixos/linkwarden/.env"
       ];
@@ -56,7 +56,7 @@
       ];
     };
     virtualisation.oci-containers.containers."linkwarden-postgres" = {
-      image = "postgres:16-alpine";
+      image = (import ../../lib/container-images.nix)."postgres:16-alpine";
       environmentFiles = [
         "/home/nixos/linkwarden/.env"
       ];

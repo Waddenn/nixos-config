@@ -22,7 +22,6 @@
         sudo systemctl start internal-gitops.service
       '')
       pkgs.git
-      pkgs.cachix
       inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena or pkgs.colmena
     ];
 
@@ -34,40 +33,30 @@
       sopsFile = ../../../secrets/secrets.yaml;
       owner = "nixos";
     };
-    sops.secrets.cachix-auth-token = {
-      sopsFile = ../../../secrets/secrets.yaml;
-      owner = "nixos";
-      mode = "0400";
-    };
     systemd.services.internal-gitops = let
       colmenaPkg = inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena;
       deployScript = pkgs.writeShellScript "deploy-fleet-wrapper" ''
-        # Allow a "force run" without having to rewind git:
-        # create /var/lib/internal-gitops/force then start internal-gitops.
-        if [ -f /var/lib/internal-gitops/force ]; then
-          export FORCE_UPDATE=1
-          rm -f /var/lib/internal-gitops/force || true
-        fi
+        set -euo pipefail
+        rm -f /var/lib/internal-gitops/force
         export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
         export NOTIFICATION_STATE_FILE=/var/lib/internal-gitops/last-discord-notification.json
         export COLMENA_BIN="${colmenaPkg}/bin/colmena"
-        if [ -f /run/secrets/cachix-auth-token ]; then
-          export CACHIX_AUTH_TOKEN=$(cat /run/secrets/cachix-auth-token)
-        fi
-        exec ${pkgs.bash}/bin/bash ${../../../scripts/deploy-fleet.sh}
+        exec ${pkgs.python3}/bin/python3 ${../../../scripts/fleet.py}
       '';
     in {
-      description = "Internal GitOps: Pull and Deploy";
+      description = "Colmena fleet reconciliation with CI and canary gates";
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
       restartIfChanged = false;
-      path = [pkgs.git pkgs.openssh pkgs.cachix colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
+      path = [pkgs.python3 pkgs.coreutils pkgs.util-linux pkgs.bash pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
       serviceConfig = {
         EnvironmentFile = [
           config.sops.secrets.gh-token.path
         ];
         User = "nixos";
         Type = "oneshot";
+        TimeoutStartSec = "4h";
+        UMask = "0077";
         ExecStart = "${deployScript}";
         StateDirectory = "internal-gitops";
       };

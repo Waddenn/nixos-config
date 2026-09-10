@@ -16,7 +16,7 @@
 
     # Containers
     virtualisation.oci-containers.containers."homeassistant" = {
-      image = "lscr.io/linuxserver/homeassistant:latest";
+      image = (import ../../lib/container-images.nix)."lscr.io/linuxserver/homeassistant:latest";
       environment = {
         "PGID" = "1000";
         "PUID" = "1000";

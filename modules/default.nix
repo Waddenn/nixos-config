@@ -1,21 +1,60 @@
-{lib, ...}: {
-  imports = let
-    # Helper to recursively find all .nix files
-    files = lib.filesystem.listFilesRecursive ./.;
-
-    # Filter function
-    isModule = file: let
-      pathStr = toString file;
-      name = baseNameOf pathStr;
-    in
-      lib.hasSuffix ".nix" pathStr
-      && name != "default.nix"
-      && name != "boot.nix"
-      && !lib.hasInfix "modules/infra" pathStr
-      && !lib.hasInfix "modules/data" pathStr # Exclude data files
-      && name != "mac-randomize.nix"; # Exclude other known non-modules if any
-
-    modules = builtins.filter isModule files;
-  in
-    modules;
+# Explicit imports: adding a file does not silently affect the entire fleet.
+{...}: {
+  imports = [
+    ./containers/beszel.nix
+    ./containers/calibre.nix
+    ./containers/homeassistant.nix
+    ./containers/linkwarden.nix
+    ./containers/mullvad-browser.nix
+    ./containers/myspeed.nix
+    ./containers/valheim-server.nix
+    ./core/nix.nix
+    ./core/system.nix
+    ./core/users.nix
+    ./identities/nixos.nix
+    ./profiles/lxc-base.nix
+    ./profiles/tailscale-router.nix
+    ./programs/ansible.nix
+    ./programs/direnv.nix
+    ./programs/fish.nix
+    ./programs/python3Minimal.nix
+    ./programs/terraform.nix
+    ./programs/zsh.nix
+    ./services/ai/agents.nix
+    ./services/auth/authelia.nix
+    ./services/dev/docker.nix
+    ./services/dev/gitea.nix
+    ./services/dev/github-runner.nix
+    ./services/dev/gitlab.nix
+    ./services/dev/k3s.nix
+    ./services/dev/kubernetes.nix
+    ./services/infra/deployer-node.nix
+    ./services/infra/deployment-target.nix
+    ./services/infra/pull-updater.nix
+    ./services/media/calibre-web.nix
+    ./services/media/immich.nix
+    ./services/media/jellyseerr.nix
+    ./services/messaging/gotify.nix
+    ./services/misc/fwupd.nix
+    ./services/misc/nextcloud.nix
+    ./services/misc/onlyoffice.nix
+    ./services/misc/paperless.nix
+    ./services/misc/vaultwarden.nix
+    ./services/monitoring/beszel-agent.nix
+    ./services/monitoring/gatus.nix
+    ./services/monitoring/glance.nix
+    ./services/monitoring/grafana.nix
+    ./services/monitoring/loki.nix
+    ./services/monitoring/prometheus.nix
+    ./services/monitoring/promtail.nix
+    ./services/monitoring/uptime-kuma.nix
+    ./services/networking/adguardhome.nix
+    ./services/networking/caddy.nix
+    ./services/networking/cloudflared.nix
+    ./services/networking/ethtool.nix
+    ./services/networking/firewall.nix
+    ./services/networking/nginx.nix
+    ./services/networking/openssh.nix
+    ./services/networking/tailscale.nix
+  ];
 }

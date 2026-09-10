@@ -4,3 +4,7 @@ result-*
 .devenv
 .envrc
 
+
+__pycache__/
+*.pyc
+.gcroots/

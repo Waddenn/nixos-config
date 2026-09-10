@@ -16,7 +16,7 @@
 
     # Containers
     virtualisation.oci-containers.containers."calibre" = {
-      image = "lscr.io/linuxserver/calibre:latest";
+      image = (import ../../lib/container-images.nix)."lscr.io/linuxserver/calibre:latest";
       environmentFiles = [
         "/home/nixos/calibre/.env"
       ];

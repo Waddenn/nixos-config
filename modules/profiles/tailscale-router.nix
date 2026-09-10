@@ -19,12 +19,7 @@
       enable = true;
       role = "server"; # Routers are servers in our context
 
-      # If upstream module supported generic extraUpFlags logic properly we could use it
-      # For now tailscale module logic handles server flags
+      extraSetFlags = lib.optional config.profiles.tailscale-router.exitNode "--advertise-exit-node";
     };
-
-    # Exit node optimization/config if specific logic exists?
-    # Currently tailscale module handles role=server with --ssh
-    # If we need --advertise-exit-node it would go here if tailscale module allows it
   };
 }

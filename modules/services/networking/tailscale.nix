@@ -10,6 +10,11 @@
       default = "client";
       description = "Tailscale routing role";
     };
+    extraSetFlags = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Persistent Tailscale settings; does not reset unspecified preferences.";
+    };
     authKeyFile = lib.mkOption {
       type = lib.types.str;
       default = "/run/secrets/tailscale/Client-secret";
@@ -21,6 +26,7 @@
     services.tailscale = {
       enable = true;
       openFirewall = true;
+      extraSetFlags = config.my-services.networking.tailscale.extraSetFlags;
       useRoutingFeatures = config.my-services.networking.tailscale.role;
       # Conditionally set authKeyFile only if client?
       # Original client used it. Server didn't.

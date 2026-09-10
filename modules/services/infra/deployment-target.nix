@@ -6,10 +6,9 @@
   options.my-services.infra.deployment-target.enable = lib.mkEnableOption "Host is a target for internal deployments";
 
   config = lib.mkIf config.my-services.infra.deployment-target.enable {
-    my-services.infra.pull-updater.enable = lib.mkDefault true;
+    my-services.infra.pull-updater.enable = lib.mkDefault false;
 
-    # dev-nixos is the only deployment authority. Targets expose an on-demand
-    # revision-aware agent; they do not poll or deploy main on their own.
+    # Colmena pushes complete closures from dev-nixos; targets need no Git checkout.
     users.users.root.openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIZu1aXoiBIUuhiSi5S6EjPrtNd/UYh6pZwuH6NGjze nixos@dev-nixos"
     ];

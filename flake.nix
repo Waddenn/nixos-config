@@ -21,23 +21,48 @@
     lib = nixpkgs.lib;
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
+    fleetPolicy = import ./lib/fleet-policy.nix;
   in {
     nixosConfigurations = import ./hosts {
       inherit lib inputs nixpkgs system;
     };
 
+    fleet =
+      lib.mapAttrs (name: host: let
+        policy = fleetPolicy.${name} or {};
+      in {
+        target = host.config.my-services.infra.deployment-target.enable;
+        local = name == "dev-nixos";
+        oci = host.config.virtualisation.oci-containers.containers != {};
+        canary = policy.canary or false;
+        units = ["tailscaled.service"] ++ (policy.units or []);
+        urls = policy.urls or [];
+        expected = toString host.config.system.build.toplevel;
+      })
+      self.nixosConfigurations;
+
     checks.${system} =
       lib.mapAttrs (name: host: host.config.system.build.toplevel) self.nixosConfigurations
       // {
+        fleet-inventory = assert lib.assertMsg (lib.all (
+          name:
+            lib.all (unit:
+              builtins.hasAttr (lib.removeSuffix ".service" unit)
+              self.nixosConfigurations.${name}.config.systemd.services)
+            self.fleet.${name}.units
+        ) (builtins.attrNames self.fleet)) "Fleet health checks reference an undefined systemd service";
+          pkgs.runCommand "fleet-inventory-check" {} "touch $out";
         deployment-scripts =
           pkgs.runCommand "deployment-scripts-check" {
-            nativeBuildInputs = [pkgs.shellcheck];
+            nativeBuildInputs = [pkgs.shellcheck pkgs.python3];
           } ''
             shellcheck \
               ${./scripts/deploy-fleet.sh} \
               ${./scripts/fleet-status.sh} \
               ${./scripts/pull-update-host.sh} \
               ${./scripts/update-caddy-plugin-hash.sh}
+            export PYTHONDONTWRITEBYTECODE=1
+            FLEET_SCRIPT=${./scripts/fleet.py} python3 ${./tests/test_fleet.py}
             touch "$out"
           '';
       };
@@ -47,7 +72,7 @@
         meta = {
           nixpkgs = pkgs;
           specialArgs = {
-            inherit inputs;
+            inherit inputs nixpkgs lib;
             username = "nixos";
           };
         };
@@ -61,16 +86,21 @@
           tags =
             if name == "dev-nixos"
             then ["local"]
-            else lib.optional isDeploymentTarget "remote";
+            else (lib.optional isDeploymentTarget "remote") ++ lib.optional ((fleetPolicy.${name} or {}).canary or false) "canary";
           targetHost =
             if name == "dev-nixos"
             then null
             else name;
           targetUser = "root";
         };
-        imports = value._module.args.modules;
+        imports = import ./lib/host-modules.nix {
+          inherit inputs system;
+          hostname = name;
+        };
       })
       self.nixosConfigurations;
+
+    packages.${system}.colmena = inputs.colmena.packages.${system}.colmena;
 
     formatter.${system} = pkgs.writeShellApplication {
       name = "nix-fmt";

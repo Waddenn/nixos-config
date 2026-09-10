@@ -33,6 +33,6 @@
 
   # Maintenance utilities
   environment.shellAliases = {
-    nix-clean = "sudo nix-collect-garbage -d && nix-store --optimise";
+    nix-clean = "sudo nix-collect-garbage --delete-older-than 14d && nix-store --optimise";
   };
 }
