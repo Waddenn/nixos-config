@@ -87,7 +87,7 @@ jobs:
             const files = await github.paginate(github.rest.pulls.listFiles,
               {owner, repo, pull_number: pr.number, per_page: 100});
             const allowed = new Set(['flake.lock', 'lib/container-images.json',
-              'modules/services/networking/caddy.nix']);
+              'modules/services/networking/caddy-plugin-hash.txt']);
             if (!files.length || files.some(f => !allowed.has(f.filename) ||
                 f.status !== 'modified')) throw new Error('Unexpected update files');
             // Preserve the tested SHA. A concurrent divergent main fails safely.
