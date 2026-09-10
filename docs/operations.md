@@ -64,7 +64,9 @@ via `my-services.networking.tailscale.extraSetFlags`.
 - `unhealthy-or-diverged` : vérifier services applicatifs et génération active.
 - `reboot-required` : génération préparée, redémarrage à planifier.
 - CI absente/en échec : corriger ou attendre la CI ; `reconcile` ne contourne pas cette garde.
-- Déploiement partiel : le contrôleur n'est pas mis à jour ; corriger puis relancer.
+- Échec sur une cible joignable : le contrôleur n'est pas mis à jour ; corriger puis relancer.
+- Cible secondaire injoignable : signalée et retentée chaque heure ; le contrôleur
+  peut se mettre à jour si toutes les cibles joignables sont conformes.
 
 Lire `last-run.json` et les journaux systemd. Pour une configuration sans migration
 de données, la génération précédente peut servir à une reprise manuelle via console.
@@ -95,3 +97,11 @@ la rotation du secret si nécessaire. Aucun secret n'a été déchiffré pour ce
 - [Colmena : options et parallélisme](https://colmena.cli.rs/0.4/reference/cli.html)
 - [Proxmox : conteneurs et sauvegardes des montages](https://pve.proxmox.com/pve-docs/chapter-pct.html)
 - [Tailscale : exit nodes](https://tailscale.com/docs/features/exit-nodes)
+
+## Permissions du dépôt du contrôleur
+
+Le bootstrap root et le service nixos partagent les métadonnées Git. Le dépôt
+existant a été configuré avec `core.sharedRepository=group`, groupe `users`,
+écriture de groupe et bit setgid sur ses répertoires `.git`. Conserver ces droits
+lors d'une restauration ou recréation du checkout afin que les fetch root ne
+bloquent pas les fetch du service. Le contenu applicatif n'est pas concerné.

@@ -25,10 +25,6 @@
       inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena or pkgs.colmena
     ];
 
-    sops.secrets.gh-token = {
-      sopsFile = ../../../secrets/secrets.yaml;
-      owner = "nixos";
-    };
     sops.secrets.discord-webhook = {
       sopsFile = ../../../secrets/secrets.yaml;
       owner = "nixos";
@@ -48,11 +44,8 @@
       # Prevent the service from restarting during activation (would kill the running script)
       stopIfChanged = false;
       restartIfChanged = false;
-      path = [pkgs.python3 pkgs.coreutils pkgs.util-linux pkgs.bash pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk pkgs.gh "/run/wrappers"];
+      path = [pkgs.python3 pkgs.coreutils pkgs.util-linux pkgs.bash pkgs.git pkgs.openssh colmenaPkg pkgs.nix pkgs.curl pkgs.jq pkgs.gnugrep pkgs.gawk "/run/wrappers"];
       serviceConfig = {
-        EnvironmentFile = [
-          config.sops.secrets.gh-token.path
-        ];
         User = "nixos";
         Type = "oneshot";
         TimeoutStartSec = "4h";

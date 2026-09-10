@@ -54,6 +54,25 @@ def ci_passed(runs, revision):
                for r in runs)
 
 
+def public_ci_runs(repository, revision):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        raise FleetError("Invalid GitHub repository")
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        raise FleetError("Invalid revision")
+    url = (f"https://api.github.com/repos/{repository}/actions/workflows/ci.yml/runs"
+           f"?head_sha={revision}&per_page=20")
+    request = urllib.request.Request(url, headers={"User-Agent": "nixos-fleet",
+                                                   "Accept": "application/vnd.github+json"})
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            runs = json.load(response)["workflow_runs"]
+    except Exception as exc:
+        raise FleetError("Cannot verify public GitHub CI; deployment withheld") from exc
+    return [dict(headSha=r.get("head_sha"), headBranch=r.get("head_branch"),
+                 event=r.get("event"), status=r.get("status"), conclusion=r.get("conclusion"))
+            for r in runs]
+
+
 def canaries_passed(hosts, results):
     canaries = [name for name, cfg in hosts.items() if cfg.get("canary")]
     return bool(canaries) and all(results.get(name) == "converged" for name in canaries)
@@ -227,7 +246,7 @@ class Fleet:
             summary += f"\n{error}"
         data = json.dumps({"content": summary[:1900]}).encode()
         try:
-            req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
+            req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json", "User-Agent": "nixos-fleet"})
             with urllib.request.urlopen(req, timeout=15):
                 pass
             atomic_json(previous, state)
@@ -242,9 +261,7 @@ class Fleet:
         self.revision = run(["git", "rev-parse", "origin/main"], cwd=self.repo)
         if not re.fullmatch(r"[0-9a-f]{40}", self.revision):
             raise FleetError("Invalid revision")
-        runs = json.loads(run(["gh", "run", "list", "--workflow", "ci.yml", "--commit", self.revision,
-                              "--limit", "20", "--json",
-                              "headSha,headBranch,event,status,conclusion"], cwd=self.repo))
+        runs = public_ci_runs(os.environ.get("GITHUB_REPOSITORY", "Waddenn/nixos-config"), self.revision)
         if not ci_passed(runs, self.revision):
             raise FleetError("Deployment blocked: no successful main CI for this exact revision")
         with tempfile.TemporaryDirectory(prefix="fleet-", dir=self.state) as directory:
@@ -291,7 +308,7 @@ class Fleet:
                 self.results.setdefault(name, "blocked-by-canary")
             raise FleetError("Canary gate failed; remaining hosts were not activated")
         self.group([n for n in reachable if not remote[n]["canary"]], remote)
-        if any(v != "converged" for v in self.results.values()):
+        if any(v not in ("converged", "unreachable") for v in self.results.values()):
             raise FleetError("Partial deployment; controller update withheld")
         # The existing detached systemd agent is retained only on the controller.
         for name, cfg in hosts.items():
@@ -309,6 +326,9 @@ class Fleet:
                 self.healthy(name, cfg)
             else:
                 raise FleetError("Controller needs attention")
+
+        if any(v == "unreachable" for v in self.results.values()):
+            raise FleetError("Partial deployment: unreachable hosts will be retried")
 
     def status(self):
         print("Comparing with the local checkout; no fetch, build or activation.")

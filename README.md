@@ -13,7 +13,10 @@ Le timer `internal-gitops` réconcilie la flotte toutes les heures. Il :
 4. construit les hôtes joignables et le contrôleur avec Colmena avant toute activation ;
 5. active les canaris séquentiellement, puis vérifie génération active, profil et santé ;
 6. active les autres hôtes avec au maximum trois déploiements simultanés ;
-7. met à jour le contrôleur en dernier, uniquement si toutes les cibles sont conformes.
+7. met à jour le contrôleur en dernier, si les canaris et toutes les cibles joignables sont conformes.
+
+Les cibles secondaires injoignables sont signalées et retentées chaque heure ;
+elles ne figent pas la mise à jour du contrôleur.
 
 Les hôtes indisponibles hors canaris sont retentés au prochain passage. Une activation
 interdite par NixOS prépare la génération de boot et signale `reboot-required`, sans
@@ -83,3 +86,7 @@ la promotion ; les protections GitHub ne sont pas contournées.
 
 Cette chaîne nécessite une première publication et installation du contrôleur
 selon `docs/operations.md`. Les redémarrages nécessaires restent manuels.
+
+Le contrôle de CI utilise l'API publique GitHub sans jeton (dépôt public), une
+requête par passage horaire. Une indisponibilité ou limitation de l'API bloque
+l'activation et sera retentée au prochain passage.

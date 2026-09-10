@@ -1,5 +1,6 @@
 """Policy tests: no real SSH, GitHub, builds or activation."""
 import importlib.util
+import io
 import os
 from pathlib import Path
 import tempfile
@@ -26,6 +27,21 @@ class PolicyTests(unittest.TestCase):
                              ("status", "in_progress"), ("conclusion", "failure")]:
             self.assertFalse(fleet.ci_passed([dict(good, **{field: value})], "a" * 40))
         self.assertFalse(fleet.ci_passed([], "a" * 40))
+
+    @patch.object(fleet.urllib.request, "urlopen")
+    def test_public_ci_needs_no_secret_and_preserves_gate(self, urlopen):
+        urlopen.return_value = io.StringIO(fleet.json.dumps({"workflow_runs": [{
+            "head_sha": "a" * 40, "head_branch": "main", "event": "workflow_dispatch",
+            "status": "completed", "conclusion": "success"}]}))
+        self.assertTrue(fleet.ci_passed(fleet.public_ci_runs("owner/repo", "a" * 40), "a" * 40))
+        request = urlopen.call_args.args[0]
+        self.assertNotIn("Authorization", dict(request.header_items()))
+        self.assertIn("/actions/workflows/ci.yml/runs?head_sha=", request.full_url)
+
+    @patch.object(fleet.urllib.request, "urlopen", side_effect=OSError("offline"))
+    def test_public_ci_network_failure_blocks_deployment(self, urlopen):
+        with self.assertRaises(fleet.FleetError):
+            fleet.public_ci_runs("owner/repo", "a" * 40)
 
     def test_canary_gate_fails_closed(self):
         hosts = {"auth": host(True), "proxy": host(True), "app": host()}
@@ -139,15 +155,27 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(f.results["dev-nixos"], "converged")
 
     @patch.object(fleet, "run")
-    def test_offline_batch_withholds_controller_update(self, run):
+    def test_offline_batch_retries_without_freezing_controller(self, run):
+        run.return_value = "dev-nixos"
         f = fleet.Fleet()
         f.storage = Mock(return_value={"safe": True})
-        f.systems = Mock(side_effect=["converged", fleet.FleetError("offline")])
+        f.systems = Mock(side_effect=["converged", fleet.FleetError("offline"), "converged"])
+        f.healthy = Mock()
         f.deploy_host = Mock(return_value="converged")
         with self.assertRaises(fleet.FleetError):
             f.rollout({"auth": host(True), "app": host(), "dev-nixos": host(local=True)})
-        self.assertFalse(any(c.args[0][0] == "sudo" for c in run.call_args_list))
+        self.assertTrue(any(c.args[0][0] == "sudo" for c in run.call_args_list))
+        self.assertEqual(f.results["dev-nixos"], "converged")
         self.assertEqual(f.results["app"], "unreachable")
+
+    @patch.object(fleet, "run")
+    def test_failed_reachable_batch_still_blocks_controller(self, run):
+        f = fleet.Fleet()
+        f.systems = Mock(return_value="drift")
+        f.deploy_host = Mock(side_effect=["converged", "failed"])
+        with self.assertRaises(fleet.FleetError):
+            f.rollout({"auth": host(True), "app": host(), "dev-nixos": host(local=True)})
+        self.assertFalse(any(c.args[0][0] == "sudo" for c in run.call_args_list))
 
     @patch.object(fleet, "run")
     def test_storage_counts_only_missing_paths_and_keeps_reserve(self, run):
