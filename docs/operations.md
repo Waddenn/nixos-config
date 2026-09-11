@@ -105,3 +105,24 @@ existant a été configuré avec `core.sharedRepository=group`, groupe `users`,
 écriture de groupe et bit setgid sur ses répertoires `.git`. Conserver ces droits
 lors d'une restauration ou recréation du checkout afin que les fetch root ne
 bloquent pas les fetch du service. Le contenu applicatif n'est pas concerné.
+
+## Inventaire Beszel
+
+Beszel suit automatiquement les `nixosConfigurations` dont l'agent est activé.
+Les dossiers `hosts/_…` sont exclus par la découverte des hôtes ; une machine
+simplement injoignable reste surveillée. Les machines hors NixOS sont déclarées
+uniquement dans `modules/data/beszel-hosts.nix` (`externalHosts`).
+
+Le fichier YAML est appliqué au démarrage du hub et son changement provoque un
+redémarrage du seul service Beszel. Ne pas ajouter les machines NixOS dans l'UI :
+le fichier fait autorité. Pour conserver l'historique lors d'un changement de nom
+d'affichage, garder le nom existant dans `nameOverrides`. Beszel identifie une
+entrée par le triplet nom/adresse/port ; changer ce triplet crée une nouvelle entrée.
+
+Avant chaque changement de fichier, les bases SQLite et l'ancien YAML sont archivés
+avec des droits privés dans `/home/nixos/beszel_data/inventory-backup-*`.
+Les entrées retirées et leur historique ne sont plus disponibles dans l'UI ; les
+archives permettent une récupération. Elles sont conservées sans purge automatique.
+Pour une restauration complète, arrêter Beszel, sauvegarder l'état présent, restaurer
+les deux bases et l'ancien YAML, puis utiliser la configuration Nix correspondante
+avant redémarrage pour éviter de réappliquer immédiatement le nouvel inventaire.
