@@ -254,9 +254,6 @@ class Fleet:
             print("Notification failed; state saved locally", file=sys.stderr)
 
     def reconcile(self):
-        space = os.statvfs("/nix/store")
-        if space.f_bavail * space.f_frsize < 5 * 1024 ** 3:
-            raise FleetError("Controller needs at least 5 GiB free before fleet builds")
         run(["git", "fetch", "origin", "main", "--prune"], cwd=self.repo)
         self.revision = run(["git", "rev-parse", "origin/main"], cwd=self.repo)
         if not re.fullmatch(r"[0-9a-f]{40}", self.revision):
@@ -280,40 +277,63 @@ class Fleet:
         remote = {n: c for n, c in hosts.items() if not c["local"]}
         if not any(c["canary"] for c in remote.values()):
             raise FleetError("No canaries defined; refusing rollout")
-        # Probe reachability before building, without excluding missing canaries from the gate.
-        reachable = []
-        for name, cfg in remote.items():
+        started = time.monotonic()
+        # Probe live generations (including manual rollbacks) in parallel. A healthy
+        # unchanged system needs neither a Colmena build nor another activation.
+        def probe(name, cfg):
             try:
-                self.systems(name, cfg)
-                reachable.append(name)
+                status = self.systems(name, cfg)
             except FleetError:
-                self.results[name] = "unreachable"
-        missing_canaries = [n for n, c in remote.items() if c["canary"] and n not in reachable]
-        if missing_canaries:
-            for name in hosts:
-                self.results.setdefault(name, "blocked-by-canary")
-            raise FleetError("Required canary unreachable; rollout withheld")
-        build_hosts = reachable + [n for n, c in hosts.items() if c["local"]]
-        if build_hosts:
-            run([self.colmena, "--config", str(self.work / "flake.nix"), "build", "--on", ",".join(build_hosts),
+                return "unreachable"
+            if status == "converged":
+                try:
+                    self.healthy(name, cfg)
+                except FleetError:
+                    return "unhealthy-or-diverged"
+            return status
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(hosts))) as pool:
+            futures = {pool.submit(probe, n, c): n for n, c in hosts.items()}
+            observed = {futures[f]: f.result() for f in concurrent.futures.as_completed(futures)}
+        self.results.update(observed)
+        changed = sorted(n for n, status in observed.items() if status == "drift")
+        print(f"Live preflight: {time.monotonic()-started:.1f}s; "
+              f"{len(changed)}/{len(hosts)} systems need activation: {', '.join(changed) or 'none'}", flush=True)
+        bad_canaries = [n for n, c in remote.items() if c["canary"]
+                        and observed[n] not in ("converged", "drift")]
+        if bad_canaries:
+            for name in changed:
+                self.results[name] = "blocked-by-canary"
+            raise FleetError("Required canary unavailable or unhealthy; rollout withheld")
+        if changed:
+            space = os.statvfs("/nix/store")
+            if space.f_bavail * space.f_frsize < 5 * 1024 ** 3:
+                raise FleetError("Controller needs at least 5 GiB free before fleet builds")
+            print("Building only changed systems", flush=True)
+            run([self.colmena, "--config", str(self.work / "flake.nix"), "build", "--on", ",".join(changed),
                  "--parallel", str(self.parallel), "--keep-result"], capture=False, timeout=7200)
-        canaries = [n for n in reachable if remote[n]["canary"]]
-        # Sequential canaries avoid concurrent changes to proxy and identity provider.
+        canaries = [n for n in changed if n in remote and remote[n]["canary"]]
+        # Unchanged canaries were health-checked above; changed ones activate first.
         for name in canaries:
             self.results[name] = self.deploy_host(name, remote[name])
             if self.results[name] != "converged":
                 break
         if not canaries_passed(remote, self.results):
-            for name in hosts:
-                self.results.setdefault(name, "blocked-by-canary")
+            for name in changed:
+                if self.results[name] == "drift":
+                    self.results[name] = "blocked-by-canary"
             raise FleetError("Canary gate failed; remaining hosts were not activated")
-        self.group([n for n in reachable if not remote[n]["canary"]], remote)
-        if any(v not in ("converged", "unreachable") for v in self.results.values()):
+        self.group([n for n in changed if n in remote and not remote[n]["canary"]], remote)
+        if any(v not in ("converged", "unreachable") for n, v in self.results.items() if n in remote):
             raise FleetError("Partial deployment; controller update withheld")
         # The existing detached systemd agent is retained only on the controller.
         for name, cfg in hosts.items():
             if not cfg["local"]:
                 continue
+            if observed[name] == "converged":
+                continue
+            if observed[name] != "drift":
+                raise FleetError("Controller needs attention")
             if run(["uname", "-n"]).split(".")[0] != name:
                 self.results[name] = "wrong-controller"
                 raise FleetError("Run deployments on the declared controller")
@@ -326,6 +346,8 @@ class Fleet:
                 self.healthy(name, cfg)
             else:
                 raise FleetError("Controller needs attention")
+        print(f"Rollout finished in {time.monotonic()-started:.1f}s; "
+              f"{len(changed)} systems selected for build", flush=True)
 
         if any(v == "unreachable" for v in self.results.values()):
             raise FleetError("Partial deployment: unreachable hosts will be retried")

@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -37,16 +38,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       hosts: ${{ steps.set-matrix.outputs.hosts }}
+      has-builds: ${{ steps.set-matrix.outputs.has-builds }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: cachix/install-nix-action@v25
       - id: set-matrix
-        run: |
-          HOSTS=$(nix eval --json .#nixosConfigurations --apply 'builtins.attrNames')
-          echo "hosts=$HOSTS" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/plan-ci.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-plan
+          path: ci-plan.json
 
   flake-check:
     needs: generate-matrix
+    if: needs.generate-matrix.outputs.has-builds == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -61,9 +70,32 @@ jobs:
     - name: Flake Check ${{ matrix.host }}
       run: nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
+  validation:
+    if: always()
+    needs: [deployment-tests, check-formatting, generate-matrix, flake-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all checks and every selected build
+        env:
+          TESTS: ${{ needs.deployment-tests.result }}
+          FORMAT: ${{ needs.check-formatting.result }}
+          PLAN: ${{ needs.generate-matrix.result }}
+          BUILDS: ${{ needs.flake-check.result }}
+          HAS_BUILDS: ${{ needs.generate-matrix.outputs.has-builds }}
+        run: |
+          test "$TESTS" = success
+          test "$FORMAT" = success
+          test "$PLAN" = success
+          if [ "$HAS_BUILDS" = true ]; then
+            test "$BUILDS" = success
+          else
+            test "$HAS_BUILDS" = false
+            test "$BUILDS" = skipped
+          fi
+
   promote-update:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/update-flake-lock'
-    needs: [deployment-tests, check-formatting, flake-check]
+    needs: [validation]
     runs-on: ubuntu-latest
     permissions:
       contents: write

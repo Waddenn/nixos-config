@@ -19,6 +19,11 @@ def host(canary=False, local=False):
 
 
 class PolicyTests(unittest.TestCase):
+    def setUp(self):
+        space = patch.object(fleet.os, "statvfs", return_value=Mock(f_bavail=20, f_frsize=1024**3))
+        space.start()
+        self.addCleanup(space.stop)
+
     def test_ci_requires_exact_revision_successful_push(self):
         good = dict(headSha="a" * 40, event="push", headBranch="main", status="completed", conclusion="success")
         self.assertTrue(fleet.ci_passed([good], "a" * 40))
@@ -60,7 +65,7 @@ class PolicyTests(unittest.TestCase):
     def test_unreachable_canary_blocks_batch_and_self(self, run):
         f = fleet.Fleet()
         f.storage = Mock(return_value={"safe": True})
-        f.systems = Mock(side_effect=[fleet.FleetError("offline"), "drift"])
+        f.systems = Mock(side_effect=lambda n, c: (_ for _ in ()).throw(fleet.FleetError("offline")) if n == "auth" else "drift")
         f.group = Mock()
         with self.assertRaises(fleet.FleetError):
             f.rollout({"auth": host(True), "app": host(), "dev-nixos": host(local=True)})
@@ -143,10 +148,15 @@ class PolicyTests(unittest.TestCase):
         run.return_value = "dev-nixos"
         f = fleet.Fleet()
         f.storage = Mock(return_value={"safe": True})
-        f.systems = Mock(return_value="converged")
+        f.systems = Mock(side_effect=lambda n, c: "converged" if n in f.results and f.results[n] != "drift" else "drift")
         f.healthy = Mock()
         events = []
-        run.side_effect = lambda args, **kwargs: events.append(args) or "dev-nixos"
+        def record(args, **kwargs):
+            events.append(args)
+            if args[0] == "sudo":
+                f.results["dev-nixos"] = "converged"
+            return "dev-nixos"
+        run.side_effect = record
         f.deploy_host = Mock(side_effect=lambda *args: events.append(["canary"]) or "converged")
         f.rollout({"auth": host(True), "dev-nixos": host(local=True)})
         self.assertIn("build", events[0])
@@ -161,7 +171,13 @@ class PolicyTests(unittest.TestCase):
         run.return_value = "dev-nixos"
         f = fleet.Fleet()
         f.storage = Mock(return_value={"safe": True})
-        f.systems = Mock(side_effect=["converged", fleet.FleetError("offline"), "converged"])
+        def observed(n, c):
+            if n == "app":
+                raise fleet.FleetError("offline")
+            if n == "dev-nixos" and not any(call.args[0][0] == "sudo" for call in run.call_args_list):
+                return "drift"
+            return "converged"
+        f.systems = Mock(side_effect=observed)
         f.healthy = Mock()
         f.deploy_host = Mock(return_value="converged")
         with self.assertRaises(fleet.FleetError):
@@ -178,6 +194,50 @@ class PolicyTests(unittest.TestCase):
         with self.assertRaises(fleet.FleetError):
             f.rollout({"auth": host(True), "app": host(), "dev-nixos": host(local=True)})
         self.assertFalse(any(c.args[0][0] == "sudo" for c in run.call_args_list))
+
+    @patch.object(fleet, "run")
+    def test_no_changes_performs_health_checks_without_build_or_self_update(self, run):
+        f = fleet.Fleet()
+        f.systems = Mock(return_value="converged")
+        f.healthy = Mock()
+        f.rollout({"auth": host(True), "app": host(), "dev-nixos": host(local=True)})
+        run.assert_not_called()
+        self.assertEqual(f.healthy.call_count, 3)
+        self.assertEqual(set(f.results.values()), {"converged"})
+
+    @patch.object(fleet, "run")
+    def test_one_changed_app_builds_and_activates_only_that_app(self, run):
+        f = fleet.Fleet()
+        f.systems = Mock(side_effect=lambda n, c: "drift" if n == "app" else "converged")
+        f.healthy = Mock()
+        f.deploy_host = Mock(return_value="converged")
+        f.rollout({"auth": host(True), "app": host(), "dev-nixos": host(local=True)})
+        self.assertEqual(run.call_args.args[0][5], "app")
+        run.assert_called_once()
+        f.deploy_host.assert_called_once_with("app", host())
+
+    @patch.object(fleet, "run")
+    def test_unchanged_but_unhealthy_canary_blocks_changed_app(self, run):
+        f = fleet.Fleet()
+        f.systems = Mock(side_effect=lambda n, c: "drift" if n == "app" else "converged")
+        f.healthy = Mock(side_effect=fleet.FleetError("unhealthy"))
+        with self.assertRaises(fleet.FleetError):
+            f.rollout({"auth": host(True), "app": host()})
+        run.assert_not_called()
+        self.assertEqual(f.results["app"], "blocked-by-canary")
+
+    @patch.object(fleet, "run")
+    def test_offline_unchanged_secondary_does_not_cause_build(self, run):
+        f = fleet.Fleet()
+        def observed(n, c):
+            if n == "app":
+                raise fleet.FleetError("offline")
+            return "converged"
+        f.systems = Mock(side_effect=observed)
+        f.healthy = Mock()
+        with self.assertRaisesRegex(fleet.FleetError, "unreachable hosts"):
+            f.rollout({"auth": host(True), "app": host()})
+        run.assert_not_called()
 
     @patch.object(fleet, "run")
     def test_storage_counts_only_missing_paths_and_keeps_reserve(self, run):

@@ -63,6 +63,7 @@
               ${./scripts/update-caddy-plugin-hash.sh}
             export PYTHONDONTWRITEBYTECODE=1
             FLEET_SCRIPT=${./scripts/fleet.py} python3 ${./tests/test_fleet.py}
+            CI_PLAN_SCRIPT=${./scripts/plan-ci.py} python3 ${./tests/test_ci_plan.py}
             touch "$out"
           '';
       };

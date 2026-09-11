@@ -126,3 +126,27 @@ archives permettent une récupération. Elles sont conservées sans purge automa
 Pour une restauration complète, arrêter Beszel, sauvegarder l'état présent, restaurer
 les deux bases et l'ancien YAML, puis utiliser la configuration Nix correspondante
 avant redémarrage pour éviter de réappliquer immédiatement le nouvel inventaire.
+
+## Déploiements ciblés
+
+La CI évalue toujours l'inventaire et vérifie les scripts, le formatage et la parité
+Colmena/NixOS. Elle construit uniquement les systèmes dont le chemin de sortie Nix
+change depuis une révision ancêtre de `main` ayant une CI réussie. Un commit précédent
+non validé ne sert jamais de référence. Les nouveaux hôtes sont construits ; les hôtes
+retirés disparaissent de la matrice. Une modification documentaire peut ne lancer
+aucune construction ; le job `validation` vérifie explicitement ce cas.
+
+Un changement du lock, du flake, des points d'entrée partagés ou du mécanisme de CI
+force les constructions complètes. L'absence de référence fiable ou l'impossibilité
+de l'évaluer revient aussi au parcours complet. `ci-plan.json`, disponible en artefact
+GitHub, indique la référence, les systèmes sélectionnés et leurs chemins attendus.
+
+Le contrôleur garde sa garde CI sur le commit exact. Il sonde les générations actives
+et préparées en parallèle (8 connexions maximum), vérifie la santé des systèmes déjà
+conformes et construit seulement les systèmes en dérive. Les canaris modifiés sont
+activés en premier ; les canaris inchangés doivent toujours être sains. Le contrôleur
+n'est réactivé que si son propre système change, après les cibles joignables.
+
+Une machine hors ligne reste signalée et retentée au cycle suivant ; elle ne déclenche
+pas de construction inutile. Un rollback manuel est détecté par la génération réelle.
+Le journal donne la durée du précontrôle et le nombre de systèmes à construire.
