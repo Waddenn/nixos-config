@@ -150,3 +150,10 @@ n'est réactivé que si son propre système change, après les cibles joignables
 Une machine hors ligne reste signalée et retentée au cycle suivant ; elle ne déclenche
 pas de construction inutile. Un rollback manuel est détecté par la génération réelle.
 Le journal donne la durée du précontrôle et le nombre de systèmes à construire.
+
+Validation du 11 septembre 2026 : la comparaison réelle des sorties Nix entre
+`d0d0668` et `eec6996` (synchronisation de l'inventaire Beszel) sélectionne seulement
+`beszel`, sur les 14 hôtes restants. Les six hôtes retirés ne sont pas construits.
+Le précontrôle réel sans changement, testé en interdisant les commandes de construction
+et d'activation, termine en 8 secondes pour 14 hôtes, dont trois injoignables. Ce temps
+exclut la récupération Git et l'évaluation Nix du cycle complet.
