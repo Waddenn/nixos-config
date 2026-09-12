@@ -483,8 +483,8 @@ in {
 
     systemd.services.authelia-users-setup = lib.mkIf hasDeclarativeUsers {
       description = "Initialize the writable Authelia users database once";
-      after = ["sops-nix.service" "authelia-env-setup.service"];
-      requires = ["sops-nix.service" "authelia-env-setup.service"];
+      after = ["authelia-env-setup.service"];
+      requires = ["authelia-env-setup.service"];
       before = ["authelia.service"];
 
       serviceConfig = {
