@@ -6,13 +6,12 @@
 }: let
   cfg = config.my-services.auth.authelia;
   hasDeclarativeUsers = (builtins.length (builtins.attrNames cfg.declarativeUsers)) > 0;
-  usersDatabaseFile =
-    if hasDeclarativeUsers
-    then
-      (pkgs.formats.yaml {}).generate "authelia-users-database.yml" {
-        users = cfg.declarativeUsers;
-      }
-    else cfg.usersFile;
+  declarativeUserSecretNames = lib.mapAttrsToList (_: user: user.hashSecret) cfg.declarativeUsers;
+  declarativeUsersForTemplate = lib.mapAttrs (_: user:
+    (removeAttrs user ["hashSecret"])
+    // {password = config.sops.placeholder.${user.hashSecret};})
+  cfg.declarativeUsers;
+  usersDatabaseFile = cfg.usersFile;
 
   # Configuration Authelia base (sans secrets)
   autheliaConfigBase = {
@@ -48,6 +47,7 @@
 
     authentication_backend = {
       password_reset.disable = true;
+      password_change.disable = false;
       file = {
         path = usersDatabaseFile;
         watch = true;
@@ -211,9 +211,9 @@ in {
             type = lib.types.str;
             description = "Display name";
           };
-          password = lib.mkOption {
+          hashSecret = lib.mkOption {
             type = lib.types.str;
-            description = "Argon2id password hash (e.g. generated with authelia crypto hash generate argon2)";
+            description = "SOPS secret name containing this user's Argon2id password hash";
           };
           email = lib.mkOption {
             type = lib.types.str;
@@ -230,12 +230,12 @@ in {
       example = {
         "tom" = {
           displayname = "Tom";
-          password = "$argon2id$v=19$m=65536,t=3,p=4$...";
+          hashSecret = "authelia_user_tom_password_hash";
           email = "tom@example.com";
           groups = ["admins"];
         };
       };
-      description = "Declarative Authelia file-backend users (replaces manual users_database.yml management)";
+      description = "Declarative Authelia file-backend users; password hashes are injected from SOPS at runtime";
     };
 
     database = {
@@ -304,6 +304,13 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = lib.optional hasDeclarativeUsers {
+      assertion =
+        builtins.length declarativeUserSecretNames
+        == builtins.length (lib.unique declarativeUserSecretNames);
+      message = "Each Authelia declarative user must reference a distinct hashSecret";
+    };
+
     # Créer le groupe et l'utilisateur authelia
     users.users.authelia = {
       isSystemUser = true;
@@ -387,7 +394,22 @@ in {
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
-      };
+      }
+      // builtins.listToAttrs (map (name: {
+          inherit name;
+          value = {
+            sopsFile = ../../../secrets/secrets.yaml;
+            restartUnits = ["authelia.service"];
+          };
+        })
+        declarativeUserSecretNames);
+
+    sops.templates."authelia-users-database.yml" = lib.mkIf hasDeclarativeUsers {
+      content = builtins.toJSON {users = declarativeUsersForTemplate;};
+      owner = "authelia";
+      group = "authelia";
+      mode = "0400";
+    };
 
     # Script pour générer le fichier d'environnement avec les secrets
     systemd.services.authelia-env-setup = {
@@ -459,14 +481,40 @@ in {
       '';
     };
 
+    systemd.services.authelia-users-setup = lib.mkIf hasDeclarativeUsers {
+      description = "Initialize the writable Authelia users database once";
+      after = ["sops-nix.service" "authelia-env-setup.service"];
+      requires = ["sops-nix.service" "authelia-env-setup.service"];
+      before = ["authelia.service"];
+
+      serviceConfig = {
+        Type = "oneshot";
+        EnvironmentFile = "/run/authelia/env";
+      };
+
+      script = ''
+        ${pkgs.bash}/bin/bash ${../../../scripts/init-authelia-users.sh} \
+          ${config.sops.templates."authelia-users-database.yml".path} \
+          ${cfg.usersFile} \
+          ${cfg.dataDir}/.users-database-migrated-v1 \
+          authelia authelia \
+          ${pkgs.yq-go}/bin/yq \
+          ${pkgs.authelia}/bin/authelia config validate \
+          --config ${configFile} --config /run/authelia/oidc.yml
+      '';
+    };
+
     # Service systemd Authelia
     systemd.services.authelia = {
       description = "Authelia authentication and authorization server";
       after =
         ["network.target" "authelia-env-setup.service"]
+        ++ lib.optional hasDeclarativeUsers "authelia-users-setup.service"
         ++ lib.optional (cfg.redis.host == "localhost") "redis-authelia.service"
         ++ lib.optional (cfg.database.type == "postgres" && cfg.database.host == "localhost") "postgresql.service";
-      requires = ["authelia-env-setup.service"];
+      requires =
+        ["authelia-env-setup.service"]
+        ++ lib.optional hasDeclarativeUsers "authelia-users-setup.service";
       wantedBy = ["multi-user.target"];
 
       serviceConfig = {
