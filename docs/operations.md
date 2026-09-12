@@ -176,3 +176,17 @@ inchangé. La CI exécute l'agent et le serveur épinglés pour vérifier leurs 
 L'agent est inclus dans les contrôles de santé du déploiement. Les hôtes NixOS hors
 ligne recevront la version commune à leur retour. Les machines externes (`externalHosts`)
 restent administrées séparément ; déclarer leur présence ne gère pas leurs logiciels.
+
+## Branches de travail et PR en brouillon
+
+Suivre `AGENTS.md` à la racine. Chaque modification se fait sur une branche courte
+`codex/<sujet>`. Les pushes hors `main` et les PR en brouillon exécutent seulement
+les tests Python, ShellCheck et le contrôle de whitespace, sans installer Nix.
+Le passage de la PR à l'état prêt déclenche la CI complète existante. Ses pushes
+suivants la relancent ; repasser en brouillon pour reprendre des itérations nombreuses.
+Le passage en brouillon annule le run précédent de la PR grâce à la concurrence.
+
+Les validations complètes et constructions GitHub sont conservées avant fusion et
+sur `main`. Un lancement manuel demande également le parcours complet, notamment
+pour le workflow hebdomadaire. Le contrôleur ne déploie jamais une simple validation
+de branche : seule la CI réussie du SHA exact sur `main` est recevable.

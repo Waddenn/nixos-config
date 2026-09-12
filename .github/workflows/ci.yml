@@ -1,9 +1,10 @@
 name: "CI"
 on:
   pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   push:
-    branches:
-      - main
+    branches: ["**"]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +16,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  quick-checks:
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.mode.outputs.full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: mode
+        name: Select validation level
+        env:
+          FULL_CI: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && !github.event.pull_request.draft) }}
+        run: echo "full=$FULL_CI" >> "$GITHUB_OUTPUT"
+      - name: Check patch whitespace
+        run: git show --format= --check HEAD
+      - name: Run policy tests without Nix or infrastructure access
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+      - name: Check shell scripts
+        run: shellcheck scripts/deploy-fleet.sh scripts/fleet-status.sh scripts/pull-update-host.sh scripts/update-caddy-plugin-hash.sh
+
   deployment-tests:
+    needs: quick-checks
+    if: needs.quick-checks.outputs.full == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +54,8 @@ jobs:
       - run: python3 scripts/check-colmena.py
 
   check-formatting:
+    needs: quick-checks
+    if: needs.quick-checks.outputs.full == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -47,6 +72,8 @@ jobs:
       run: nix fmt -- --check
 
   generate-matrix:
+    needs: quick-checks
+    if: needs.quick-checks.outputs.full == 'true'
     runs-on: ubuntu-latest
     outputs:
       hosts: ${{ steps.set-matrix.outputs.hosts }}
@@ -94,18 +121,20 @@ jobs:
       run: nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
   validation:
-    if: always()
-    needs: [deployment-tests, check-formatting, generate-matrix, flake-check]
+    if: always() && needs.quick-checks.outputs.full == 'true'
+    needs: [quick-checks, deployment-tests, check-formatting, generate-matrix, flake-check]
     runs-on: ubuntu-latest
     steps:
       - name: Require all checks and every selected build
         env:
+          QUICK: ${{ needs.quick-checks.result }}
           TESTS: ${{ needs.deployment-tests.result }}
           FORMAT: ${{ needs.check-formatting.result }}
           PLAN: ${{ needs.generate-matrix.result }}
           BUILDS: ${{ needs.flake-check.result }}
           HAS_BUILDS: ${{ needs.generate-matrix.outputs.has-builds }}
         run: |
+          test "$QUICK" = success
           test "$TESTS" = success
           test "$FORMAT" = success
           test "$PLAN" = success
