@@ -11,10 +11,7 @@
     (removeAttrs user ["hashSecret"])
     // {password = config.sops.placeholder.${user.hashSecret};})
   cfg.declarativeUsers;
-  usersDatabaseFile =
-    if hasDeclarativeUsers
-    then config.sops.templates."authelia-users-database.yml".path
-    else cfg.usersFile;
+  usersDatabaseFile = cfg.usersFile;
 
   # Configuration Authelia base (sans secrets)
   autheliaConfigBase = {
@@ -50,6 +47,7 @@
 
     authentication_backend = {
       password_reset.disable = true;
+      password_change.disable = false;
       file = {
         path = usersDatabaseFile;
         watch = true;
@@ -411,7 +409,6 @@ in {
       owner = "authelia";
       group = "authelia";
       mode = "0400";
-      restartUnits = ["authelia.service"];
     };
 
     # Script pour générer le fichier d'environnement avec les secrets
@@ -484,14 +481,40 @@ in {
       '';
     };
 
+    systemd.services.authelia-users-setup = lib.mkIf hasDeclarativeUsers {
+      description = "Initialize the writable Authelia users database once";
+      after = ["sops-nix.service" "authelia-env-setup.service"];
+      requires = ["sops-nix.service" "authelia-env-setup.service"];
+      before = ["authelia.service"];
+
+      serviceConfig = {
+        Type = "oneshot";
+        EnvironmentFile = "/run/authelia/env";
+      };
+
+      script = ''
+        ${pkgs.bash}/bin/bash ${../../../scripts/init-authelia-users.sh} \
+          ${config.sops.templates."authelia-users-database.yml".path} \
+          ${cfg.usersFile} \
+          ${cfg.dataDir}/.users-database-migrated-v1 \
+          authelia authelia \
+          ${pkgs.yq-go}/bin/yq \
+          ${pkgs.authelia}/bin/authelia config validate \
+          --config ${configFile} --config /run/authelia/oidc.yml
+      '';
+    };
+
     # Service systemd Authelia
     systemd.services.authelia = {
       description = "Authelia authentication and authorization server";
       after =
         ["network.target" "authelia-env-setup.service"]
+        ++ lib.optional hasDeclarativeUsers "authelia-users-setup.service"
         ++ lib.optional (cfg.redis.host == "localhost") "redis-authelia.service"
         ++ lib.optional (cfg.database.type == "postgres" && cfg.database.host == "localhost") "postgresql.service";
-      requires = ["authelia-env-setup.service"];
+      requires =
+        ["authelia-env-setup.service"]
+        ++ lib.optional hasDeclarativeUsers "authelia-users-setup.service";
       wantedBy = ["multi-user.target"];
 
       serviceConfig = {

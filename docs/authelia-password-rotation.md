@@ -1,10 +1,18 @@
 # Rotation des mots de passe Authelia
 
-Les métadonnées des comptes (nom, adresse et groupes) restent déclarées dans
-`hosts/authelia/default.nix`. Chaque compte référence un secret SOPS distinct via
-`hashSecret`. Le hash Argon2id n'est injecté dans la base utilisateurs qu'à
-l'activation, dans un template SOPS sous `/run/secrets-rendered/`; il n'entre donc
-plus dans Git ni dans le Nix store.
+Les métadonnées initiales des comptes (nom, adresse et groupes) restent déclarées
+dans `hosts/authelia/default.nix`. Chaque compte référence un secret SOPS distinct
+via `hashSecret`. SOPS génère une graine sous `/run/secrets-rendered/`, puis une
+migration unique initialise ou complète `/var/lib/authelia/users_database.yml`.
+Cette base persistante appartient à `authelia`, est limitée au mode `0600` et reste
+inscriptible afin que les utilisateurs puissent changer leur mot de passe depuis
+l'interface.
+
+La migration conserve les utilisateurs déjà présents et leur donne priorité sur
+la graine SOPS. Elle sauvegarde une base préexistante dans
+`users_database.yml.pre-sops-migration`, valide le résultat avec Authelia avant de
+poser son marqueur, puis ne modifie plus jamais le contenu lors des activations
+suivantes. Une erreur restaure la sauvegarde et bloque le démarrage d'Authelia.
 
 ## Limite de la migration
 
@@ -27,7 +35,8 @@ doit être traitée comme une opération séparée et coordonnée avec tous les 
    nix shell nixpkgs#authelia --command authelia crypto hash generate argon2
    ```
 
-2. Ouvrir le fichier chiffré et remplacer uniquement le secret du compte :
+2. Avant la première migration, ouvrir le fichier chiffré et remplacer uniquement
+   le secret du compte :
 
    ```bash
    nix shell nixpkgs#sops --command sops secrets/secrets.yaml
@@ -36,6 +45,12 @@ doit être traitée comme une opération séparée et coordonnée avec tous les 
    Les clés attendues sont `authelia_user_admin_password_hash` et
    `authelia_user_tom_password_hash`. Ne jamais ajouter leur valeur à un fichier
    Nix, à la description d'une PR ou aux logs de CI.
+
+   Après la première migration, ces secrets ne sont plus réappliqués afin de ne
+   pas écraser les changements réalisés dans l'interface. Une rotation
+   administrative ultérieure doit être réalisée avec les outils Authelia sur la
+   base persistante, ou via une nouvelle migration explicitement versionnée et
+   sauvegardée.
 
 3. Vérifier localement avant publication :
 
