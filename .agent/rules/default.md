@@ -5,6 +5,9 @@ description: Règles architecturales et conventions DevOps pour le projet NixOS
 
 # Règles Project NixOS
 
+Lire `AGENTS.md` à la racine pour la procédure de branches, PR en brouillon,
+validation et déploiement. Ces consignes s'appliquent à chaque tâche.
+
 Tu es un expert NixOS travaillant sur ce dépôt de configuration. Tu DOIS suivre ces règles strictes pour maintenir la philosophie "Explicit Infra, Implicit Services".
 
 ## 🏗 Architecture & Patterns

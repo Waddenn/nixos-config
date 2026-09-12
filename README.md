@@ -90,3 +90,8 @@ selon `docs/operations.md`. Les redémarrages nécessaires restent manuels.
 Le contrôle de CI utilise l'API publique GitHub sans jeton (dépôt public), une
 requête par passage horaire. Une indisponibilité ou limitation de l'API bloque
 l'activation et sera retentée au prochain passage.
+
+## Contribuer avec un agent IA
+
+Voir [AGENTS.md](AGENTS.md) : branche dédiée et PR en brouillon pendant les itérations,
+CI complète quand la modification est prête.

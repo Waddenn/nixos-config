@@ -22,8 +22,13 @@ jobs:
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - uses: DeterminateSystems/magic-nix-cache-action@v7
-      
+      - name: Use shared Cachix cache
+        # cachix-action v17
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866
+        with:
+          name: waddenn-nixos
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
       - name: Update flake.lock
         run: nix flake update
 
@@ -54,7 +59,7 @@ jobs:
           title: "Update flake.lock"
           body: |
             Automated update of flake inputs and pinned container image digests.
-            
+
             This PR was created automatically by the `update-flake` workflow.
           branch: update-flake-lock
           delete-branch: true
