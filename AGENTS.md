@@ -18,10 +18,9 @@ l'utilisateur et préserver ses modifications existantes.
 - `workflow_dispatch` lance volontairement la CI complète ; ne pas l'utiliser pour
   chaque essai. Ne pas ajouter `[skip ci]` pour contourner les contrôles.
 - Après fusion, attendre la CI réussie du commit exact de `main` avant déploiement.
-  Pour un merge commit dont l'arbre, la base et la tête correspondent exactement à
-  une CI complète de PR promue par le workflow de confiance, ce run de `main` peut
-  être le contrôle rapide de provenance. Toute preuve absente ou ambiguë force la CI
-  complète. Une CI verte de branche ou de brouillon ne valide jamais un déploiement.
+  La promotion par arbre est désactivée : le run de `main` doit suivre le parcours
+  complet. Une CI verte de branche ou de brouillon et un statut de promotion ne
+  valident jamais un déploiement.
 - Ne pas fusionner une PR dont la CI complète échoue ou est annulée. Une autorisation
   explicite existante de livrer/déployer peut couvrir la fusion ; sinon laisser la PR
   prête et donner son lien. Ne pas redemander une autorisation déjà fournie.

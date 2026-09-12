@@ -295,53 +295,26 @@ Le passage de la PR à l'état prêt déclenche la CI complète existante. Ses p
 suivants la relancent ; repasser en brouillon pour reprendre des itérations nombreuses.
 Le passage en brouillon annule le run précédent de la PR grâce à la concurrence.
 
-### Promotion de la validation complète après fusion
+### Promotion de la validation complète après fusion — désactivée
 
-Une PR prête exécute une seule validation complète sur le merge ref préparé par
-GitHub. Quand ce run réussit, `promote-ci.yml`, chargé exclusivement depuis `main` via
-`workflow_run`, résout lui-même la PR encore ouverte et son merge ref. Il exige les
-jobs terminaux `validation` et `ci-gate`, contrôle le dépôt source, les deux parents
-base/tête et l'arbre Git, puis publie sur la tête de PR le statut durable
-`CI / validated merge tree`. Le statut contient l'arbre et la base et pointe vers le
-run complet. Aucun fichier ou artefact produit par la branche ne fait autorité.
+Le prototype de promotion par arbre n'est pas une preuve de validation suffisante.
+La CI de chaque SHA de `main` suit donc le parcours complet, comme les PR prêtes et
+les lancements manuels. Les branches ordinaires et les PR brouillon conservent les
+contrôles rapides. Le garde `ci-gate` vérifie lui-même le type d'événement et refuse
+un résultat rapide, un mode absent ou une validation omise sur `main`.
 
-Après un merge commit GitHub, la CI attachée au SHA exact de `main` refait les tests
-rapides puis vérifie indépendamment :
+Le workflow publieur est supprimé, aucun statut de promotion n'est consommé et
+`scripts/ci-promotion.py` refuse explicitement les anciens appels `publish` et
+`verify-main`. Une preuve absente, imitée, ambiguë, périmée ou invalide ne peut donc
+pas éviter le parcours complet. Voir [l'audit et les prérequis de réactivation](ci-promotion-security.md).
 
-- un commit à exactement deux parents ;
-- l'unique PR fusionnée vers `main`, issue du même dépôt, avec ces base et tête ;
-- l'identité de l'arbre final avec l'arbre promu ;
-- un statut créé par `github-actions[bot]` avant la fusion et son run de CI PR réussi ;
-- la présence et le succès des gardes complètes `validation` et `ci-gate` dans ce run.
+Les builds de PR et de `main` utilisent toujours le cache binaire signé
+`waddenn-nixos`. Une sortie présente peut être substituée, une sortie absente doit
+être construite. Cela économise les reconstructions quand les chemins Nix sont
+identiques, sans supprimer le second parcours de validation. La sélection des
+systèmes affectés reste assurée par `scripts/plan-ci.py`.
 
-Si tout concorde, les jobs Nix déjà validés sont omis sur `main` et `ci-gate` rend le
-run exact de `main` déployable. Sinon, notamment pour un squash, un rebase, une branche
-externe, une base avancée, une fusion trop rapide ou une API indisponible, la CI
-retombe automatiquement sur le parcours complet. `workflow_dispatch` reste toujours
-complet. La première fusion qui introduit ce mécanisme sera complète sur `main`, car
-le workflow de promotion n'existe pas encore sur la branche par défaut au moment de
-sa propre CI PR.
-
-Le dépôt utilise les merge commits mais n'a actuellement ni règle de protection ni
-merge queue activée. `merge_group` serait préférable avec une file obligatoire, car
-GitHub y teste directement la branche temporaire destinée à la fusion ; il n'est pas
-utilisable comme garde réelle tant que cette configuration n'existe pas. La promotion
-par arbre conserve entre-temps la vérification explicite de la base et ne suppose
-jamais que deux SHA différents ont le même contenu.
-
-Les builds complets de PR alimentent le cache binaire `waddenn-nixos`. Les hôtes,
-dont `dev-nixos`, font confiance à sa clé publique déclarée et peuvent donc substituer
-les chemins Nix signés lors du déploiement du même arbre. La promotion ne prétend pas
-qu'un artefact GitHub est un cache durable et ne remplace pas l'évaluation des chemins
-attendus par le contrôleur. Si une sortie manque du cache, Nix la reconstruit ; les
-canaris, contrôles de santé et d'espace, ciblage des générations en dérive et ordre du
-contrôleur restent inchangés.
-
-Mesure de référence du 12 septembre 2026 : la PR #32 a pris 4 min 44 s en CI complète,
-puis le SHA exact de `main` 4 min 10 s, soit 8 min 54 s cumulées. Les runs rapides de
-branche observés duraient 8 à 11 s. Le temps après promotion devra être relevé sur le
-premier merge suivant le bootstrap ; tant que cette mesure réelle n'existe pas, ne pas
-présenter la durée des runs rapides comme une garantie du nouveau chemin `main`.
-
-Le contrôleur ne déploie jamais une simple validation de branche ou le seul statut de
-promotion : seule la CI réussie attachée au SHA exact de `main` reste recevable.
+Le contrôleur attend toujours une CI réussie du SHA exact de `main`. Les canaris,
+les contrôles de santé et d'espace, le ciblage des générations en dérive et le rôle
+exclusif de `dev-nixos` sont conservés. Aucun statut de promotion ni succès de
+branche ne constitue une autorisation de déploiement.

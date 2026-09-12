@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -34,34 +33,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       full: ${{ steps.mode.outputs.full }}
-      promoted: ${{ steps.mode.outputs.promoted }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
       - id: mode
         name: Select validation level
         env:
-          GH_TOKEN: ${{ github.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
         run: |
-          full=false
-          promoted=false
-          if [ "${{ github.event_name }}" = workflow_dispatch ]; then
-            full=true
-          elif [ "${{ github.event_name }}" = pull_request ] && \
-               [ "${{ github.event.pull_request.draft }}" = false ]; then
-            full=true
-          elif [ "${{ github.event_name }}" = push ] && [ "${{ github.ref }}" = refs/heads/main ]; then
-            if python3 scripts/ci-promotion.py verify-main; then
-              promoted=true
-            else
-              echo "No reusable proof; falling back to complete validation."
-              full=true
-            fi
+          # No status or historical PR metadata can bypass full validation on main.
+          # Unknown event/draft values fail closed to the full path.
+          full=true
+          if [ "$EVENT_NAME" = pull_request ] && [ "$PR_DRAFT" = true ]; then
+            full=false
+          elif [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] && \
+               [ "$EVENT_REF" != refs/heads/main ]; then
+            full=false
           fi
           echo "full=$full" >> "$GITHUB_OUTPUT"
-          echo "promoted=$promoted" >> "$GITHUB_OUTPUT"
 
   deployment-tests:
     needs: validation-mode
@@ -99,6 +88,9 @@ jobs:
       run: nix fmt -- --check
 
   generate-matrix:
+    permissions:
+      contents: read
+      actions: read
     needs: validation-mode
     if: needs.validation-mode.outputs.full == 'true'
     runs-on: ubuntu-latest
@@ -177,25 +169,27 @@ jobs:
     needs: [quick-checks, validation-mode, validation]
     runs-on: ubuntu-latest
     steps:
-      - name: Require quick checks and either full validation or trusted promotion
+      - name: Require full validation on main and ready PRs
         env:
           QUICK: ${{ needs.quick-checks.result }}
           MODE: ${{ needs.validation-mode.result }}
           FULL: ${{ needs.validation-mode.outputs.full }}
-          PROMOTED: ${{ needs.validation-mode.outputs.promoted }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
           VALIDATION: ${{ needs.validation.result }}
         run: |
           test "$QUICK" = success
           test "$MODE" = success
-          if [ "$FULL" = true ]; then
-            test "$PROMOTED" = false
-            test "$VALIDATION" = success
-          elif [ "$PROMOTED" = true ]; then
-            test "$PROMOTED" = true
+          # Check the event again so a missing/false mode cannot greenlight main.
+          if { [ "$EVENT_NAME" = pull_request ] && [ "$PR_DRAFT" = true ]; } ||
+             { [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] &&
+               [ "$EVENT_REF" != refs/heads/main ]; }; then
+            test "$FULL" = false
             test "$VALIDATION" = skipped
           else
-            # Draft PRs and ordinary branch pushes intentionally run quick checks only.
-            test "$VALIDATION" = skipped
+            test "$FULL" = true
+            test "$VALIDATION" = success
           fi
 
   promote-update:
