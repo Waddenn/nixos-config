@@ -53,6 +53,26 @@
             self.fleet.${name}.units
         ) (builtins.attrNames self.fleet)) "Fleet health checks reference an undefined systemd service";
           pkgs.runCommand "fleet-inventory-check" {} "touch $out";
+        nextcloud-major-upgrade-policy = let
+          host = self.nixosConfigurations.nextcloud-pgsql;
+          nextcloud = host.config.services.nextcloud;
+          backup = host.config.services.postgresqlBackup;
+          healthUrls = self.fleet.nextcloud-pgsql.urls;
+        in
+          assert lib.assertMsg (lib.versions.major nextcloud.package.version == "33")
+          "Nextcloud must stay on major 33 until its migration is validated";
+          assert lib.assertMsg (backup.enable && backup.databases == ["nextcloud"])
+          "Nextcloud migration requires a declared PostgreSQL backup";
+          assert lib.assertMsg (lib.elem "http://192.168.40.116/status.php" healthUrls)
+          "Nextcloud fleet health must probe status.php";
+            pkgs.runCommand "nextcloud-major-upgrade-policy-check" {} "touch $out";
+        seerr-data-compatibility = let
+          seerrConfig = self.nixosConfigurations.jellyseerr.config.services.seerr;
+        in
+          assert lib.assertMsg seerrConfig.enable "The jellyseerr host must enable Seerr";
+          assert lib.assertMsg (seerrConfig.stateRevision == 0) "Seerr stateRevision must remain at the legacy data layout until an explicit migration";
+          assert lib.assertMsg (seerrConfig.configDir == "/var/lib/jellyseerr/config") "Seerr must keep using the existing Jellyseerr data directory";
+            pkgs.runCommand "seerr-data-compatibility-check" {} "touch $out";
         deployment-scripts =
           pkgs.runCommand "deployment-scripts-check" {
             nativeBuildInputs = [pkgs.shellcheck pkgs.python3];
@@ -65,6 +85,7 @@
             export PYTHONDONTWRITEBYTECODE=1
             FLEET_SCRIPT=${./scripts/fleet.py} python3 ${./tests/test_fleet.py}
             CI_PLAN_SCRIPT=${./scripts/plan-ci.py} python3 ${./tests/test_ci_plan.py}
+            CI_CACHE_ROOT=${./.} python3 ${./tests/test_ci_cache.py}
             BESZEL_UPDATER=${./scripts/update-beszel.py} python3 ${./tests/test_beszel_release.py}
             touch "$out"
           '';

@@ -12,7 +12,9 @@
   config = lib.mkIf config.my-services.misc.nextcloud.enable {
     services.nextcloud = {
       enable = true;
-      package = pkgs.nextcloud32;
+      # Major upgrades must remain sequential. Keep this on 33 until the
+      # application and database checks in docs/operations.md have passed.
+      package = pkgs.nextcloud33;
       hostName = "nextcloud.hexaflare.net";
       database.createLocally = true;
       configureRedis = true;
@@ -76,6 +78,30 @@
         effective_io_concurrency = 200; # SSD concurrent I/O
       };
     };
+
+    # Keep a logical dump available before application upgrades. The migration
+    # runbook still requires a fresh, explicitly verified dump and datadir copy.
+    services.postgresqlBackup = {
+      enable = true;
+      backupAll = false;
+      databases = ["nextcloud"];
+      location = "/var/backup/postgresql";
+      startAt = "01:15";
+    };
+
+    # Contacts used to be installed from the writable app store before it was
+    # managed through extraApps. A stale writable copy makes Nextcloud load
+    # both Composer autoloaders during a major upgrade. Preserve that copy for
+    # diagnosis, disable it, then let nextcloud-setup enable the Nix copy.
+    systemd.services.nextcloud-setup.preStart = lib.mkBefore ''
+      duplicate=/var/lib/nextcloud/store-apps/contacts
+      if [[ -e "$duplicate" ]]; then
+        ${config.services.nextcloud.occ}/bin/nextcloud-occ app:disable contacts || true
+        backup=/var/lib/nextcloud/app-backups/managed-by-nix
+        ${pkgs.coreutils}/bin/install -d -m 0700 "$backup"
+        ${pkgs.coreutils}/bin/mv "$duplicate" "$backup/contacts-$(${pkgs.coreutils}/bin/date -u +%Y%m%dT%H%M%SZ)"
+      fi
+    '';
 
     networking.firewall.allowedTCPPorts = [80 443];
   };

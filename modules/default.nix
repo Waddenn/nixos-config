@@ -33,7 +33,7 @@
     ./services/infra/pull-updater.nix
     ./services/media/calibre-web.nix
     ./services/media/immich.nix
-    ./services/media/jellyseerr.nix
+    ./services/media/seerr.nix
     ./services/messaging/gotify.nix
     ./services/misc/fwupd.nix
     ./services/misc/nextcloud.nix

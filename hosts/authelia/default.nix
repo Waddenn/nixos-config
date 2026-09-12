@@ -164,7 +164,7 @@
       # Utilisez pour :
       # - Services médias (Jellyfin, Plex)
       # - Photos (Immich)
-      # - Demandes de médias (Jellyseerr, Overseerr)
+      # - Demandes de médias (Seerr)
       # - Services collaboratifs non-critiques
       # 💡 Bon équilibre sécurité/facilité pour un usage quotidien
 
@@ -175,7 +175,7 @@
         subject = ["group:family" "group:admins"];
       }
 
-      # Jellyseerr - Demandes de médias
+      # Seerr - Demandes de médias
       {
         domain = ["jellyseerr.hexaflare.net"];
         policy = "one_factor";
