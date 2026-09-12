@@ -179,13 +179,13 @@ class WorkflowTests(unittest.TestCase):
                                     env=dict(os.environ, GITHUB_OUTPUT=str(output), **environment))
             return result, output.read_text() if output.exists() else ""
 
-    def test_validation_mode_runs_full_on_main_ready_pr_dispatch_and_unknown_events(self):
+    def test_validation_mode_keeps_prs_quick_and_main_dispatch_full(self):
         for event, ref, draft, expected in (
             ("push", "refs/heads/main", "", "true"),
-            ("pull_request", "refs/pull/7/merge", "false", "true"),
+            ("pull_request", "refs/pull/7/merge", "false", "false"),
             ("workflow_dispatch", "refs/heads/main", "", "true"),
             ("workflow_dispatch", "refs/heads/update-flake-lock", "", "true"),
-            ("pull_request", "refs/pull/7/merge", "", "true"),
+            ("pull_request", "refs/pull/7/merge", "", "false"),
             ("push", "", "", "true"),
             ("unknown", "refs/heads/main", "", "true"),
             ("pull_request", "refs/pull/7/merge", "true", "false"),
@@ -212,13 +212,15 @@ class WorkflowTests(unittest.TestCase):
         for full in ("false", "", "nonsense"):
             self.assertNotEqual(self.gate(FULL=full, VALIDATION="skipped", PROMOTED="true"), 0)
 
-    def test_ready_pr_and_dispatch_cannot_use_quick_or_promoted_mode(self):
-        for event in ("pull_request", "workflow_dispatch", "unknown"):
+    def test_dispatch_and_unknown_events_cannot_use_quick_or_promoted_mode(self):
+        for event in ("workflow_dispatch", "unknown"):
             self.assertNotEqual(self.gate(EVENT_NAME=event, PR_DRAFT="false",
                                          FULL="false", VALIDATION="skipped", PROMOTED="true"), 0)
 
-    def test_draft_and_branch_keep_quick_checks(self):
+    def test_draft_ready_pr_fork_and_branch_keep_quick_checks(self):
         for event, ref, draft in (("pull_request", "refs/pull/7/merge", "true"),
+                                  ("pull_request", "refs/pull/7/merge", "false"),
+                                  ("pull_request", "refs/pull/8/merge", ""),
                                   ("push", "refs/heads/feature", "")):
             self.assertEqual(self.gate(EVENT_NAME=event, EVENT_REF=ref, PR_DRAFT=draft,
                                       FULL="false", VALIDATION="skipped"), 0)

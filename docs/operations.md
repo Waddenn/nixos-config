@@ -80,7 +80,8 @@ par Nextcloud 34 avant validation complète de la version 33. Une activation Nix
 lancer la migration de schéma : un retour à la génération précédente ne restaure ni la
 base PostgreSQL ni le répertoire de données.
 
-Avant la fenêtre de maintenance, obtenir une CI complète verte sur la PR prête, puis
+Avant la fenêtre de maintenance, obtenir une CI complète verte lancée explicitement
+sur la branche de PR (`workflow_dispatch`), puis
 arrêter le timer sur `dev-nixos` et vérifier qu'aucun déploiement n'est actif. Garder
 le timer arrêté jusqu'à la validation finale afin qu'une fusion ne déclenche pas la
 migration avant la sauvegarde :
@@ -286,21 +287,30 @@ L'agent est inclus dans les contrôles de santé du déploiement. Les hôtes Nix
 ligne recevront la version commune à leur retour. Les machines externes (`externalHosts`)
 restent administrées séparément ; déclarer leur présence ne gère pas leurs logiciels.
 
-## Branches de travail et PR en brouillon
+## Branches de travail et PR
 
-Suivre `AGENTS.md` à la racine. Chaque modification se fait sur une branche courte
-`codex/<sujet>`. Les pushes hors `main` et les PR en brouillon exécutent seulement
-les tests Python, ShellCheck et le contrôle de whitespace, sans installer Nix.
-Le passage de la PR à l'état prêt déclenche la CI complète existante. Ses pushes
-suivants la relancent ; repasser en brouillon pour reprendre des itérations nombreuses.
-Le passage en brouillon annule le run précédent de la PR grâce à la concurrence.
+Chaque changement part de `main` à jour dans une branche courte `codex/<sujet>`.
+Les pushes hors `main` et toutes les PR, brouillon ou prêtes, exécutent seulement
+les tests Python, ShellCheck et le contrôle de whitespace. Le passage à l'état
+prêt signale que le travail peut être relu ; il ne déclenche aucun build Nix.
+
+Après fusion, la CI du SHA exact de `main` exécute le parcours complet avant tout
+déploiement. C'est l'unique CI complète automatique d'une fonctionnalité ordinaire.
+Une erreur Nix peut donc être découverte après fusion : le déploiement reste bloqué
+jusqu'à une correction ou un revert dont la CI réussit. Un résultat vert de PR ne
+prouve pas que les configurations Nix sont valides.
+
+Les lancements manuels (`workflow_dispatch`) restent complets. La mise à jour
+hebdomadaire continue à demander une CI complète sur `update-flake-lock` avant son
+intégration automatique, puis sur `main`. Ce contrôle préalable est également
+possible sur demande pour une migration sensible.
 
 ### Promotion de la validation complète après fusion — désactivée
 
 Le prototype de promotion par arbre n'est pas une preuve de validation suffisante.
-La CI de chaque SHA de `main` suit donc le parcours complet, comme les PR prêtes et
-les lancements manuels. Les branches ordinaires et les PR brouillon conservent les
-contrôles rapides. Le garde `ci-gate` vérifie lui-même le type d'événement et refuse
+La CI de chaque SHA de `main` suit le parcours complet, comme les lancements
+manuels. Les branches ordinaires et toutes les PR conservent les contrôles rapides.
+Le garde `ci-gate` vérifie lui-même le type d'événement et refuse
 un résultat rapide, un mode absent ou une validation omise sur `main`.
 
 Le workflow publieur est supprimé, aucun statut de promotion n'est consommé et
@@ -308,10 +318,10 @@ Le workflow publieur est supprimé, aucun statut de promotion n'est consommé et
 `verify-main`. Une preuve absente, imitée, ambiguë, périmée ou invalide ne peut donc
 pas éviter le parcours complet. Voir [l'audit et les prérequis de réactivation](ci-promotion-security.md).
 
-Les builds de PR et de `main` utilisent toujours le cache binaire signé
+Les builds complets utilisent toujours le cache binaire signé
 `waddenn-nixos`. Une sortie présente peut être substituée, une sortie absente doit
 être construite. Cela économise les reconstructions quand les chemins Nix sont
-identiques, sans supprimer le second parcours de validation. La sélection des
+identiques. La sélection des
 systèmes affectés reste assurée par `scripts/plan-ci.py`.
 
 Le contrôleur attend toujours une CI réussie du SHA exact de `main`. Les canaris,

@@ -9,19 +9,19 @@ l'utilisateur et préserver ses modifications existantes.
   Ne pas développer ni pousser directement sur `main`, sauf demande explicite.
 - Pendant les itérations, exécuter les tests ciblés localement et utiliser une PR
   **en brouillon** si le travail est publié. Ne pas ouvrir une PR prête trop tôt.
-- Les pushes de branche et les PR en brouillon exécutent seulement les contrôles
-  rapides (tests Python, ShellCheck, whitespace). Aucun build Nix sur GitHub.
+- Les pushes de branche et toutes les PR (brouillon ou prêtes) exécutent seulement
+  les contrôles rapides (tests Python, ShellCheck, whitespace), sans build Nix.
 - Quand le changement est terminé, vérifier le diff, lancer les validations locales
-  pertinentes, puis marquer la PR prête (`gh pr ready`). Cela déclenche la CI complète.
-  Les nouveaux pushes sur une PR prête relancent la CI complète : pour reprendre de
-  nombreuses itérations, repasser d'abord la PR en brouillon (`gh pr ready --undo`).
+  pertinentes, puis marquer la PR prête (`gh pr ready`). Ce passage ne lance pas de
+  CI complète ; l'état brouillon/prêt indique seulement si le travail est à relire.
 - `workflow_dispatch` lance volontairement la CI complète ; ne pas l'utiliser pour
   chaque essai. Ne pas ajouter `[skip ci]` pour contourner les contrôles.
 - Après fusion, attendre la CI réussie du commit exact de `main` avant déploiement.
   La promotion par arbre est désactivée : le run de `main` doit suivre le parcours
-  complet. Une CI verte de branche ou de brouillon et un statut de promotion ne
+  complet. Une CI verte de branche ou de PR et un statut de promotion ne
   valident jamais un déploiement.
-- Ne pas fusionner une PR dont la CI complète échoue ou est annulée. Une autorisation
+- Ne pas fusionner une PR dont les contrôles rapides échouent. Si une CI complète
+  a été demandée explicitement, attendre son succès avant fusion. Une autorisation
   explicite existante de livrer/déployer peut couvrir la fusion ; sinon laisser la PR
   prête et donner son lien. Ne pas redemander une autorisation déjà fournie.
 - Après une fusion autorisée, supprimer la branche de travail distante et locale
