@@ -73,11 +73,120 @@ de données, la génération précédente peut servir à une reprise manuelle vi
 Pour un service ayant migré sa base, restaurer une sauvegarde cohérente avec la version
 applicative plutôt que supposer qu'un rollback Nix rétablit les données.
 
+## Migration Nextcloud 32 vers 33
+
+Cette révision ne couvre que le passage majeur 32 vers 33. Ne pas remplacer le paquet
+par Nextcloud 34 avant validation complète de la version 33. Une activation Nix peut
+lancer la migration de schéma : un retour à la génération précédente ne restaure ni la
+base PostgreSQL ni le répertoire de données.
+
+Avant la fenêtre de maintenance, obtenir une CI complète verte sur la PR prête, puis
+arrêter le timer sur `dev-nixos` et vérifier qu'aucun déploiement n'est actif. Garder
+le timer arrêté jusqu'à la validation finale afin qu'une fusion ne déclenche pas la
+migration avant la sauvegarde :
+
+```bash
+sudo systemctl stop internal-gitops.timer
+systemctl is-active internal-gitops.service
+```
+
+Sur `nextcloud-pgsql`, relever l'état initial et préparer une sauvegarde cohérente.
+Le timer déclaratif `postgresqlBackup` conserve un dump quotidien dans
+`/var/backup/postgresql`, mais il ne remplace pas cette sauvegarde juste avant migration.
+La copie doit être placée sur un stockage ayant assez d'espace et, idéalement, distinct
+du disque du conteneur.
+
+```bash
+sudo -u nextcloud nextcloud-occ status
+sudo -u nextcloud nextcloud-occ app:list --shipped=false
+sudo -u postgres psql -d nextcloud -Atc \
+  "select current_database(), pg_size_pretty(pg_database_size(current_database()));"
+df -h /var/lib/nextcloud /var/backup
+
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+backup_dir="/var/backup/nextcloud-migrations/$stamp"
+sudo install -d -m 0700 -o postgres -g postgres "$backup_dir"
+sudo -u nextcloud nextcloud-occ maintenance:mode --on
+sudo -u postgres pg_dump --format=custom --file="$backup_dir/nextcloud.pgdump" nextcloud
+sudo tar --xattrs --acls --numeric-owner -C /var/lib -cpf \
+  "$backup_dir/nextcloud-datadir.tar" nextcloud
+sudo -u postgres pg_restore --list "$backup_dir/nextcloud.pgdump" >/dev/null
+sudo tar -tf "$backup_dir/nextcloud-datadir.tar" >/dev/null
+sudo sha256sum "$backup_dir"/* | sudo tee "$backup_dir/SHA256SUMS"
+sudo sha256sum -c "$backup_dir/SHA256SUMS"
+```
+
+Ne poursuivre que si chaque commande réussit, si les deux archives sont non vides et
+si leur vérification réussit. Laisser le mode maintenance actif. Fusionner ensuite,
+attendre la CI complète verte du commit exact de `main`, puis construire ce commit sans
+l'activer avant tout déploiement autorisé :
+
+```bash
+git fetch origin main
+revision=$(git rev-parse origin/main)
+git worktree add --detach /var/tmp/nextcloud-33-deploy "$revision"
+cd /var/tmp/nextcloud-33-deploy
+nix build --no-link --no-write-lock-file \
+  .#nixosConfigurations.nextcloud-pgsql.config.system.build.toplevel
+```
+
+Activer uniquement `nextcloud-pgsql` selon la procédure de déploiement autorisée, puis
+contrôler :
+
+```bash
+sudo -u nextcloud nextcloud-occ status
+sudo -u nextcloud nextcloud-occ db:add-missing-indices
+sudo -u nextcloud nextcloud-occ db:add-missing-primary-keys
+sudo -u nextcloud nextcloud-occ db:add-missing-columns
+sudo -u nextcloud nextcloud-occ maintenance:repair
+sudo -u nextcloud nextcloud-occ status
+sudo -u nextcloud nextcloud-occ app:list --shipped=false
+sudo -u postgres psql -d nextcloud -Atc \
+  "select count(*) from oc_migrations;"
+curl --fail --silent --show-error http://192.168.40.116/status.php
+curl --fail --silent --show-error https://nextcloud.hexaflare.net/status.php
+systemctl --failed
+journalctl -u nextcloud-setup.service -u phpfpm-nextcloud.service \
+  -u postgresql.service -u nginx.service --since "30 minutes ago" --no-pager
+sudo -u nextcloud nextcloud-occ maintenance:mode --off
+```
+
+Le succès exige Nextcloud 33 installé, `maintenance: false`, `needsDbUpgrade: false`,
+les services sans échec, les deux sondes HTTP à 200, les applications nécessaires
+activées et un test manuel de connexion, lecture et écriture d'un fichier. Conserver
+la sauvegarde et surveiller les journaux avant toute proposition de passage à 34. Une
+fois ces critères remplis, réactiver `internal-gitops.timer` sur `dev-nixos`.
+
+En cas d'échec avant migration du schéma, corriger ou réactiver la génération 32 puis
+désactiver le mode maintenance. Après toute migration de schéma, ne pas simplement
+revenir à la génération 32. Depuis la console Proxmox si l'accès SSH n'est plus fiable,
+conserver l'état défaillant et restaurer les deux éléments du même `backup_dir` :
+
+```bash
+sudo systemctl stop nginx.service phpfpm-nextcloud.service
+failed_stamp=$(date -u +%Y%m%dT%H%M%SZ)
+sudo mv /var/lib/nextcloud "/var/lib/nextcloud.failed-$failed_stamp"
+sudo tar --xattrs --acls --numeric-owner -C /var/lib -xpf \
+  "$backup_dir/nextcloud-datadir.tar"
+sudo -u postgres dropdb nextcloud
+sudo -u postgres createdb --owner=nextcloud nextcloud
+sudo -u postgres pg_restore --dbname=nextcloud "$backup_dir/nextcloud.pgdump"
+sudo nix-env --rollback --profile /nix/var/nix/profiles/system
+sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
+sudo -u nextcloud nextcloud-occ status
+sudo -u nextcloud nextcloud-occ maintenance:mode --off
+```
+
+Vérifier avant le rollback que la génération précédente correspond bien à Nextcloud
+32 (`nix-env --list-generations --profile /nix/var/nix/profiles/system`). Ne supprimer
+l'état `.failed-*` qu'après validation de la restauration et conserver les archives.
+
 ## Périmètre Proxmox
 
 La mise en place de nouvelles sauvegardes est reportée à la demande de l'utilisateur.
-Cette refonte ne modifie pas les sauvegardes existantes et n'ajoute pas de dump Nextcloud.
-La destination de sauvegarde n'est pas requise pour poursuivre cette refonte.
+Cette refonte ne modifie pas les sauvegardes Proxmox existantes. Le dump PostgreSQL
+Nextcloud local ajouté ici protège les migrations applicatives mais ne constitue pas
+une sauvegarde indépendante du conteneur.
 
 À valider avant de conclure à la haute disponibilité : quorum, stockage disponible
 sur les nœuds de reprise, ressources HA déclarées et RAM disponible après perte d'un
