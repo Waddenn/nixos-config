@@ -12,7 +12,9 @@
   config = lib.mkIf config.my-services.misc.nextcloud.enable {
     services.nextcloud = {
       enable = true;
-      package = pkgs.nextcloud32;
+      # Major upgrades must remain sequential. Keep this on 33 until the
+      # application and database checks in docs/operations.md have passed.
+      package = pkgs.nextcloud33;
       hostName = "nextcloud.hexaflare.net";
       database.createLocally = true;
       configureRedis = true;
@@ -75,6 +77,16 @@
         random_page_cost = "1.1"; # SSD optimization
         effective_io_concurrency = 200; # SSD concurrent I/O
       };
+    };
+
+    # Keep a logical dump available before application upgrades. The migration
+    # runbook still requires a fresh, explicitly verified dump and datadir copy.
+    services.postgresqlBackup = {
+      enable = true;
+      backupAll = false;
+      databases = ["nextcloud"];
+      location = "/var/backup/postgresql";
+      startAt = "01:15";
     };
 
     networking.firewall.allowedTCPPorts = [80 443];
