@@ -134,20 +134,20 @@ else:
             target = directory / "state/users_database.yml"
             marker = directory / "state/.users-database-migrated-v1"
             yq = self._fake_yq(directory)
-            seed.write_text(json.dumps({"users": {"tom": {"password": "initial"}}}))
+            seed.write_text(json.dumps({"users": {"tom": {"password": "a"}}}))
 
             result = self._run_initializer(seed, target, marker, yq)
             self.assertEqual(0, result.returncode, result.stderr)
-            self.assertEqual("initial", json.loads(target.read_text())["users"]["tom"]["password"])
+            self.assertEqual("a", json.loads(target.read_text())["users"]["tom"]["password"])
             self.assertEqual(0o600, stat.S_IMODE(target.stat().st_mode))
             self.assertEqual(os.getuid(), target.stat().st_uid)
             self.assertEqual(os.getgid(), target.stat().st_gid)
             self.assertNotIn("/nix/store", str(target))
             self.assertNotIn("/run/secrets", str(target))
 
-            changed = {"users": {"tom": {"password": "changed-in-ui"}}}
+            changed = {"users": {"tom": {"password": "b"}}}
             target.write_text(json.dumps(changed))
-            seed.write_text(json.dumps({"users": {"tom": {"password": "new-seed"}}}))
+            seed.write_text(json.dumps({"users": {"tom": {"password": "c"}}}))
             result = self._run_initializer(seed, target, marker, yq)
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertEqual(changed, json.loads(target.read_text()))
@@ -159,13 +159,13 @@ else:
             target = directory / "state/users_database.yml"
             marker = directory / "state/.users-database-migrated-v1"
             target.parent.mkdir()
-            target.write_text(json.dumps({"users": {"tom": {"password": "existing"}}}))
-            seed.write_text(json.dumps({"users": {"tom": {"password": "seed"}, "admin": {"password": "seed-admin"}}}))
+            target.write_text(json.dumps({"users": {"tom": {"password": "a"}}}))
+            seed.write_text(json.dumps({"users": {"tom": {"password": "b"}, "admin": {"password": "c"}}}))
 
             result = self._run_initializer(seed, target, marker, self._fake_yq(directory))
             self.assertEqual(0, result.returncode, result.stderr)
             users = json.loads(target.read_text())["users"]
-            self.assertEqual("existing", users["tom"]["password"])
+            self.assertEqual("a", users["tom"]["password"])
             self.assertIn("admin", users)
             self.assertTrue(Path(f"{target}.pre-sops-migration").exists())
 
@@ -176,9 +176,9 @@ else:
             target = directory / "state/users_database.yml"
             marker = directory / "state/.users-database-migrated-v1"
             target.parent.mkdir()
-            original = {"users": {"tom": {"password": "existing"}}}
+            original = {"users": {"tom": {"password": "a"}}}
             target.write_text(json.dumps(original))
-            seed.write_text(json.dumps({"users": {"admin": {"password": "seed"}}}))
+            seed.write_text(json.dumps({"users": {"admin": {"password": "b"}}}))
 
             result = self._run_initializer(seed, target, marker, self._fake_yq(directory), "/bin/false")
             self.assertNotEqual(0, result.returncode)
