@@ -109,7 +109,7 @@ in {
                             url = "https://immich.hexaflare.net";
                           }
                           {
-                            title = "Jellyseerr";
+                            title = "Seerr";
                             url = "https://jellyseerr.hexaflare.net";
                           }
                         ];

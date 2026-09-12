@@ -66,6 +66,13 @@
           assert lib.assertMsg (lib.elem "http://192.168.40.116/status.php" healthUrls)
           "Nextcloud fleet health must probe status.php";
             pkgs.runCommand "nextcloud-major-upgrade-policy-check" {} "touch $out";
+        seerr-data-compatibility = let
+          seerrConfig = self.nixosConfigurations.jellyseerr.config.services.seerr;
+        in
+          assert lib.assertMsg seerrConfig.enable "The jellyseerr host must enable Seerr";
+          assert lib.assertMsg (seerrConfig.stateRevision == 0) "Seerr stateRevision must remain at the legacy data layout until an explicit migration";
+          assert lib.assertMsg (seerrConfig.configDir == "/var/lib/jellyseerr/config") "Seerr must keep using the existing Jellyseerr data directory";
+            pkgs.runCommand "seerr-data-compatibility-check" {} "touch $out";
         deployment-scripts =
           pkgs.runCommand "deployment-scripts-check" {
             nativeBuildInputs = [pkgs.shellcheck pkgs.python3];
