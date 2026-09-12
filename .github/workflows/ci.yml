@@ -4,7 +4,7 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   push:
-    branches: ["**"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   quick-checks:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,15 +39,11 @@ jobs:
         name: Select validation level
         env:
           EVENT_NAME: ${{ github.event_name }}
-          EVENT_REF: ${{ github.ref }}
         run: |
           # No status or historical PR metadata can bypass full validation on main.
           # Unknown events fail closed to the full path.
           full=true
           if [ "$EVENT_NAME" = pull_request ]; then
-            full=false
-          elif [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] && \
-               [ "$EVENT_REF" != refs/heads/main ]; then
             full=false
           fi
           echo "full=$full" >> "$GITHUB_OUTPUT"
@@ -164,7 +161,7 @@ jobs:
           fi
 
   ci-gate:
-    if: always()
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     needs: [quick-checks, validation-mode, validation]
     runs-on: ubuntu-latest
     steps:
@@ -174,15 +171,12 @@ jobs:
           MODE: ${{ needs.validation-mode.result }}
           FULL: ${{ needs.validation-mode.outputs.full }}
           EVENT_NAME: ${{ github.event_name }}
-          EVENT_REF: ${{ github.ref }}
           VALIDATION: ${{ needs.validation.result }}
         run: |
           test "$QUICK" = success
           test "$MODE" = success
           # Check the event again so a missing/false mode cannot greenlight main.
-          if [ "$EVENT_NAME" = pull_request ] ||
-             { [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] &&
-               [ "$EVENT_REF" != refs/heads/main ]; }; then
+          if [ "$EVENT_NAME" = pull_request ]; then
             test "$FULL" = false
             test "$VALIDATION" = skipped
           else

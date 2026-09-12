@@ -9,11 +9,13 @@ l'utilisateur et préserver ses modifications existantes.
   Ne pas développer ni pousser directement sur `main`, sauf demande explicite.
 - Pendant les itérations, exécuter les tests ciblés localement et utiliser une PR
   **en brouillon** si le travail est publié. Ne pas ouvrir une PR prête trop tôt.
-- Les pushes de branche et toutes les PR (brouillon ou prêtes) exécutent seulement
-  les contrôles rapides (tests Python, ShellCheck, whitespace), sans build Nix.
+- Aucun contrôle automatique sur un simple push hors `main` ni sur une PR brouillon.
+  Une PR prête exécute les contrôles rapides (tests Python, ShellCheck, whitespace)
+  à son ouverture, au passage à l'état prêt et à chaque nouveau push, sans build Nix.
 - Quand le changement est terminé, vérifier le diff, lancer les validations locales
   pertinentes, puis marquer la PR prête (`gh pr ready`). Ce passage ne lance pas de
-  CI complète ; l'état brouillon/prêt indique seulement si le travail est à relire.
+  CI complète ; il déclenche les contrôles rapides. Repasser en brouillon suspend
+  les contrôles de PR et annule le run précédent encore actif.
 - `workflow_dispatch` lance volontairement la CI complète ; ne pas l'utiliser pour
   chaque essai. Ne pas ajouter `[skip ci]` pour contourner les contrôles.
 - Après fusion, attendre la CI réussie du commit exact de `main` avant déploiement.
