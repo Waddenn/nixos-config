@@ -189,7 +189,7 @@ class WorkflowTests(unittest.TestCase):
             ("push", "", "", "true"),
             ("unknown", "refs/heads/main", "", "true"),
             ("pull_request", "refs/pull/7/merge", "true", "false"),
-            ("push", "refs/heads/feature", "", "false"),
+            ("push", "refs/heads/feature", "", "true"),
         ):
             with self.subTest(event=event, ref=ref, draft=draft):
                 result, output = self.execute("validation-mode", EVENT_NAME=event, EVENT_REF=ref,
@@ -217,15 +217,24 @@ class WorkflowTests(unittest.TestCase):
             self.assertNotEqual(self.gate(EVENT_NAME=event, PR_DRAFT="false",
                                          FULL="false", VALIDATION="skipped", PROMOTED="true"), 0)
 
-    def test_draft_ready_pr_fork_and_branch_keep_quick_checks(self):
-        for event, ref, draft in (("pull_request", "refs/pull/7/merge", "true"),
-                                  ("pull_request", "refs/pull/7/merge", "false"),
-                                  ("pull_request", "refs/pull/8/merge", ""),
-                                  ("push", "refs/heads/feature", "")):
+    def test_ready_pr_and_fork_keep_quick_checks(self):
+        for event, ref, draft in (("pull_request", "refs/pull/7/merge", "false"),
+                                  ("pull_request", "refs/pull/8/merge", "false")):
             self.assertEqual(self.gate(EVENT_NAME=event, EVENT_REF=ref, PR_DRAFT=draft,
                                       FULL="false", VALIDATION="skipped"), 0)
             self.assertNotEqual(self.gate(EVENT_NAME=event, EVENT_REF=ref, PR_DRAFT=draft,
                                          FULL="false", VALIDATION="skipped", QUICK="failure"), 0)
+
+    def test_branch_pushes_are_filtered_and_drafts_allocate_no_runner(self):
+        triggers = self.workflow.split("permissions:", 1)[0]
+        self.assertIn("  push:\n    branches: [main]", triggers)
+        self.assertIn("ready_for_review", triggers)
+        self.assertIn("converted_to_draft", triggers)
+        condition = "github.event_name != 'pull_request' || github.event.pull_request.draft == false"
+        self.assertIn("  quick-checks:\n    if: " + condition, self.workflow)
+        # The always-running final gate must also be disabled on drafts.
+        self.assertIn("  ci-gate:\n    if: always() && (" + condition + ")", self.workflow)
+        self.assertIn("  validation-mode:\n    needs: quick-checks", self.workflow)
 
     def test_publisher_and_status_privileges_are_removed(self):
         self.assertFalse((ROOT / ".github/workflows/promote-ci.yml").exists())

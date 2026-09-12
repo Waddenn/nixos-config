@@ -290,9 +290,11 @@ restent administrées séparément ; déclarer leur présence ne gère pas leurs
 ## Branches de travail et PR
 
 Chaque changement part de `main` à jour dans une branche courte `codex/<sujet>`.
-Les pushes hors `main` et toutes les PR, brouillon ou prêtes, exécutent seulement
-les tests Python, ShellCheck et le contrôle de whitespace. Le passage à l'état
-prêt signale que le travail peut être relu ; il ne déclenche aucun build Nix.
+Un simple push hors `main` ne déclenche aucune CI. Une PR brouillon n'exécute
+aucun job : GitHub peut afficher une exécution entièrement ignorée, sans runner.
+L'ouverture d'une PR prête, son passage à l'état prêt et ses nouveaux pushes
+lancent les tests Python, ShellCheck et le contrôle de whitespace, sans build Nix.
+Repasser en brouillon annule le run encore actif et suspend ces contrôles.
 
 Après fusion, la CI du SHA exact de `main` exécute le parcours complet avant tout
 déploiement. C'est l'unique CI complète automatique d'une fonctionnalité ordinaire.
@@ -309,7 +311,8 @@ possible sur demande pour une migration sensible.
 
 Le prototype de promotion par arbre n'est pas une preuve de validation suffisante.
 La CI de chaque SHA de `main` suit le parcours complet, comme les lancements
-manuels. Les branches ordinaires et toutes les PR conservent les contrôles rapides.
+manuels. Seules les PR prêtes exécutent les contrôles rapides ; les brouillons et
+les simples pushes de branche n'exécutent aucun job.
 Le garde `ci-gate` vérifie lui-même le type d'événement et refuse
 un résultat rapide, un mode absent ou une validation omise sur `main`.
 
