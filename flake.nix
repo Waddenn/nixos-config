@@ -53,6 +53,13 @@
             self.fleet.${name}.units
         ) (builtins.attrNames self.fleet)) "Fleet health checks reference an undefined systemd service";
           pkgs.runCommand "fleet-inventory-check" {} "touch $out";
+        seerr-data-compatibility = let
+          seerrConfig = self.nixosConfigurations.jellyseerr.config.services.seerr;
+        in
+          assert lib.assertMsg seerrConfig.enable "The jellyseerr host must enable Seerr";
+          assert lib.assertMsg (seerrConfig.stateRevision == 0) "Seerr stateRevision must remain at the legacy data layout until an explicit migration";
+          assert lib.assertMsg (seerrConfig.configDir == "/var/lib/jellyseerr/config") "Seerr must keep using the existing Jellyseerr data directory";
+            pkgs.runCommand "seerr-data-compatibility-check" {} "touch $out";
         deployment-scripts =
           pkgs.runCommand "deployment-scripts-check" {
             nativeBuildInputs = [pkgs.shellcheck pkgs.python3];
