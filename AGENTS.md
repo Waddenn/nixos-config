@@ -22,6 +22,12 @@ l'utilisateur et préserver ses modifications existantes.
 - Ne pas fusionner une PR dont la CI complète échoue ou est annulée. Une autorisation
   explicite existante de livrer/déployer peut couvrir la fusion ; sinon laisser la PR
   prête et donner son lien. Ne pas redemander une autorisation déjà fournie.
+- Après une fusion autorisée, supprimer la branche de travail distante et locale
+  lorsqu'elle ne contient plus de travail non intégré, puis actualiser les références
+  avec `git fetch --prune`. Vérifier l'état de la PR et les éventuels nouveaux commits
+  avant suppression ; ne pas supprimer les branches permanentes ou d'automatisation
+  (notamment `main` et `update-flake-lock`). Privilégier la suppression automatique
+  des branches de PR sur GitHub ; ne pas modifier ce réglage sans autorisation.
 
 ## Validation et déploiement
 
