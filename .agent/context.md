@@ -19,3 +19,8 @@ L'architecture suit strictement le principe : **"Explicit Infra, Implicit Servic
 - Le projet est en cours de refonte architecturale.
 - La CI est en place.
 - Les workflows d'agent (`validate`, `add_service`) sont configurés.
+
+## Procédure des agents
+
+Lire et suivre `AGENTS.md` à la racine : branches de travail, PR en brouillon,
+contrôles légers pendant les itérations, CI complète avant fusion et déploiement.

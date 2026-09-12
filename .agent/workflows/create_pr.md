@@ -1,22 +1,16 @@
 ---
-description: Créer une Pull Request sur GitHub à partir de la branche courante
+description: Publier une modification dans une PR en brouillon, puis valider avant fusion
 ---
 
-Ce workflow automatise la publication de ton travail.
+Suivre `AGENTS.md` à la racine du dépôt.
 
-1.  **Vérifications** :
-    *   Vérifier que `nix flake check` passe (via le workflow `/validate` si besoin).
-    *   Vérifier que tous les fichiers sont commités.
-
-2.  **Push** :
-    *   Pousser la branche courante vers le remote `origin`.
-
-3.  **Création de la PR** :
-    *   Utiliser l'outil `create_pull_request` du MCP GitHub.
-    *   **Titre** : Générer un titre clair basé sur le dernier commit ou le nom de la branche.
-    *   **Body** : Générer une description résumant les changements (en lisant `memory.md` ou les diffs).
-    *   **Base** : `main`.
-    *   **Head** : La branche courante.
-
-4.  **Confirmation** :
-    *   Donner l'URL de la PR à l'utilisateur.
+1. Travailler sur une branche `codex/<sujet>`, jamais directement sur `main` par défaut.
+2. Vérifier le diff et les tests locaux adaptés, puis pousser la branche.
+3. Créer la PR **en brouillon** vers `main` (`gh pr create --draft`). Décrire le problème,
+   la correction et les validations réalisées. Ne pas copier de mémoire privée.
+4. Continuer les itérations avec les contrôles rapides. Ne pas déclencher de CI complète
+   manuellement à chaque push.
+5. Quand le travail est terminé, marquer la PR prête (`gh pr ready`) et attendre la CI
+   complète. En cas de nombreuses reprises, repasser en brouillon (`gh pr ready --undo`).
+6. Fusionner seulement avec la CI complète réussie et l'autorisation de livraison
+   appropriée. Attendre ensuite la CI du SHA exact sur `main` avant déploiement.
