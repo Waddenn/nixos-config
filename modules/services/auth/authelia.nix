@@ -6,12 +6,14 @@
 }: let
   cfg = config.my-services.auth.authelia;
   hasDeclarativeUsers = (builtins.length (builtins.attrNames cfg.declarativeUsers)) > 0;
+  declarativeUserSecretNames = lib.mapAttrsToList (_: user: user.hashSecret) cfg.declarativeUsers;
+  declarativeUsersForTemplate = lib.mapAttrs (_: user:
+    (removeAttrs user ["hashSecret"])
+    // {password = config.sops.placeholder.${user.hashSecret};})
+  cfg.declarativeUsers;
   usersDatabaseFile =
     if hasDeclarativeUsers
-    then
-      (pkgs.formats.yaml {}).generate "authelia-users-database.yml" {
-        users = cfg.declarativeUsers;
-      }
+    then config.sops.templates."authelia-users-database.yml".path
     else cfg.usersFile;
 
   # Configuration Authelia base (sans secrets)
@@ -211,9 +213,9 @@ in {
             type = lib.types.str;
             description = "Display name";
           };
-          password = lib.mkOption {
+          hashSecret = lib.mkOption {
             type = lib.types.str;
-            description = "Argon2id password hash (e.g. generated with authelia crypto hash generate argon2)";
+            description = "SOPS secret name containing this user's Argon2id password hash";
           };
           email = lib.mkOption {
             type = lib.types.str;
@@ -230,12 +232,12 @@ in {
       example = {
         "tom" = {
           displayname = "Tom";
-          password = "$argon2id$v=19$m=65536,t=3,p=4$...";
+          hashSecret = "authelia_user_tom_password_hash";
           email = "tom@example.com";
           groups = ["admins"];
         };
       };
-      description = "Declarative Authelia file-backend users (replaces manual users_database.yml management)";
+      description = "Declarative Authelia file-backend users; password hashes are injected from SOPS at runtime";
     };
 
     database = {
@@ -304,6 +306,13 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = lib.optional hasDeclarativeUsers {
+      assertion =
+        builtins.length declarativeUserSecretNames
+        == builtins.length (lib.unique declarativeUserSecretNames);
+      message = "Each Authelia declarative user must reference a distinct hashSecret";
+    };
+
     # Créer le groupe et l'utilisateur authelia
     users.users.authelia = {
       isSystemUser = true;
@@ -387,7 +396,23 @@ in {
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
-      };
+      }
+      // builtins.listToAttrs (map (name: {
+          inherit name;
+          value = {
+            sopsFile = ../../../secrets/secrets.yaml;
+            restartUnits = ["authelia.service"];
+          };
+        })
+        declarativeUserSecretNames);
+
+    sops.templates."authelia-users-database.yml" = lib.mkIf hasDeclarativeUsers {
+      content = builtins.toJSON {users = declarativeUsersForTemplate;};
+      owner = "authelia";
+      group = "authelia";
+      mode = "0400";
+      restartUnits = ["authelia.service"];
+    };
 
     # Script pour générer le fichier d'environnement avec les secrets
     systemd.services.authelia-env-setup = {

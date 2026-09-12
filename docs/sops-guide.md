@@ -51,5 +51,10 @@ Puis dans la config service:
 ... = config.sops.secrets.mon_secret.path;
 ```
 
+Pour les hashes de mots de passe Authelia, utiliser exclusivement le template
+SOPS à l'exécution décrit dans [authelia-password-rotation.md](authelia-password-rotation.md).
+Un hash de mot de passe reste un secret et ne doit jamais être interpolé dans une
+dérivation Nix.
+
 ## Point important
 Si un host n'est pas dans `.sops.yaml` (ex: `immich`), il ne pourra pas déchiffrer `secrets/secrets.yaml`, même si le secret existe.

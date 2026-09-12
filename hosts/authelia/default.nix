@@ -7,6 +7,7 @@
 # DOCUMENTATION:
 # - Guide setup: docs/authelia-setup.md
 # - Guide utilisateurs: docs/authelia-users-guide.md
+# - Rotation des mots de passe: docs/authelia-password-rotation.md
 # - Bonnes pratiques: Voir commentaires ci-dessous
 #
 # ORDRE D'ÉVALUATION DES RÈGLES:
@@ -55,20 +56,17 @@
     # ========================================================================
     # UTILISATEURS DÉCLARATIFS (NixOS)
     # ========================================================================
-    # Décommentez et adaptez pour gérer les utilisateurs sans édition manuelle
-    # du users_database.yml sur le serveur.
-    #
+    # Les métadonnées restent dans Nix ; les hashes sont injectés depuis SOPS.
     declarativeUsers = {
       admin = {
         displayname = "Administrator";
-        # Historical admin recovered from /var/lib/authelia/users_database.yml on nixos@authelia
-        password = "$argon2id$v=19$m=65536,t=3,p=4$4s35/aEJqYmtockM3IeP2Q$GDovC8sBqyINWJeTuudFExK40AE1oulZYVqs9rZLsV8";
+        hashSecret = "authelia_user_admin_password_hash";
         email = "admin@hexaflare.net";
         groups = ["admins"];
       };
       tom = {
         displayname = "Tom";
-        password = "$argon2id$v=19$m=65536,t=3,p=4$gg0JzWFg2I+WSVLMlWD/uw$jBq0VdD4UpyYlQ/CEsGBTyDcapJzrH/BAJdroODwFqc";
+        hashSecret = "authelia_user_tom_password_hash";
         email = "tom@patelas.com";
         groups = ["users" "family"];
       };
@@ -267,7 +265,7 @@
 # users:
 #   admin:
 #     displayname: "Administrator"
-#     password: "$argon2id$..."
+#     hashSecret: "authelia_user_admin_password_hash"
 #     email: admin@hexaflare.net
 #     groups:
 #       - admins
@@ -275,7 +273,7 @@
 #
 #   john:
 #     displayname: "John Doe"
-#     password: "$argon2id$..."
+#     hashSecret: "authelia_user_john_password_hash"
 #     email: john@example.com
 #     groups:
 #       - dev
@@ -283,7 +281,7 @@
 #
 #   marie:
 #     displayname: "Marie"
-#     password: "$argon2id$..."
+#     hashSecret: "authelia_user_marie_password_hash"
 #     email: marie@example.com
 #     groups:
 #       - family
