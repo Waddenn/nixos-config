@@ -39,12 +39,11 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_REF: ${{ github.ref }}
-          PR_DRAFT: ${{ github.event.pull_request.draft }}
         run: |
           # No status or historical PR metadata can bypass full validation on main.
-          # Unknown event/draft values fail closed to the full path.
+          # Unknown events fail closed to the full path.
           full=true
-          if [ "$EVENT_NAME" = pull_request ] && [ "$PR_DRAFT" = true ]; then
+          if [ "$EVENT_NAME" = pull_request ]; then
             full=false
           elif [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] && \
                [ "$EVENT_REF" != refs/heads/main ]; then
@@ -169,20 +168,19 @@ jobs:
     needs: [quick-checks, validation-mode, validation]
     runs-on: ubuntu-latest
     steps:
-      - name: Require full validation on main and ready PRs
+      - name: Require quick PR checks and full validation on main
         env:
           QUICK: ${{ needs.quick-checks.result }}
           MODE: ${{ needs.validation-mode.result }}
           FULL: ${{ needs.validation-mode.outputs.full }}
           EVENT_NAME: ${{ github.event_name }}
           EVENT_REF: ${{ github.ref }}
-          PR_DRAFT: ${{ github.event.pull_request.draft }}
           VALIDATION: ${{ needs.validation.result }}
         run: |
           test "$QUICK" = success
           test "$MODE" = success
           # Check the event again so a missing/false mode cannot greenlight main.
-          if { [ "$EVENT_NAME" = pull_request ] && [ "$PR_DRAFT" = true ]; } ||
+          if [ "$EVENT_NAME" = pull_request ] ||
              { [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] &&
                [ "$EVENT_REF" != refs/heads/main ]; }; then
             test "$FULL" = false

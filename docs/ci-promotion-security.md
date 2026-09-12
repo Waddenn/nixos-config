@@ -1,5 +1,9 @@
 # Audit de la promotion CI par arbre
 
+Note historique : ce document décrit la correction de la PR #33. Depuis la
+simplification de la CI, toutes les PR ont uniquement des tests rapides ; la CI
+complète automatique est effectuée sur `main`. Voir la [procédure actuelle](operations.md#branches-de-travail-et-pr).
+
 État : **désactivée**, PR #33, audit du 12 septembre 2026. Le gain recherché
 (supprimer la seconde CI complète après fusion) n'est pas livré. Le repli complet
 est le résultat de sécurité retenu ; les trois P1 sont neutralisés par retrait du
