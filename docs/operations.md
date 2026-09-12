@@ -157,3 +157,22 @@ Validation du 11 septembre 2026 : la comparaison réelle des sorties Nix entre
 Le précontrôle réel sans changement, testé en interdisant les commandes de construction
 et d'activation, termine en 8 secondes pour 14 hôtes, dont trois injoignables. Ce temps
 exclut la récupération Git et l'évaluation Nix du cycle complet.
+
+## Version commune du serveur et des agents Beszel
+
+`lib/beszel-release.json` est l'unique référence de version pour le serveur Docker
+et les agents NixOS. Le serveur utilise le tag exact et le digest de cette release ;
+`pkgs/beszel-agent.nix` installe son binaire officiel Linux amd64, avec checksum fixé
+et test de `--version`. Les agents restent des services natifs, sans Docker ni
+mise à jour autonome hors Nix. L'inventaire et les données du hub sont inchangés.
+
+Le workflow hebdomadaire et `just update` exécutent `scripts/update-beszel.py` :
+lecture de la dernière release stable, vérification de l'archive contre les checksums
+upstream et résolution du digest du tag serveur correspondant, puis écriture atomique
+du fichier commun. Beszel est exclu de `container-images.json` pour éviter une seconde
+source indépendante. Si un téléchargement, checksum ou digest échoue, le fichier reste
+inchangé. La CI exécute l'agent et le serveur épinglés pour vérifier leurs versions.
+
+L'agent est inclus dans les contrôles de santé du déploiement. Les hôtes NixOS hors
+ligne recevront la version commune à leur retour. Les machines externes (`externalHosts`)
+restent administrées séparément ; déclarer leur présence ne gère pas leurs logiciels.

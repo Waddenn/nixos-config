@@ -10,7 +10,7 @@ validate:
 
 # Policy tests do not contact any host
 test:
-    python3 tests/test_fleet.py
+    python3 -m unittest discover -s tests -p 'test_*.py'
 
 # Verify that the deployment and CI produce identical systems
 check-colmena:
@@ -21,6 +21,7 @@ update:
     nix flake update
     ./scripts/update-caddy-plugin-hash.sh
     nix shell nixpkgs#skopeo --command python3 scripts/update-container-images.py
+    nix shell nixpkgs#skopeo --command python3 scripts/update-beszel.py
 
 # Trigger GitOps deployment on dev-nixos
 deploy:

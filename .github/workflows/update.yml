@@ -33,6 +33,9 @@ jobs:
       - name: Pin container images
         run: nix shell nixpkgs#skopeo --command python3 scripts/update-container-images.py
 
+      - name: Pin matching Beszel hub and agent
+        run: nix shell nixpkgs#skopeo --command python3 scripts/update-beszel.py
+
       - name: Check formatting
         run: nix fmt -- --check
 

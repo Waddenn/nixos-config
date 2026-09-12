@@ -5,6 +5,7 @@
   inputs,
   ...
 }: let
+  release = builtins.fromJSON (builtins.readFile ../../lib/beszel-release.json);
   beszelConfig = import ../data/beszel-hosts.nix;
   monitoredHosts = lib.filterAttrs (_: host:
     host.config.my-services.monitoring.beszel-agent.enable)
@@ -46,7 +47,7 @@ in {
 
     # Containers
     virtualisation.oci-containers.containers."beszel" = {
-      image = (import ../../lib/container-images.nix)."henrygd/beszel:latest";
+      image = "henrygd/beszel:${release.version}@${release.hubDigest}";
       volumes = [
         "/home/nixos/beszel_data:/beszel_data:rw"
       ];

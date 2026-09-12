@@ -2,7 +2,6 @@
   "germannewsmaker/myspeed": "sha256:3a3e774b3f78d930a5a962d625b99bcb3d71730bfeb4a6b93e04fd38cfe7d9a9",
   "ghcr.io/linkwarden/linkwarden:latest": "sha256:0664c28a039bda8ffa6663389e8536b2fc717219e329f85b83faca7efed3b144",
   "ghcr.io/lloesche/valheim-server": "sha256:bbda47cbbc9fd7b0385803ba0a70ba2084df4cb87ec6170a145aec5df06be07e",
-  "henrygd/beszel:latest": "sha256:fefb27166f5e1611ebf67f8697ea928a23f44efdb00af922e2ac3b5faa2efd5c",
   "lscr.io/linuxserver/calibre:latest": "sha256:9c153bd9915c9748863e8c452426e99e23ec0a961ca351195acb3b1662b59e7b",
   "lscr.io/linuxserver/homeassistant:latest": "sha256:9275f3697e72d5ea042bc54663b848c4aae59596195eba396df3b37738123907",
   "lscr.io/linuxserver/mullvad-browser:latest": "sha256:ef0368e3caa971af7fc509510f89a5340802fb72a5ff6694bf7aa175336ca909",

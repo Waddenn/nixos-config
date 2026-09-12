@@ -20,7 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v25
-      - run: nix build --no-link .#checks.x86_64-linux.deployment-scripts .#checks.x86_64-linux.fleet-inventory
+      - run: nix build --no-link .#checks.x86_64-linux.deployment-scripts .#checks.x86_64-linux.fleet-inventory .#checks.x86_64-linux.beszel-agent
+      - run: python3 scripts/check-beszel-hub.py
       - run: python3 scripts/check-colmena.py
 
   check-formatting:
@@ -118,7 +119,7 @@ jobs:
             }
             const files = await github.paginate(github.rest.pulls.listFiles,
               {owner, repo, pull_number: pr.number, per_page: 100});
-            const allowed = new Set(['flake.lock', 'lib/container-images.json',
+            const allowed = new Set(['flake.lock', 'lib/container-images.json', 'lib/beszel-release.json',
               'modules/services/networking/caddy-plugin-hash.txt']);
             if (!files.length || files.some(f => !allowed.has(f.filename) ||
                 f.status !== 'modified')) throw new Error('Unexpected update files');

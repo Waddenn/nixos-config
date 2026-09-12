@@ -35,7 +35,7 @@
         local = name == "dev-nixos";
         oci = host.config.virtualisation.oci-containers.containers != {};
         canary = policy.canary or false;
-        units = ["tailscaled.service"] ++ (policy.units or []);
+        units = ["tailscaled.service"] ++ lib.optional host.config.my-services.monitoring.beszel-agent.enable "beszel-agent.service" ++ (policy.units or []);
         urls = policy.urls or [];
         expected = toString host.config.system.build.toplevel;
       })
@@ -44,6 +44,7 @@
     checks.${system} =
       lib.mapAttrs (name: host: host.config.system.build.toplevel) self.nixosConfigurations
       // {
+        beszel-agent = pkgs.callPackage ./pkgs/beszel-agent.nix {};
         fleet-inventory = assert lib.assertMsg (lib.all (
           name:
             lib.all (unit:
@@ -64,6 +65,7 @@
             export PYTHONDONTWRITEBYTECODE=1
             FLEET_SCRIPT=${./scripts/fleet.py} python3 ${./tests/test_fleet.py}
             CI_PLAN_SCRIPT=${./scripts/plan-ci.py} python3 ${./tests/test_ci_plan.py}
+            BESZEL_UPDATER=${./scripts/update-beszel.py} python3 ${./tests/test_beszel_release.py}
             touch "$out"
           '';
       };

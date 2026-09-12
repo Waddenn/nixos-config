@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  agent = pkgs.callPackage ../../../pkgs/beszel-agent.nix {};
+in {
   options.my-services.monitoring.beszel-agent.enable = lib.mkEnableOption "Enable beszel-agent service";
 
   config = lib.mkIf config.my-services.monitoring.beszel-agent.enable {
@@ -28,7 +30,7 @@
       };
 
       serviceConfig = {
-        ExecStart = "${pkgs.beszel}/bin/beszel-agent";
+        ExecStart = "${agent}/bin/beszel-agent";
         Restart = "always";
         RestartSec = "10s";
         User = "beszel";
