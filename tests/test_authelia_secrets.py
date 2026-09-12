@@ -43,6 +43,7 @@ class AutheliaSecretsTests(unittest.TestCase):
         self.assertIn("config.sops.placeholder.${user.hashSecret}", module)
         self.assertIn("authelia-users-setup", module)
         self.assertIn(".users-database-migrated-v1", module)
+        self.assertNotIn('requires = ["sops-nix.service"', module)
         self.assertNotIn('then config.sops.templates."authelia-users-database.yml".path', module)
 
     def test_password_hash_secrets_are_sops_encrypted(self):
