@@ -13,7 +13,7 @@ source = Path(os.environ.get(
 spec = importlib.util.spec_from_file_location("ci_promotion", source)
 promotion = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(promotion)
-ROOT = source.resolve().parents[1]
+ROOT = Path(os.environ.get("CI_PROMOTION_ROOT", source.resolve().parents[1]))
 
 
 REPOSITORY = "owner/repo"
