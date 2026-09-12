@@ -18,7 +18,10 @@
   gotify.units = ["gotify-server.service"];
   immich.units = ["immich-server.service" "postgresql.service"];
   jellyseerr.units = ["seerr.service"];
-  nextcloud-pgsql.units = ["phpfpm-nextcloud.service" "postgresql.service" "nginx.service"];
+  nextcloud-pgsql = {
+    units = ["phpfpm-nextcloud.service" "postgresql.service" "nginx.service"];
+    urls = ["http://192.168.40.116/status.php"];
+  };
   paperless.units = ["paperless-web.service"];
   valheim.units = ["docker-valheim.service"];
   vaultwarden.units = ["vaultwarden.service"];
