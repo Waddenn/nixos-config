@@ -295,7 +295,26 @@ Le passage de la PR à l'état prêt déclenche la CI complète existante. Ses p
 suivants la relancent ; repasser en brouillon pour reprendre des itérations nombreuses.
 Le passage en brouillon annule le run précédent de la PR grâce à la concurrence.
 
-Les validations complètes et constructions GitHub sont conservées avant fusion et
-sur `main`. Un lancement manuel demande également le parcours complet, notamment
-pour le workflow hebdomadaire. Le contrôleur ne déploie jamais une simple validation
-de branche : seule la CI réussie du SHA exact sur `main` est recevable.
+### Promotion de la validation complète après fusion — désactivée
+
+Le prototype de promotion par arbre n'est pas une preuve de validation suffisante.
+La CI de chaque SHA de `main` suit donc le parcours complet, comme les PR prêtes et
+les lancements manuels. Les branches ordinaires et les PR brouillon conservent les
+contrôles rapides. Le garde `ci-gate` vérifie lui-même le type d'événement et refuse
+un résultat rapide, un mode absent ou une validation omise sur `main`.
+
+Le workflow publieur est supprimé, aucun statut de promotion n'est consommé et
+`scripts/ci-promotion.py` refuse explicitement les anciens appels `publish` et
+`verify-main`. Une preuve absente, imitée, ambiguë, périmée ou invalide ne peut donc
+pas éviter le parcours complet. Voir [l'audit et les prérequis de réactivation](ci-promotion-security.md).
+
+Les builds de PR et de `main` utilisent toujours le cache binaire signé
+`waddenn-nixos`. Une sortie présente peut être substituée, une sortie absente doit
+être construite. Cela économise les reconstructions quand les chemins Nix sont
+identiques, sans supprimer le second parcours de validation. La sélection des
+systèmes affectés reste assurée par `scripts/plan-ci.py`.
+
+Le contrôleur attend toujours une CI réussie du SHA exact de `main`. Les canaris,
+les contrôles de santé et d'espace, le ciblage des générations en dérive et le rôle
+exclusif de `dev-nixos` sont conservés. Aucun statut de promotion ni succès de
+branche ne constitue une autorisation de déploiement.

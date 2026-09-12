@@ -85,6 +85,8 @@
             export PYTHONDONTWRITEBYTECODE=1
             FLEET_SCRIPT=${./scripts/fleet.py} python3 ${./tests/test_fleet.py}
             CI_PLAN_SCRIPT=${./scripts/plan-ci.py} python3 ${./tests/test_ci_plan.py}
+            CI_PROMOTION_SCRIPT=${./scripts/ci-promotion.py} \
+              CI_PROMOTION_ROOT=${./.} python3 ${./tests/test_ci_promotion.py}
             CI_CACHE_ROOT=${./.} python3 ${./tests/test_ci_cache.py}
             BESZEL_UPDATER=${./scripts/update-beszel.py} python3 ${./tests/test_beszel_release.py}
             touch "$out"

@@ -15,7 +15,7 @@ import tempfile
 GLOBAL_PATHS = {
     "flake.lock", "flake.nix", "hosts/default.nix", "lib/builder.nix",
     "lib/host-modules.nix", "modules/default.nix", ".github/workflows/ci.yml",
-    "scripts/plan-ci.py",
+    ".github/workflows/promote-ci.yml", "scripts/ci-promotion.py", "scripts/plan-ci.py",
 }
 
 

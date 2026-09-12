@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -18,17 +17,10 @@ concurrency:
 jobs:
   quick-checks:
     runs-on: ubuntu-latest
-    outputs:
-      full: ${{ steps.mode.outputs.full }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - id: mode
-        name: Select validation level
-        env:
-          FULL_CI: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && !github.event.pull_request.draft) }}
-        run: echo "full=$FULL_CI" >> "$GITHUB_OUTPUT"
       - name: Check patch whitespace
         run: git show --format= --check HEAD
       - name: Run policy tests without Nix or infrastructure access
@@ -36,9 +28,33 @@ jobs:
       - name: Check shell scripts
         run: shellcheck scripts/deploy-fleet.sh scripts/fleet-status.sh scripts/pull-update-host.sh scripts/update-caddy-plugin-hash.sh
 
-  deployment-tests:
+  validation-mode:
     needs: quick-checks
-    if: needs.quick-checks.outputs.full == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.mode.outputs.full }}
+    steps:
+      - id: mode
+        name: Select validation level
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          # No status or historical PR metadata can bypass full validation on main.
+          # Unknown event/draft values fail closed to the full path.
+          full=true
+          if [ "$EVENT_NAME" = pull_request ] && [ "$PR_DRAFT" = true ]; then
+            full=false
+          elif [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] && \
+               [ "$EVENT_REF" != refs/heads/main ]; then
+            full=false
+          fi
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+
+  deployment-tests:
+    needs: validation-mode
+    if: needs.validation-mode.outputs.full == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,8 +70,8 @@ jobs:
       - run: python3 scripts/check-colmena.py
 
   check-formatting:
-    needs: quick-checks
-    if: needs.quick-checks.outputs.full == 'true'
+    needs: validation-mode
+    if: needs.validation-mode.outputs.full == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -72,8 +88,11 @@ jobs:
       run: nix fmt -- --check
 
   generate-matrix:
-    needs: quick-checks
-    if: needs.quick-checks.outputs.full == 'true'
+    permissions:
+      contents: read
+      actions: read
+    needs: validation-mode
+    if: needs.validation-mode.outputs.full == 'true'
     runs-on: ubuntu-latest
     outputs:
       hosts: ${{ steps.set-matrix.outputs.hosts }}
@@ -121,8 +140,8 @@ jobs:
       run: nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel
 
   validation:
-    if: always() && needs.quick-checks.outputs.full == 'true'
-    needs: [quick-checks, deployment-tests, check-formatting, generate-matrix, flake-check]
+    if: always() && needs.validation-mode.outputs.full == 'true'
+    needs: [quick-checks, validation-mode, deployment-tests, check-formatting, generate-matrix, flake-check]
     runs-on: ubuntu-latest
     steps:
       - name: Require all checks and every selected build
@@ -145,9 +164,37 @@ jobs:
             test "$BUILDS" = skipped
           fi
 
+  ci-gate:
+    if: always()
+    needs: [quick-checks, validation-mode, validation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require full validation on main and ready PRs
+        env:
+          QUICK: ${{ needs.quick-checks.result }}
+          MODE: ${{ needs.validation-mode.result }}
+          FULL: ${{ needs.validation-mode.outputs.full }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+          VALIDATION: ${{ needs.validation.result }}
+        run: |
+          test "$QUICK" = success
+          test "$MODE" = success
+          # Check the event again so a missing/false mode cannot greenlight main.
+          if { [ "$EVENT_NAME" = pull_request ] && [ "$PR_DRAFT" = true ]; } ||
+             { [ "$EVENT_NAME" = push ] && [[ "$EVENT_REF" == refs/heads/* ]] &&
+               [ "$EVENT_REF" != refs/heads/main ]; }; then
+            test "$FULL" = false
+            test "$VALIDATION" = skipped
+          else
+            test "$FULL" = true
+            test "$VALIDATION" = success
+          fi
+
   promote-update:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/update-flake-lock'
-    needs: [validation]
+    needs: [validation, ci-gate]
     runs-on: ubuntu-latest
     permissions:
       contents: write
