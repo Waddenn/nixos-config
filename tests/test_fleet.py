@@ -132,6 +132,39 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(f.deploy_host("app", host()), "failed")
         run.assert_called_once()
 
+    @patch.object(fleet, "run")
+    def test_successful_activation_refreshes_tailscale_after_colmena(self, run):
+        f = fleet.Fleet()
+        f.storage = Mock(return_value={"safe": True})
+        f.systems = Mock(side_effect=["drift", "converged"])
+        f.healthy = Mock()
+        f.refresh_transport = Mock()
+        cfg = host()
+        cfg["units"].append("tailscaled.service")
+
+        self.assertEqual(f.deploy_host("app", cfg), "converged")
+
+        self.assertEqual(run.call_args_list[0].args[0][3:5], ["apply", "switch"])
+        f.refresh_transport.assert_called_once_with("app", cfg)
+        f.healthy.assert_called_once_with("app", cfg)
+
+    def test_transport_refresh_is_detached_and_skips_local_controller(self):
+        f = fleet.Fleet()
+        f.ssh = Mock()
+        cfg = host()
+        cfg["units"].append("tailscaled.service")
+
+        f.refresh_transport("app", cfg)
+
+        command = f.ssh.call_args.args[1]
+        self.assertIn("systemd-run", command)
+        self.assertIn("--on-active=3s", command)
+        self.assertIn("--no-block", command)
+        self.assertIn("restart tailscaled.service", command)
+        f.ssh.reset_mock()
+        f.refresh_transport("dev-nixos", dict(cfg, local=True))
+        f.ssh.assert_not_called()
+
     def test_health_requires_each_unit_and_exact_http_200(self):
         f = fleet.Fleet()
         f.storage = Mock(return_value={"safe": True})
