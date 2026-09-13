@@ -127,6 +127,14 @@ class Fleet:
         else:
             self.ssh(host, command)
 
+    def refresh_transport(self, host, cfg):
+        """Restart Tailscale after activation without tying it to the SSH scope."""
+        if cfg.get("local") or "tailscaled.service" not in cfg["units"]:
+            return
+        self.ssh(host, "systemd-run --unit=internal-gitops-tailscale-refresh "
+                 "--on-active=3s --collect --no-block "
+                 "/run/current-system/sw/bin/systemctl restart tailscaled.service")
+
     def manifest(self, local=False):
         hosts = json.loads(run(["nix", "--extra-experimental-features", "nix-command flakes",
                                "eval", "--json", "--no-write-lock-file",
@@ -202,6 +210,11 @@ class Fleet:
                     if prepared not in ("reboot-required", "converged"):
                         raise FleetError("Boot profile differs from desired system")
                     return prepared
+                # Tailscale is kept alive by its NixOS unit during activation so
+                # Colmena can finish. Refresh it from a detached transient unit;
+                # the health loop below tolerates the brief reconnect and proves
+                # that the target is reachable again.
+                self.refresh_transport(host, cfg)
             deadline = time.monotonic() + self.health_timeout
             while True:
                 try:

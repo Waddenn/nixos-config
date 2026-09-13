@@ -23,6 +23,15 @@
   };
 
   config = lib.mkIf config.my-services.networking.tailscale.enable {
+    # Fleet activations are transported over Tailscale SSH. Restarting this unit
+    # inside switch-to-configuration kills the SSH scope and leaves the target
+    # only partially activated. The deployer performs a detached refresh after
+    # Colmena has returned and then waits for connectivity and health again.
+    systemd.services.tailscaled = {
+      stopIfChanged = false;
+      restartIfChanged = false;
+    };
+
     services.tailscale = {
       enable = true;
       openFirewall = true;
