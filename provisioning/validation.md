@@ -1,3 +1,6 @@
+> Historique du premier pilote applicatif. Voir la [validation suivante](validation-integration.md)
+> pour le second CT et la proposition de raccordement central.
+
 # Pilote applicatif — validation du 19 septembre 2026
 
 ## Périmètre effectivement déployé

@@ -10,10 +10,10 @@
 
     # Colmena pushes complete closures from dev-nixos; targets need no Git checkout.
     users.users.root.openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIZu1aXoiBIUuhiSi5S6EjPrtNd/UYh6pZwuH6NGjze nixos@dev-nixos"
+      (import ../../../provisioning/controller-public-key.nix)
     ];
     users.users.nixos.openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPIZu1aXoiBIUuhiSi5S6EjPrtNd/UYh6pZwuH6NGjze nixos@dev-nixos"
+      (import ../../../provisioning/controller-public-key.nix)
     ];
   };
 }

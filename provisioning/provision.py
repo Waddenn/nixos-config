@@ -6,6 +6,7 @@ import importlib.util
 import ipaddress
 import json
 import os
+from pwd import getpwnam
 from pathlib import Path
 import secrets
 import shlex
@@ -374,6 +375,49 @@ def enroll(s):
         raise ProvisionError('SSH over Tailscale failed')
 
 
+def register(s):
+    """Authenticate the existing GitOps user before proposing main-flake ownership."""
+    require_owned(s)
+    health(s)
+    record = load(hostdir(s['name']) / 'identity.json')
+    identity = {key: record[key] for key in ['hostKey', 'sshPublicKey']}
+    directory = SRC / 'identities'
+    directory.mkdir(exist_ok=True)
+    target = directory / (s['name'] + '.json')
+    if target.exists() and load(target) != identity:
+        raise ProvisionError('Published SSH identity differs; explicit recovery required')
+    # The host key was obtained through authenticated Proxmox SSH, not keyscan.
+    controller_user = getpwnam('nixos')
+    ssh_dir = Path(controller_user.pw_dir) / '.ssh'
+    known = ssh_dir / 'known_hosts'
+    ssh_dir.mkdir(mode=0o700, exist_ok=True)
+    for hostname in [s['hostname']]:
+        if known.exists():
+            found = subprocess.run(['ssh-keygen', '-F', hostname, '-f', str(known)],
+                                   text=True, capture_output=True, check=False)
+            if found.returncode not in (0, 1):
+                raise ProvisionError('Cannot read controller SSH trust file')
+            keys = [line.split()[1:3] for line in found.stdout.splitlines() if line and not line.startswith('#')]
+            expected = record['hostKey'].split()[:2]
+            if keys and (expected not in keys or any(key[0] == 'ssh-ed25519' and key != expected for key in keys)):
+                raise ProvisionError('Controller already trusts a different host key')
+        else:
+            keys = []
+        if not keys:
+            with known.open('a') as output:
+                output.write('\n' + hostname + ' ' + record['hostKey'] + '\n')
+            known.chmod(0o600)
+            os.chown(known, controller_user.pw_uid, controller_user.pw_gid)
+        result = run(['runuser', '-u', 'nixos', '--', 'ssh', '-oBatchMode=yes',
+                      '-oStrictHostKeyChecking=yes', '-oConnectTimeout=10',
+                      '-oHostKeyAlgorithms=ssh-ed25519', '-oUpdateHostKeys=no',
+                      'root@' + hostname, 'hostname'])
+        if result != s['hostname']:
+            raise ProvisionError('Existing GitOps identity cannot authenticate the new service')
+    write_json(target, identity)
+    target.chmod(0o644)  # Public keys only: this generated artifact belongs in Git.
+
+
 def stage(name, action, s, report):
     report.update(stage=name, status='running')
     write_json(hostdir(s['name']) / 'last-run.json', report)
@@ -393,7 +437,7 @@ def stage(name, action, s, report):
 def main():
     global MANIFEST
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['authorize', 'prepare', 'plan', 'infra', 'discover', 'secrets', 'deploy', 'health', 'enroll', 'up'])
+    parser.add_argument('action', choices=['authorize', 'prepare', 'plan', 'infra', 'discover', 'secrets', 'deploy', 'health', 'enroll', 'register', 'up'])
     parser.add_argument('service')
     args = parser.parse_args()
     if os.geteuid() != 0 or socket.gethostname().split('.')[0] != 'dev-nixos':
@@ -410,12 +454,14 @@ def main():
         if args.service not in MANIFEST:
             raise ProvisionError('Unknown service')
         s = MANIFEST[args.service]
+        if s.get('gitops', {}).get('enable') and args.action in ('deploy', 'up'):
+            raise ProvisionError('GitOps-owned service: activation requires the main fleet CI/canary path')
         if s['lifecycle'] != 'active' and args.action not in ('plan', 'infra'):
             raise ProvisionError('Retained service: activation is disabled')
         backup()
         migrate_runtime()
         actions = {'authorize': authorize, 'prepare': prepare, 'plan': infra, 'infra': lambda s: infra(s, True),
-                   'discover': discover, 'secrets': encrypt_secrets, 'deploy': deploy, 'health': health, 'enroll': enroll}
+                   'discover': discover, 'secrets': encrypt_secrets, 'deploy': deploy, 'health': health, 'enroll': enroll, 'register': register}
         steps = ['authorize', 'prepare', 'infra', 'discover', 'secrets', 'deploy', 'health', 'enroll'] if args.action == 'up' else [args.action]
         report = {'service': s['name'], 'completed': [], 'mode': 'isolated-pilot'}
         try:

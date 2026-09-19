@@ -61,7 +61,7 @@ jobs:
         with:
           name: waddenn-nixos
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - run: nix build --no-link .#checks.x86_64-linux.deployment-scripts .#checks.x86_64-linux.fleet-inventory .#checks.x86_64-linux.beszel-agent
+      - run: nix build --no-link .#checks.x86_64-linux.deployment-scripts .#checks.x86_64-linux.fleet-inventory .#checks.x86_64-linux.beszel-agent .#checks.x86_64-linux.declared-services
       - run: python3 scripts/check-beszel-hub.py
       - run: python3 scripts/check-colmena.py
 

@@ -22,7 +22,9 @@
     && s.diskGiB >= 4
     && s.application.port > 1024
     && s.application.port < 65536
-    && s.tailscaleTags != [];
+    && s.tailscaleTags != []
+    && lib.all builtins.isBool (builtins.attrValues (s.gitops or {}))
+    && lib.all (key: builtins.elem key ["enable" "canary" "internalProxy"]) (builtins.attrNames (s.gitops or {}));
 in
   assert lib.assertMsg (unique (map (s: s.vmId) values)) "Duplicate Proxmox VM ID";
   assert lib.assertMsg (unique (map (s: s.hostname) values)) "Duplicate service hostname";
@@ -31,6 +33,13 @@ in
       service
       // {
         inherit name;
+        gitops =
+          {
+            enable = false;
+            canary = false;
+            internalProxy = false;
+          }
+          // (service.gitops or {});
         resourceAddress = "proxmox_virtual_environment_container.${name}";
         sshAlias = "service-${name}";
         secretFile = ./secrets + "/${name}.yaml";

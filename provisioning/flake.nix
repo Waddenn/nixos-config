@@ -21,21 +21,18 @@
     lib = nixpkgs.lib;
     pkgs = nixpkgs.legacyPackages.${system};
     inventory = import ./inventory.nix {inherit lib;};
-    active = lib.filterAttrs (_: s: s.lifecycle == "active") inventory;
+    active = lib.filterAttrs (_: s: s.lifecycle == "active" && !s.gitops.enable) inventory;
     runtime =
       if builtins.pathExists ./runtime-public.json
       then builtins.fromJSON (builtins.readFile ./runtime-public.json)
       else {};
-    pilotModules = name: service: [
-      sops-nix.nixosModules.sops
-      ./pilot.nix
-      service.application.module
-      {
-        _module.args = {inherit service;};
-        nixpkgs.hostPlatform = system;
-        users.users.root.openssh.authorizedKeys.keys = assert lib.assertMsg (builtins.hasAttr name runtime) "Run discover before building a pilot"; [runtime.${name}.sshPublicKey];
-      }
-    ];
+    pilotModules = name: service:
+      import ./service-modules.nix {
+        inherit service system;
+        sopsModule = sops-nix.nixosModules.sops;
+        nixpkgsSource = nixpkgs.outPath;
+        bootstrapKey = assert lib.assertMsg (builtins.hasAttr name runtime) "Run discover before building a pilot"; runtime.${name}.sshPublicKey;
+      };
   in {
     manifest =
       lib.mapAttrs (name: s: {
@@ -53,6 +50,7 @@
           bridge
           ipv4
           lifecycle
+          gitops
           resourceAddress
           sshAlias
           tailscaleTags
