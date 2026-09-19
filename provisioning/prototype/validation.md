@@ -1,3 +1,6 @@
+> Archive du premier lot. Les commandes et fichiers exécutables ont été remplacés
+> par le [parcours de services commun](../README.md).
+
 # Validation du 19 septembre 2026
 
 ## Observé sur le jetable

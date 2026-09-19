@@ -16,3 +16,5 @@ __pycache__/
 *.tfplan
 *.tfvars
 *.tfvars.json
+# Observed public bootstrap facts, regenerated on the controller.
+provisioning/runtime-public.json

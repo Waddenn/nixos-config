@@ -1,3 +1,6 @@
+> Archive du premier lot. Les commandes et fichiers exécutables ont été remplacés
+> par le [parcours de services commun](../README.md).
+
 # Prototype Proxmox — hors production
 
 Ce lot crée **uniquement le CT jetable 9901 sur proxade**. Il ne déclare aucun
