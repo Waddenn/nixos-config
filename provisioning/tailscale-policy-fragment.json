@@ -1,0 +1,5 @@
+{
+  "tagOwners": {
+    "tag:nixos-pilot": ["autogroup:admin"]
+  }
+}

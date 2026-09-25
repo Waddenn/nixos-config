@@ -4,6 +4,13 @@
   pkgs,
   ...
 }: let
+  declared = import ../../../lib/provisioned-services.nix {inherit lib;};
+  internalRoutes = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: s: ''
+      handle_path /${name}/* {
+        reverse_proxy http://${s.hostname}.${declared.tailnet}:${toString s.application.port}
+      }
+    '')
+    declared.proxyServices);
   securityHeaders = ''
     header {
       Server "Secure-Proxy"
@@ -82,75 +89,89 @@ in {
         }
       '';
 
-      virtualHosts = {
-        "nextcloud.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.116:80
-            '';
-        };
-        "bitwarden.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.30.113:8222
-            '';
-        };
-        "auth.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.123:9091 {
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Forwarded-Host {host}
-                header_up X-Forwarded-Uri {uri}
-                header_up X-Forwarded-For {remote_host}
-              }
-            '';
-        };
-        "homeassistant.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://homeassistant:8123
-            '';
-        };
-        "jellyseerr.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.121:5055
-            '';
-        };
-        "immich.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              reverse_proxy http://192.168.40.115:2283
-            '';
-        };
-        "codex.hexaflare.net" = {
-          extraConfig =
-            commonConfig
-            + ''
-              forward_auth http://192.168.40.123:9091 {
-                uri /api/authz/forward-auth
-                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
-              }
-              reverse_proxy https://100.124.126.44:6902 {
-                transport http {
-                  tls_insecure_skip_verify
+      virtualHosts =
+        lib.optionalAttrs (declared.proxyServices != {}) {
+          "http://${declared.proxyHost}:${toString declared.proxyPort}".extraConfig = ''
+            route {
+              @outside not remote_ip 100.64.0.0/10
+              respond @outside 403
+              ${internalRoutes}
+              respond 404
+            }
+          '';
+        }
+        // {
+          "nextcloud.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                reverse_proxy http://192.168.40.116:80
+              '';
+          };
+          "bitwarden.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                reverse_proxy http://192.168.30.113:8222
+              '';
+          };
+          "auth.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                reverse_proxy http://192.168.40.123:9091 {
+                  header_up X-Forwarded-Proto {scheme}
+                  header_up X-Forwarded-Host {host}
+                  header_up X-Forwarded-Uri {uri}
+                  header_up X-Forwarded-For {remote_host}
                 }
-              }
-            '';
+              '';
+          };
+          "homeassistant.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                reverse_proxy http://homeassistant:8123
+              '';
+          };
+          "jellyseerr.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                reverse_proxy http://192.168.40.121:5055
+              '';
+          };
+          "immich.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                reverse_proxy http://192.168.40.115:2283
+              '';
+          };
+          "codex.hexaflare.net" = {
+            extraConfig =
+              commonConfig
+              + ''
+                forward_auth http://192.168.40.123:9091 {
+                  uri /api/authz/forward-auth
+                  copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+                }
+                reverse_proxy https://100.124.126.44:6902 {
+                  transport http {
+                    tls_insecure_skip_verify
+                  }
+                }
+              '';
+          };
         };
-      };
     };
 
     # Port 443 (HTTPS) exposed publicly
     # Port 2019 (Caddy metrics) is only accessible locally for monitoring
     networking.firewall.allowedTCPPorts = [443];
+    # No public listener allowance: this validation proxy is tailnet-only.
+    networking.firewall.interfaces.tailscale0.allowedTCPPorts =
+      lib.optional (declared.proxyServices != {}) declared.proxyPort;
 
     # Increase UDP buffer sizes for QUIC performance
     # https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes

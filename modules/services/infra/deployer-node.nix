@@ -4,10 +4,18 @@
   pkgs,
   inputs,
   ...
-}: {
+}: let
+  declared = import ../../../lib/provisioned-services.nix {inherit lib;};
+in {
   options.my-services.infra.deployer-node.enable = lib.mkEnableOption "Enable internal GitOps controller";
 
   config = lib.mkIf config.my-services.infra.deployer-node.enable {
+    programs.ssh.knownHosts =
+      lib.mapAttrs (_: s: {
+        hostNames = [s.hostname "${s.hostname}.${declared.tailnet}"];
+        publicKey = (declared.identity s).hostKey;
+      })
+      declared.services;
     environment.shellAliases = {
       gitops-force = "sudo touch /var/lib/internal-gitops/force && sudo systemctl start internal-gitops.service";
     };

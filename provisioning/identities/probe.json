@@ -1,0 +1,4 @@
+{
+  "hostKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINf4W49KYUIT/y5Xn4omaiH7M+udBUvuRaemWgJU2Efr root@nixos-service-probe",
+  "sshPublicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAefex8mFbfRQQEsOiaK56zHDYDgwvUG3/RSf6aYTPar nixos-service-probe"
+}

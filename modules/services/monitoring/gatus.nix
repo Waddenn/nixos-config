@@ -6,6 +6,7 @@
 }: let
   # Import centralized domain configuration
   domainsConfig = import ../../../lib/domains.nix;
+  declared = import ../../../lib/provisioned-services.nix {inherit lib;};
 
   # Generate Gatus endpoints from centralized domains
   generateEndpoints = domains:
@@ -63,7 +64,19 @@ in {
           };
         };
         # Automatically generate endpoints from centralized domains configuration
-        endpoints = generateEndpoints domainsConfig.domains;
+        endpoints =
+          generateEndpoints domainsConfig.domains
+          ++ map (endpoint:
+            endpoint
+            // {
+              alerts = [
+                {
+                  type = "discord";
+                  send-on-resolved = true;
+                }
+              ];
+            })
+          declared.endpoints;
       };
     };
   };

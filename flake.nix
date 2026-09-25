@@ -22,16 +22,45 @@
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
     fleetPolicy = import ./lib/fleet-policy.nix;
+    declared = import ./lib/provisioned-services.nix {inherit lib;};
+    legacy = import ./hosts {inherit lib inputs nixpkgs system;};
+    declaredModules = service:
+      import ./provisioning/service-modules.nix {
+        inherit service system;
+        sopsModule = inputs.sops-nix.nixosModules.sops;
+        nixpkgsSource = inputs.nixpkgs.outPath;
+        bootstrapKey = (declared.identity service).sshPublicKey;
+        extraModules = [
+          ./modules/services/monitoring/beszel-agent.nix
+          {my-services.monitoring.beszel-agent.enable = true;}
+        ];
+      };
   in {
-    nixosConfigurations = import ./hosts {
-      inherit lib inputs nixpkgs system;
-    };
+    nixosConfigurations = assert lib.assertMsg (lib.intersectLists (builtins.attrNames legacy) (builtins.attrNames declared.byHost) == []) "Declared service collides with an existing host";
+      legacy
+      // lib.mapAttrs (_: s:
+        lib.nixosSystem {
+          inherit system;
+          modules = declaredModules s;
+        })
+      declared.byHost;
 
     fleet =
       lib.mapAttrs (name: host: let
-        policy = fleetPolicy.${name} or {};
+        service = declared.byHost.${name} or null;
+        policy =
+          if service == null
+          then fleetPolicy.${name} or {}
+          else {
+            canary = service.gitops.canary;
+            units = service.application.units ++ lib.optional service.monitoring "gatus.service";
+            urls = ["http://127.0.0.1:${toString service.application.port}${service.application.healthPath}"];
+          };
       in {
-        target = host.config.my-services.infra.deployment-target.enable;
+        target =
+          if service == null
+          then host.config.my-services.infra.deployment-target.enable
+          else service.lifecycle == "active";
         local = name == "dev-nixos";
         oci = host.config.virtualisation.oci-containers.containers != {};
         canary = policy.canary or false;
@@ -53,6 +82,33 @@
             self.fleet.${name}.units
         ) (builtins.attrNames self.fleet)) "Fleet health checks reference an undefined systemd service";
           pkgs.runCommand "fleet-inventory-check" {} "touch $out";
+        declared-services = assert lib.all (
+          name: let
+            s = declared.byHost.${name};
+          in
+            self.fleet.${name}.target
+            == (s.lifecycle == "active")
+            && self.fleet.${name}.canary == s.gitops.canary
+            && self.nixosConfigurations.${name}.config.networking.hostName == s.hostname
+            && self.nixosConfigurations.${name}.config.my-services.monitoring.beszel-agent.enable
+            && self.colmena.${name}.deployment.targetHost == s.hostname
+            && (self.nixosConfigurations.dev-nixos.config.programs.ssh.knownHosts.${s.name}.publicKey == (declared.identity s).hostKey)
+        ) (builtins.attrNames declared.byHost);
+        assert lib.all (endpoint:
+          lib.any (
+            actual:
+              actual.name == endpoint.name && actual.url == endpoint.url && actual.conditions == endpoint.conditions
+          )
+          self.nixosConfigurations.gatus.config.services.gatus.settings.endpoints)
+        declared.endpoints;
+        assert lib.all (
+          name: let
+            s = declared.proxyServices.${name};
+          in
+            lib.hasInfix "${s.hostname}.${declared.tailnet}:${toString s.application.port}"
+            self.nixosConfigurations.caddy.config.services.caddy.virtualHosts."http://${declared.proxyHost}:${toString declared.proxyPort}".extraConfig
+        ) (builtins.attrNames declared.proxyServices);
+          pkgs.runCommand "declared-service-integration-check" {} "touch $out";
         nextcloud-major-upgrade-policy = let
           host = self.nixosConfigurations.nextcloud-pgsql;
           nextcloud = host.config.services.nextcloud;
@@ -105,24 +161,30 @@
       }
       // builtins.mapAttrs (name: value: let
         isDeploymentTarget =
-          lib.attrByPath ["config" "my-services" "infra" "deployment-target" "enable"] false value;
+          if builtins.hasAttr name declared.byHost
+          then declared.byHost.${name}.lifecycle == "active"
+          else lib.attrByPath ["config" "my-services" "infra" "deployment-target" "enable"] false value;
       in {
         deployment = {
           allowLocalDeployment = name == "dev-nixos";
           tags =
             if name == "dev-nixos"
             then ["local"]
-            else (lib.optional isDeploymentTarget "remote") ++ lib.optional ((fleetPolicy.${name} or {}).canary or false) "canary";
+            else (lib.optional isDeploymentTarget "remote") ++ lib.optional self.fleet.${name}.canary "canary";
           targetHost =
             if name == "dev-nixos"
             then null
             else name;
           targetUser = "root";
         };
-        imports = import ./lib/host-modules.nix {
-          inherit inputs system;
-          hostname = name;
-        };
+        imports =
+          if builtins.hasAttr name declared.byHost
+          then declaredModules declared.byHost.${name}
+          else
+            import ./lib/host-modules.nix {
+              inherit inputs system;
+              hostname = name;
+            };
       })
       self.nixosConfigurations;
 

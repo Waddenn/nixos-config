@@ -8,3 +8,13 @@ result-*
 __pycache__/
 *.pyc
 .gcroots/
+
+# Provisioning state and plans contain sensitive infrastructure data.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+# Observed public bootstrap facts, regenerated on the controller.
+provisioning/runtime-public.json
