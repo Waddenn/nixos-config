@@ -2,8 +2,8 @@
   "germannewsmaker/myspeed": "sha256:3a3e774b3f78d930a5a962d625b99bcb3d71730bfeb4a6b93e04fd38cfe7d9a9",
   "ghcr.io/linkwarden/linkwarden:latest": "sha256:0664c28a039bda8ffa6663389e8536b2fc717219e329f85b83faca7efed3b144",
   "ghcr.io/lloesche/valheim-server": "sha256:c885aa902faf885ceb8f69a34663b90519e65aa65fbd9f893451f0640e218a4f",
-  "lscr.io/linuxserver/calibre:latest": "sha256:84d3e30e0f0b3bf74260ff3312d4443121f5359387e50691a49a86ea219ed347",
-  "lscr.io/linuxserver/homeassistant:latest": "sha256:44b0ab0d8e9916b88146a590fce810df23ee78248cd097d39d3fde38f0dfe541",
-  "lscr.io/linuxserver/mullvad-browser:latest": "sha256:ecb207e1cae976400cbe296ee1632e97e8a704affc37bd6e3dad7d33f068a6fb",
+  "lscr.io/linuxserver/calibre:latest": "sha256:c97f86a5acc3372d5e25e75b4c98d1bffa64e70d4c413554beb1e554ae109187",
+  "lscr.io/linuxserver/homeassistant:latest": "sha256:a19464587d5d59ea13d90b3eb8f60e9eace2a932b0e28e8c2fe3bbf3d6095b8f",
+  "lscr.io/linuxserver/mullvad-browser:latest": "sha256:1aa06e17e52f5e2370b64919615bb5f13df07b71a9e6a82e487fad89c1752853",
   "postgres:16-alpine": "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea"
 }
