@@ -63,6 +63,31 @@ in {
       };
     };
 
+    systemd.services.internal-gitops-capacity = {
+      description = "Read-only fleet disk capacity warnings";
+      path = [pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils pkgs.bash];
+      serviceConfig = {
+        User = "nixos";
+        Type = "oneshot";
+        UMask = "0077";
+        TimeoutStartSec = "10m";
+        StateDirectory = "internal-gitops";
+        ExecStart = pkgs.writeShellScript "fleet-capacity-monitor" ''
+          export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
+          export MONITOR_FLAKE=${../../..}
+          exec ${pkgs.python3}/bin/python3 ${../../../scripts/fleet.py} --capacity-monitor
+        '';
+      };
+    };
+    systemd.timers.internal-gitops-capacity = {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "10m";
+        OnUnitActiveSec = "1h";
+        RandomizedDelaySec = "5m";
+      };
+    };
+
     systemd.timers.internal-gitops = {
       wantedBy = ["timers.target"];
       timerConfig = {

@@ -19,7 +19,7 @@
     && s.vmId <= 999999999
     && s.cores > 0
     && s.memoryMiB >= 256
-    && s.diskGiB >= 4
+    && s.diskGiB >= 16
     && s.application.port > 1024
     && s.application.port < 65536
     && s.tailscaleTags != []
