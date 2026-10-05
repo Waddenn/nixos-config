@@ -20,6 +20,9 @@
       environment = {
         UPDATE_CRON = "0 4 * * *";
         UPDATE_IF_IDLE = "true";
+        # New world formats contain directories: X preserves their traversal
+        # without making ordinary save files executable.
+        WORLDS_FILE_PERMISSIONS = "u=rwX,go=rX";
       };
       environmentFiles = [
         "/home/nixos/valheim/.env"
