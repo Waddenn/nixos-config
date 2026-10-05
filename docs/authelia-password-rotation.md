@@ -39,7 +39,7 @@ doit être traitée comme une opération séparée et coordonnée avec tous les 
    le secret du compte :
 
    ```bash
-   nix shell nixpkgs#sops --command sops secrets/secrets.yaml
+   nix shell nixpkgs#sops --command sops secrets/authelia.yaml
    ```
 
    Les clés attendues sont `authelia_user_admin_password_hash` et
@@ -82,5 +82,5 @@ declarativeUsers.alice = {
 };
 ```
 
-Ajouter ensuite la clé correspondante dans `secrets/secrets.yaml` avec SOPS. Une
+Ajouter ensuite la clé correspondante dans `secrets/authelia.yaml` avec SOPS. Une
 assertion Nix interdit de partager le même secret entre deux comptes.

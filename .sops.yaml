@@ -1,26 +1,34 @@
 # .sops.yaml
 
 keys:
+  - &workstation age19narukfyx0ln5e92dn3m7yuz3yrrsaga295xu7r04r2rdykjqyks6x29ke
   - &primary age10yfuvwlr6su8u02sc9xmmvxj4aj59562dkxlpk0rl5kum8amw4zqaxrjpk
   - &caddy age1t2s42a6akm7r2vrz7p4jg9w3uvh2t0cvevjr7hreuf6mkvzad95q4kw85s
-  - &github-runner age1u5n52q9kgumdt3lqvcnagga54p2ldetw6knc8paxvc43njyfjdnq87g7ff
   - &dev-nixos age13nxnv5jyymls6d9xjl47r6rmkq749gwj9u5txepcxrq7cuvtvesqms45uf
   - &authelia age1ktmlt86xq8jzaxvc7zmy9y32urqydurvwcmz3m7gx7jljhca5pjql4jlds
   - &immich age1ssppsf2v0grlhq5n8ssny65gk26fm504q85x20pt86ytaxemdecq64a37g
   - &gatus age1w3rhlgkxk2ycur82lcpswn3u8c40gg4h755mtu5dp5fhj755jajsmj96jr
+# Each service owns its encrypted file; the personal key remains the recovery key.
+# Unclassified files are operator-only until an explicit host rule is added.
 creation_rules:
-  - path_regex: secrets/gatus\.yaml$
+  - path_regex: ^secrets/caddy\.yaml$
     key_groups:
-    - age:
-        - *primary
-        - *dev-nixos
-        - *gatus
-  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)(\.enc)?$
+      - age: [*primary, *workstation, *caddy]
+  - path_regex: ^secrets/authelia\.yaml$
     key_groups:
-    - age:
-        - *primary
-        - *caddy
-        - *github-runner
-        - *dev-nixos
-        - *authelia
-        - *immich
+      - age: [*primary, *workstation, *authelia]
+  - path_regex: ^secrets/immich\.yaml$
+    key_groups:
+      - age: [*primary, *workstation, *immich]
+  - path_regex: ^secrets/controller\.yaml$
+    key_groups:
+      - age: [*primary, *workstation, *dev-nixos]
+  - path_regex: ^secrets/gatus\.yaml$
+    key_groups:
+      - age: [*primary, *workstation, *gatus]
+  - path_regex: ^secrets/operator\.yaml$
+    key_groups:
+      - age: [*primary, *workstation]
+  - path_regex: ^secrets/[^/]+\.(yaml|json|env|ini)(\.enc)?$
+    key_groups:
+      - age: [*primary, *workstation]

@@ -70,7 +70,7 @@ in {
 
   config = lib.mkIf config.my-services.networking.caddy.enable {
     sops.secrets.cf_api_token = {
-      sopsFile = ../../../secrets/secrets.yaml;
+      sopsFile = ../../../secrets/caddy.yaml;
       owner = config.services.caddy.user;
       mode = "0400";
     };
