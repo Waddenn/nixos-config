@@ -5,7 +5,7 @@
   service,
   ...
 }: {
-  imports = [./bootstrap.nix];
+  imports = [./bootstrap.nix ./storage/maintenance.nix];
   environment.systemPackages = [pkgs.curl];
   networking.hostName = lib.mkOverride 40 service.hostname;
   sops = {

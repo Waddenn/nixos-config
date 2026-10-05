@@ -97,6 +97,7 @@ class Fleet:
             raise FleetError("Invalid parallelism or health timeout")
         self.revision = ""
         self.results = {}
+        self.capacity = {}
         self.work = self.repo
 
     def ssh(self, host, command):
@@ -162,6 +163,82 @@ class Fleet:
         return {"available": available, "missing": missing, "required": required,
                 "safe": available >= required}
 
+    def ensure_storage(self, host, cfg):
+        capacity = self.storage(host, cfg)
+        if not capacity["safe"]:
+            print(f"{host}: low space; collecting unreferenced Nix paths once", flush=True)
+            command = "nix-storage-cleanup"
+            if cfg.get("local"):
+                run(["sudo", command], timeout=600)
+            else:
+                # A separate timeout: garbage collection can take longer than an SSH probe.
+                run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+                     "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2",
+                     f"root@{host}", command], timeout=600)
+            capacity = self.storage(host, cfg)
+        self.capacity[host] = capacity
+        if "available" in capacity:
+            gib = 1024 ** 3
+            print(f"{host}: free={capacity['available']/gib:.2f} GiB "
+                  f"required={capacity['required']/gib:.2f} GiB", flush=True)
+        return capacity["safe"]
+
+    def capacity_monitor(self):
+        # Read-only; independent of CI so a blocked update cannot hide low capacity.
+        self.work = Path(os.environ.get("MONITOR_FLAKE", str(self.repo)))
+        hosts = self.manifest(local=True)
+        warnings, measurements = {}, {}
+        def probe(name, cfg):
+            command = "df -B1 --output=avail,size /nix/store | tail -1"
+            try:
+                output = run(["bash", "-c", command]) if cfg["local"] else self.ssh(name, command)
+                available, total = map(int, output.split())
+                low = available < (5 if cfg["local"] else 3) * 1024 ** 3 or available * 5 < total
+                return name, {"available": available, "total": total, "low": low}
+            except (FleetError, ValueError):
+                return name, {"error": "unreachable"}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+            for name, measurement in pool.map(lambda item: probe(*item), hosts.items()):
+                measurements[name] = measurement
+                if measurement.get("low"):
+                    warnings[name] = "low-space"
+        self.state.mkdir(parents=True, exist_ok=True)
+        atomic_json(self.state / "capacity.json", measurements)
+        previous = self.state / "last-capacity-notification.json"
+        old = json.loads(previous.read_text()) if previous.exists() else {}
+        for name in old:
+            if measurements.get(name, {}).get("error"):
+                warnings[name] = old[name]
+        if warnings == old:
+            return 1 if any(m.get("error") for m in measurements.values()) else 0
+        lines = ["NixOS capacity warning" if warnings else "NixOS capacity recovered"]
+        for name in sorted(warnings):
+            if measurements[name].get("error"):
+                lines.append(f"{name}: previous low-space warning; host currently unreachable")
+                continue
+            lines.append(f"{name}: {measurements[name]['available']/1024**3:.2f} GiB free; "
+                         "warning threshold: 3 GiB (controller: 5 GiB) or 20%")
+        if self.notify("\n".join(lines)):
+            atomic_json(previous, warnings)
+        return 0
+
+    def notify(self, summary):
+        webhook = os.environ.get("DISCORD_WEBHOOK", "")
+        if not webhook:
+            return False
+        if webhook.startswith("discord://"):
+            token, ident = webhook.removeprefix("discord://").rsplit("@", 1)
+            webhook = f"https://discord.com/api/webhooks/{ident}/{token}"
+        data = json.dumps({"content": summary[:1900]}).encode()
+        try:
+            req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json", "User-Agent": "nixos-fleet"})
+            with urllib.request.urlopen(req, timeout=15):
+                pass
+            return True
+        except Exception:
+            print("Notification failed; state saved locally", file=sys.stderr)
+            return False
+
     def preflight(self):
         hosts = self.manifest(local=True)
         print("Local draft: building systems locally, then checking capacity. No activation or notification.", flush=True)
@@ -193,7 +270,7 @@ class Fleet:
             if status == "reboot-required":
                 return status
             if status != "converged":
-                if not self.storage(host, cfg)["safe"]:
+                if not self.ensure_storage(host, cfg):
                     return "insufficient-space"
                 print(f"{host}: activating", flush=True)
                 command = [self.colmena, "--config", str(self.work / "flake.nix"), "apply", "switch",
@@ -240,31 +317,26 @@ class Fleet:
                 print(f"{name}: {self.results[name]}", flush=True)
 
     def report(self, error=None):
-        state = {"revision": self.revision, "hosts": self.results, "error": error}
+        state = {"revision": self.revision, "hosts": self.results, "error": error,
+                 "capacity": self.capacity}
         atomic_json(self.state / "last-run.json", state)
-        webhook = os.environ.get("DISCORD_WEBHOOK", "")
-        if not webhook:
-            return
-        if webhook.startswith("discord://"):
-            token, ident = webhook.removeprefix("discord://").rsplit("@", 1)
-            webhook = f"https://discord.com/api/webhooks/{ident}/{token}"
         previous = self.state / "last-notification.json"
+        # Capacity bytes fluctuate; deduplicate notifications on statuses only.
+        fingerprint = {"revision": self.revision, "hosts": self.results, "error": error}
         try:
-            if previous.exists() and json.loads(previous.read_text()) == state:
+            if previous.exists() and json.loads(previous.read_text()) == fingerprint:
                 return
         except (OSError, ValueError):
             pass
         summary = f"NixOS {self.revision[:12]}\n" + "\n".join(f"{n}: {s}" for n, s in sorted(self.results.items()))
+        for name, capacity in sorted(self.capacity.items()):
+            if not capacity["safe"]:
+                summary += (f"\n{name}: free={capacity['available']/1024**3:.2f} GiB, "
+                            f"required={capacity['required']/1024**3:.2f} GiB")
         if error:
             summary += f"\n{error}"
-        data = json.dumps({"content": summary[:1900]}).encode()
-        try:
-            req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json", "User-Agent": "nixos-fleet"})
-            with urllib.request.urlopen(req, timeout=15):
-                pass
-            atomic_json(previous, state)
-        except Exception:
-            print("Notification failed; state saved locally", file=sys.stderr)
+        if self.notify(summary):
+            atomic_json(previous, fingerprint)
 
     def reconcile(self):
         run(["git", "fetch", "origin", "main", "--prune"], cwd=self.repo)
@@ -321,6 +393,9 @@ class Fleet:
         if changed:
             space = os.statvfs("/nix/store")
             if space.f_bavail * space.f_frsize < 5 * 1024 ** 3:
+                run(["sudo", "nix-storage-cleanup"], timeout=600)
+                space = os.statvfs("/nix/store")
+            if space.f_bavail * space.f_frsize < 5 * 1024 ** 3:
                 raise FleetError("Controller needs at least 5 GiB free before fleet builds")
             print("Building only changed systems", flush=True)
             run([self.colmena, "--config", str(self.work / "flake.nix"), "build", "--on", ",".join(changed),
@@ -350,7 +425,7 @@ class Fleet:
             if run(["uname", "-n"]).split(".")[0] != name:
                 self.results[name] = "wrong-controller"
                 raise FleetError("Run deployments on the declared controller")
-            if not self.storage(name, cfg)["safe"]:
+            if not self.ensure_storage(name, cfg):
                 self.results[name] = "insufficient-space"
                 raise FleetError("Controller has insufficient free space")
             run(["sudo", "systemctl", "start", f"internal-pull-update@{self.revision}.service"], timeout=1800)
@@ -381,13 +456,15 @@ class Fleet:
 
 def main():
     fleet = Fleet()
+    if sys.argv[1:] == ["--capacity-monitor"]:
+        return fleet.capacity_monitor()
     if sys.argv[1:] == ["--preflight"]:
         return fleet.preflight()
     if sys.argv[1:] == ["--status"]:
         fleet.status()
         return 0
     if sys.argv[1:]:
-        raise FleetError("Supported arguments: --status, --preflight")
+        raise FleetError("Supported arguments: --status, --preflight, --capacity-monitor")
     fleet.state.mkdir(parents=True, exist_ok=True)
     with (fleet.state / "deploy.lock").open("w") as lock:
         try:

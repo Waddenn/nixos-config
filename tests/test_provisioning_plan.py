@@ -39,6 +39,33 @@ class ProvisioningPlanTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             MODULE.check(self.plan, self.manifest, 'another-service')
 
+    def growth_plan(self):
+        self.manifest['demo']['diskGiB'] = 16
+        change = self.plan['resource_changes'][0]['change']
+        change['actions'] = ['update']
+        change['before'] = dict(change['after'], disk=[{'size': 4, 'datastore_id': 'pool'}])
+        change['after']['disk'] = [{'size': 16, 'datastore_id': 'pool'}]
+        change['after_unknown'] = {'disk': [False]}
+        return change
+
+    def test_explicit_disk_growth_only(self):
+        self.growth_plan()
+        with self.assertRaises(ValueError):
+            MODULE.check(self.plan, self.manifest)
+        MODULE.check(self.plan, self.manifest, allow_disk_growth=True)
+
+    def test_disk_growth_rejects_shrink_other_changes_and_unknowns(self):
+        self.growth_plan()
+        for mutate in [lambda c: c['after']['disk'][0].update(size=2),
+                       lambda c: c['after']['disk'][0].update(datastore_id='other'),
+                       lambda c: c['after'].update(started=False),
+                       lambda c: c.update(after_unknown={'disk': [True]}),
+                       lambda c: c.update(actions=['delete', 'create'])]:
+            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
+                plan = copy.deepcopy(self.plan)
+                mutate(plan['resource_changes'][0]['change'])
+                MODULE.check(plan, self.manifest, allow_disk_growth=True)
+
     def test_removed_declaration_still_rejects_deletion(self):
         self.plan['resource_changes'][0]['change']['actions'] = ['delete']
         with self.assertRaises(ValueError):

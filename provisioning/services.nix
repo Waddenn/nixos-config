@@ -8,7 +8,7 @@
     storage = "Storage2";
     cores = 1;
     memoryMiB = 512;
-    diskGiB = 4;
+    diskGiB = 16;
     bridge = "vmbr0";
     ipv4 = "dhcp";
     lifecycle = "active"; # "retained" keeps the CT but excludes it from activation.
@@ -44,7 +44,7 @@
     storage = "Storage2";
     cores = 1;
     memoryMiB = 512;
-    diskGiB = 4;
+    diskGiB = 16;
     bridge = "vmbr0";
     ipv4 = "dhcp";
     lifecycle = "active"; # "retained" keeps the CT but excludes it from activation.

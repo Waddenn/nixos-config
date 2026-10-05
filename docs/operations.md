@@ -331,3 +331,32 @@ Le contrôleur attend toujours une CI réussie du SHA exact de `main`. Les canar
 les contrôles de santé et d'espace, le ciblage des générations en dérive et le rôle
 exclusif de `dev-nixos` sont conservés. Aucun statut de promotion ni succès de
 branche ne constitue une autorisation de déploiement.
+
+## Capacité disque et rétention Nix
+
+Les conteneurs déclarés dans `provisioning/services.nix` disposent d'au moins
+16 Gio ; cette valeur est validée par l'inventaire. La commande explicite
+`nix develop -c python3 provision.py resize probe` dans `provisioning/`, sur
+`dev-nixos`, réconcilie les agrandissements déclarés avec le state OpenTofu
+existant. Elle sauvegarde l'état et refuse création, réduction, remplacement
+et toute modification autre que la taille des disques existants.
+
+Le nettoyage quotidien `nix-gc.service` conserve les trois dernières générations
+système, plus celles nécessaires au système actif et au prochain démarrage.
+Les deux systèmes sont aussi protégés par des racines GC actualisées avant le
+nettoyage. Les profils utilisateur et les données applicatives ne sont pas purgés.
+La commande `nix-storage-cleanup --prune` applique cette rétention puis collecte
+les fichiers inutilisés ; sans argument, elle ne supprime aucune génération.
+
+En cas de capacité insuffisante, le déployeur lance une seule collecte sans
+suppression de générations, puis recalcule les fichiers manquants, la marge de
+25 % et la réserve de 1 Gio (3 Gio pour OCI). Le blocage reste obligatoire si
+la place manque. `last-run.json` inclut les mesures de capacité et les journaux
+affichent les Gio disponibles et nécessaires.
+
+`internal-gitops-capacity.timer` mesure la flotte chaque heure sans build ni
+activation, indépendamment de la CI. Les alertes Discord existantes signalent
+moins de 3 Gio libres (5 Gio sur le contrôleur) ou moins de 20 % libres, puis
+le retour à la normale. Elles sont dédupliquées tant que les hôtes concernés
+ne changent pas ; un hôte injoignable n'est jamais déclaré rétabli. Les mesures
+sont dans `/var/lib/internal-gitops/capacity.json`.

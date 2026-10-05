@@ -155,7 +155,11 @@ réconciliation. L'enrôlement vérifie d'abord l'identité déjà inscrite et n
 consomme pas une nouvelle clé si elle est correcte. Un échec de santé n'est pas
 rapporté comme un succès global.
 
-Le plan permet création/no-op uniquement. Mise à jour d'infrastructure,
+Le plan ordinaire permet création/no-op uniquement. La commande explicite
+`nix develop -c python3 provision.py resize probe` accepte uniquement les
+agrandissements de disques déclarés, sans autre modification, et interdit les
+créations. Elle réconcilie tous les agrandissements déclarés dans cet inventaire.
+Les autres mises à jour d'infrastructure,
 remplacement, suppression et ressource disparue hors OpenTofu sont bloqués.
 Une déclaration retirée ne permet pas de supprimer le CT. Utiliser
 `lifecycle = "retained"` pour garder la ressource et exclure l'activation ; cela

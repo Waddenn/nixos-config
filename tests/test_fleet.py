@@ -287,10 +287,50 @@ class PolicyTests(unittest.TestCase):
     @patch.object(fleet, "run")
     def test_low_space_prevents_activation(self, run):
         f = fleet.Fleet()
-        f.storage = Mock(return_value={"safe": False})
+        f.storage = Mock(return_value={"safe": False, "available": 1, "required": 2})
         f.systems = Mock(return_value="drift")
         self.assertEqual(f.deploy_host("app", host()), "insufficient-space")
-        run.assert_not_called()
+        run.assert_called_once()
+        self.assertNotIn("apply", run.call_args.args[0])
+        self.assertEqual(f.storage.call_count, 2)
+
+    @patch.object(fleet, "run")
+    def test_cleanup_rechecks_capacity_before_activation(self, run):
+        f = fleet.Fleet()
+        f.storage = Mock(side_effect=[{"safe": False}, {"safe": True}])
+        f.systems = Mock(side_effect=["drift", "converged"])
+        f.healthy = Mock()
+        self.assertEqual(f.deploy_host("app", host()), "converged")
+        commands = [c.args[0] for c in run.call_args_list]
+        self.assertIn("nix-storage-cleanup", commands[0][-1])
+        self.assertIn("apply", commands[1])
+
+    @patch.object(fleet, "run", side_effect=fleet.FleetError("cleanup failed"))
+    def test_cleanup_failure_does_not_activate(self, run):
+        f = fleet.Fleet()
+        f.storage = Mock(return_value={"safe": False})
+        f.systems = Mock(return_value="drift")
+        self.assertEqual(f.deploy_host("app", host()), "failed")
+        self.assertEqual(run.call_count, 1)
+
+    def test_capacity_monitor_deduplicates_and_reports_recovery(self):
+        f = fleet.Fleet()
+        f.manifest = Mock(return_value={"app": host()})
+        f.ssh = Mock(return_value=f"{2*1024**3} {16*1024**3}")
+        f.notify = Mock(return_value=True)
+        with tempfile.TemporaryDirectory() as directory:
+            f.state = Path(directory)
+            f.capacity_monitor()
+            f.capacity_monitor()
+            f.notify.assert_called_once()
+            f.ssh.side_effect = fleet.FleetError("offline")
+            self.assertEqual(f.capacity_monitor(), 1)
+            f.notify.assert_called_once()
+            f.ssh.side_effect = None
+            f.ssh.return_value = f"{10*1024**3} {16*1024**3}"
+            f.capacity_monitor()
+            self.assertEqual(f.notify.call_count, 2)
+            self.assertIn("recovered", f.notify.call_args.args[0])
 
     def test_report_persists_failure(self):
         f = fleet.Fleet()

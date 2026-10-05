@@ -257,7 +257,7 @@ def prepare(s):
     write_json(STATE / 'bootstrap.auto.tfvars.json', variables)
 
 
-def infra(s, apply=False):
+def infra(s, apply=False, resize=False):
     config = run(['nix', 'build', f'path:{SRC}', '--no-link', '--print-out-paths'])
     shutil.copyfile(config, STATE / 'config.tf.json')
     shutil.copyfile(SRC / '.terraform.lock.hcl', STATE / '.terraform.lock.hcl')
@@ -268,7 +268,7 @@ def infra(s, apply=False):
         text = run(['tofu', *args], cwd=STATE, env=env)
         (STATE / ('tofu-' + args[0] + '.log')).write_text(text)
     plan = json.loads(run(['tofu', 'show', '-json', 'review.tfplan'], cwd=STATE, env=env))
-    GUARD.check(plan, MANIFEST, s['name'])
+    GUARD.check(plan, MANIFEST, s['name'], allow_disk_growth=resize)
     if apply:
         (STATE / 'tofu-apply.log').write_text(run(['tofu', 'apply', '-input=false', 'review.tfplan'], cwd=STATE, env=env))
 
@@ -437,7 +437,7 @@ def stage(name, action, s, report):
 def main():
     global MANIFEST
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['authorize', 'prepare', 'plan', 'infra', 'discover', 'secrets', 'deploy', 'health', 'enroll', 'register', 'up'])
+    parser.add_argument('action', choices=['authorize', 'prepare', 'plan', 'infra', 'resize', 'discover', 'secrets', 'deploy', 'health', 'enroll', 'register', 'up'])
     parser.add_argument('service')
     args = parser.parse_args()
     if os.geteuid() != 0 or socket.gethostname().split('.')[0] != 'dev-nixos':
@@ -456,11 +456,12 @@ def main():
         s = MANIFEST[args.service]
         if s.get('gitops', {}).get('enable') and args.action in ('deploy', 'up'):
             raise ProvisionError('GitOps-owned service: activation requires the main fleet CI/canary path')
-        if s['lifecycle'] != 'active' and args.action not in ('plan', 'infra'):
+        if s['lifecycle'] != 'active' and args.action not in ('plan', 'infra', 'resize'):
             raise ProvisionError('Retained service: activation is disabled')
         backup()
         migrate_runtime()
         actions = {'authorize': authorize, 'prepare': prepare, 'plan': infra, 'infra': lambda s: infra(s, True),
+                   'resize': lambda s: infra(s, True, resize=True),
                    'discover': discover, 'secrets': encrypt_secrets, 'deploy': deploy, 'health': health, 'enroll': enroll, 'register': register}
         steps = ['authorize', 'prepare', 'infra', 'discover', 'secrets', 'deploy', 'health', 'enroll'] if args.action == 'up' else [args.action]
         report = {'service': s['name'], 'completed': [], 'mode': 'isolated-pilot'}

@@ -7,6 +7,7 @@
     allowUnfree = true;
     allowBroken = false;
   };
+  imports = [../../provisioning/storage/maintenance.nix];
   nix = {
     nixPath = ["nixpkgs=${inputs.nixpkgs}"];
     channel.enable = false;
@@ -40,16 +41,6 @@
         "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
         "waddenn-nixos.cachix.org-1:jNMQSkhK3tnymEL3tlStOaFvRcEkqdOxtZ8y5hF6ftU="
       ];
-    };
-    gc = {
-      automatic = true;
-      persistent = true;
-      dates = "daily";
-      options = "--delete-older-than 14d";
-    };
-    optimise = {
-      automatic = true;
-      dates = ["03:15"]; # Daily at 3:15 AM
     };
   };
 }
