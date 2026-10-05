@@ -63,7 +63,7 @@ in {
     enable = lib.mkEnableOption "Enable Caddy";
     requireOriginCertificate = lib.mkOption {
       type = lib.types.bool;
-      default = false;
+      default = true;
       description = "Require the dedicated Cloudflare origin client certificate after verifying its presentation.";
     };
   };

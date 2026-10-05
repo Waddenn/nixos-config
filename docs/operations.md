@@ -408,7 +408,9 @@ contrôler l'expiration. Aucune clé privée ni jeton API n'entre dans Git ou Ca
 Les clés de cette émission sont conservées hors dépôt dans le répertoire privé
 `~/.local/share/nixos-config/cloudflare-aop/2026-10-05/` du poste d'administration.
 
-Le réglage `my-services.networking.caddy.requireOriginCertificate` permet une
+Le certificat est obligatoire par défaut depuis la vérification de sa présentation
+sur les six sites le 5 octobre 2026. Le réglage
+`my-services.networking.caddy.requireOriginCertificate` permet une
 mise en place en deux étapes : `false` demande et vérifie le certificat s'il est
 présent, puis `true` le rend obligatoire. Ne passer à `true` qu'après observation
 de l'empreinte attendue dans `aop_client_fingerprint` des journaux d'accès des six
