@@ -362,3 +362,42 @@ ne changent pas ; un hôte injoignable n'est jamais déclaré rétabli. Une mesu
 indisponible reste explicite dans le rapport et les journaux, sans faire échouer
 le service de surveillance. Les mesures
 sont dans `/var/lib/internal-gitops/capacity.json`.
+## Accès à l'origine des sites Cloudflare
+
+Caddy réserve `auth`, `bitwarden`, `homeassistant`, `jellyseerr`, `immich` et
+`codex.hexaflare.net` aux connexions dont le pair TCP appartient à Cloudflare.
+La vérification `remote_ip` précède l'authentification et le reverse proxy dans
+un bloc `route`; les en-têtes `X-Forwarded-For` et `CF-Connecting-IP` ne peuvent
+pas autoriser une connexion directe. Aucune exception LAN/Tailscale n'est ajoutée
+à ces domaines. Nextcloud garde son accès direct et le proxy interne sur 8085
+conserve sa propre restriction Tailscale. La sonde de santé Caddy utilise le
+domaine public `auth.hexaflare.net` et passe donc par Cloudflare.
+
+Les plages sont centralisées dans `lib/cloudflare-ips.json`, vérifiées le
+5 octobre 2026 avec `https://api.cloudflare.com/client/v4/ips` (champs
+`result.ipv4_cidrs` et `result.ipv6_cidrs`). Lors d'une mise à jour de ces plages,
+actualiser ce fichier par PR, vérifier le format et refaire les contrôles avant
+déploiement. Une erreur de récupération ne doit jamais vider la liste autorisée.
+
+Test comportemental dans un checkout isolé disposant de Nix :
+
+```sh
+nix eval --json .#nixosConfigurations.caddy.config.services.caddy.virtualHosts > /tmp/caddy-vhosts.json
+caddy_package=$(nix build --no-link --print-out-paths .#nixosConfigurations.caddy.config.services.caddy.package)
+nix shell --inputs-from . nixpkgs#python3 --command python3 scripts/check-caddy-origin.py "$caddy_package/bin/caddy" /tmp/caddy-vhosts.json
+```
+
+Ce test démarre un serveur temporaire uniquement sur loopback, remplace les
+proxies applicatifs et d'authentification par des réponses locales, puis vérifie
+56 requêtes : refus direct, refus avec en-têtes forgés, pair autorisé simulé et
+accès direct Nextcloud. Il ne contacte aucun backend de production.
+
+Après activation, vérifier chaque domaine via son DNS public, puis via
+`curl --resolve DOMAINE:443:IP_ORIGINE https://DOMAINE/` depuis Internet : les
+six domaines doivent répondre 403 en accès direct, même avec de faux en-têtes,
+et fonctionner via Cloudflare. Vérifier séparément Nextcloud et la sonde de santé.
+
+Ce filtrage identifie le réseau Cloudflare, pas un compte Cloudflare particulier.
+Il ne masque pas l'IP partagée avec Nextcloud/Plex et n'empêche pas une saturation
+du lien Internet. Authenticated Origin Pulls avec un certificat propre ou un
+tunnel peuvent renforcer cette séparation dans une évolution distincte.

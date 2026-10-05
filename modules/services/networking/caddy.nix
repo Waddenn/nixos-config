@@ -4,6 +4,8 @@
   pkgs,
   ...
 }: let
+  cloudflareIPs = builtins.fromJSON (builtins.readFile ../../../lib/cloudflare-ips.json);
+  cloudflareRanges = lib.concatStringsSep " " (cloudflareIPs.ipv4_cidrs ++ cloudflareIPs.ipv6_cidrs);
   declared = import ../../../lib/provisioned-services.nix {inherit lib;};
   internalRoutes = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: s: ''
       handle_path /${name}/* {
@@ -28,6 +30,17 @@
     + ''
       tls {
         dns cloudflare {env.CF_API_TOKEN}
+      }
+    '';
+  # Check the TCP peer, never a visitor-controlled forwarded header. The route
+  # preserves this check before forward_auth as well as the application proxy.
+  cloudflareOnly = upstream:
+    commonConfig
+    + ''
+      route {
+        @outsideCloudflare not remote_ip ${cloudflareRanges}
+        respond @outsideCloudflare "Direct origin access is forbidden" 403
+        ${upstream}
       }
     '';
 in {
@@ -81,7 +94,7 @@ in {
         # Cloudflare IP ranges for trusted_proxies
         # https://www.cloudflare.com/ips/
         servers {
-          trusted_proxies static private_ranges 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+          trusted_proxies static private_ranges ${cloudflareRanges}
         }
 
         metrics {
@@ -109,59 +122,47 @@ in {
               '';
           };
           "bitwarden.hexaflare.net" = {
-            extraConfig =
-              commonConfig
-              + ''
-                reverse_proxy http://192.168.30.113:8222
-              '';
+            extraConfig = cloudflareOnly ''
+              reverse_proxy http://192.168.30.113:8222
+            '';
           };
           "auth.hexaflare.net" = {
-            extraConfig =
-              commonConfig
-              + ''
-                reverse_proxy http://192.168.40.123:9091 {
-                  header_up X-Forwarded-Proto {scheme}
-                  header_up X-Forwarded-Host {host}
-                  header_up X-Forwarded-Uri {uri}
-                  header_up X-Forwarded-For {remote_host}
-                }
-              '';
+            extraConfig = cloudflareOnly ''
+              reverse_proxy http://192.168.40.123:9091 {
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up X-Forwarded-Uri {uri}
+                header_up X-Forwarded-For {remote_host}
+              }
+            '';
           };
           "homeassistant.hexaflare.net" = {
-            extraConfig =
-              commonConfig
-              + ''
-                reverse_proxy http://homeassistant:8123
-              '';
+            extraConfig = cloudflareOnly ''
+              reverse_proxy http://homeassistant:8123
+            '';
           };
           "jellyseerr.hexaflare.net" = {
-            extraConfig =
-              commonConfig
-              + ''
-                reverse_proxy http://192.168.40.121:5055
-              '';
+            extraConfig = cloudflareOnly ''
+              reverse_proxy http://192.168.40.121:5055
+            '';
           };
           "immich.hexaflare.net" = {
-            extraConfig =
-              commonConfig
-              + ''
-                reverse_proxy http://192.168.40.115:2283
-              '';
+            extraConfig = cloudflareOnly ''
+              reverse_proxy http://192.168.40.115:2283
+            '';
           };
           "codex.hexaflare.net" = {
-            extraConfig =
-              commonConfig
-              + ''
-                forward_auth http://192.168.40.123:9091 {
-                  uri /api/authz/forward-auth
-                  copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+            extraConfig = cloudflareOnly ''
+              forward_auth http://192.168.40.123:9091 {
+                uri /api/authz/forward-auth
+                copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+              }
+              reverse_proxy https://100.124.126.44:6902 {
+                transport http {
+                  tls_insecure_skip_verify
                 }
-                reverse_proxy https://100.124.126.44:6902 {
-                  transport http {
-                    tls_insecure_skip_verify
-                  }
-                }
-              '';
+              }
+            '';
           };
         };
     };
