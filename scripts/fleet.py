@@ -185,8 +185,11 @@ class Fleet:
 
     def capacity_monitor(self):
         # Read-only; independent of CI so a blocked update cannot hide low capacity.
-        self.work = Path(os.environ.get("MONITOR_FLAKE", str(self.repo)))
-        hosts = self.manifest(local=True)
+        inventory = os.environ.get("CAPACITY_INVENTORY")
+        if inventory:
+            hosts = {n: c for n, c in json.loads(Path(inventory).read_text()).items() if c["target"]}
+        else:
+            hosts = self.manifest(local=True)
         warnings, measurements = {}, {}
         def probe(name, cfg):
             command = "df -B1 --output=avail,size /nix/store | tail -1"

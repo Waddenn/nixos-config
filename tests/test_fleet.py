@@ -332,6 +332,20 @@ class PolicyTests(unittest.TestCase):
             self.assertEqual(f.notify.call_count, 2)
             self.assertIn("recovered", f.notify.call_args.args[0])
 
+    def test_capacity_monitor_uses_static_inventory_without_nix_evaluation(self):
+        f = fleet.Fleet()
+        f.manifest = Mock(side_effect=AssertionError("Must not evaluate system closures"))
+        f.ssh = Mock(return_value=f"{10*1024**3} {16*1024**3}")
+        with tempfile.TemporaryDirectory() as directory:
+            inventory = Path(directory) / "hosts.json"
+            inventory.write_text(fleet.json.dumps({"app": {"target": True, "local": False},
+                                                  "disabled": {"target": False, "local": False}}))
+            f.state = Path(directory)
+            with patch.dict(os.environ, {"CAPACITY_INVENTORY": str(inventory)}):
+                f.capacity_monitor()
+            f.ssh.assert_called_once()
+            self.assertEqual(f.ssh.call_args.args[0], "app")
+
     def test_report_persists_failure(self):
         f = fleet.Fleet()
         f.storage = Mock(return_value={"safe": True})

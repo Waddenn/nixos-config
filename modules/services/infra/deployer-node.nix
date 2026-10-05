@@ -6,6 +6,10 @@
   ...
 }: let
   declared = import ../../../lib/provisioned-services.nix {inherit lib;};
+  # Only force inventory fields, never system closures (which include this service).
+  capacityInventory =
+    pkgs.writeText "fleet-capacity-hosts.json" (builtins.toJSON
+      (lib.mapAttrs (_: cfg: {inherit (cfg) local target;}) inputs.self.fleet));
 in {
   options.my-services.infra.deployer-node.enable = lib.mkEnableOption "Enable internal GitOps controller";
 
@@ -74,7 +78,7 @@ in {
         StateDirectory = "internal-gitops";
         ExecStart = pkgs.writeShellScript "fleet-capacity-monitor" ''
           export DISCORD_WEBHOOK=$(cat ${config.sops.secrets.discord-webhook.path})
-          export MONITOR_FLAKE=${../../..}
+          export CAPACITY_INVENTORY=${capacityInventory}
           exec ${pkgs.python3}/bin/python3 ${../../../scripts/fleet.py} --capacity-monitor
         '';
       };
