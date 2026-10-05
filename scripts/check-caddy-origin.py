@@ -23,6 +23,20 @@ PROTECTED = {f"{name}.hexaflare.net" for name in (
 DIRECT = "nextcloud.hexaflare.net"
 
 
+def remove_tls(extra):
+    """Remove the one site TLS block, including nested client authentication."""
+    matches = list(re.finditer(r"(?m)^\s*tls \{", extra))
+    assert len(matches) == 1, "Expected exactly one site TLS block"
+    start = matches[0].start()
+    opening = extra.index("{", matches[0].start())
+    depth = 0
+    for end in range(opening, len(extra)):
+        depth += (extra[end] == "{") - (extra[end] == "}")
+        if depth == 0:
+            return extra[:start] + extra[end + 1:]
+    raise AssertionError("Unbalanced TLS block")
+
+
 def transform(value, allow_test_peer=False):
     if isinstance(value, dict):
         if value.get("handler") == "reverse_proxy":
@@ -90,8 +104,7 @@ def main():
         for host in sorted(PROTECTED | {DIRECT}):
             extra = hosts[host]["extraConfig"]
             # Only remove certificate provisioning; preserve all HTTP routes.
-            extra, count = re.subn(r"\s*tls \{\s*dns cloudflare[^\n]*\n\s*\}", "", extra)
-            assert count == 1, f"Unexpected TLS stanza for {host}"
+            extra = remove_tls(extra)
             sites.append(f"http://{host}:{port} {{\n{extra}\n}}")
         caddyfile = directory / "Caddyfile"
         caddyfile.write_text("{\n admin off\n auto_https off\n}\n" + "\n".join(sites))

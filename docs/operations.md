@@ -362,6 +362,7 @@ ne changent pas ; un hôte injoignable n'est jamais déclaré rétabli. Une mesu
 indisponible reste explicite dans le rapport et les journaux, sans faire échouer
 le service de surveillance. Les mesures
 sont dans `/var/lib/internal-gitops/capacity.json`.
+
 ## Accès à l'origine des sites Cloudflare
 
 Caddy réserve `auth`, `bitwarden`, `homeassistant`, `jellyseerr`, `immich` et
@@ -397,7 +398,58 @@ Après activation, vérifier chaque domaine via son DNS public, puis via
 six domaines doivent répondre 403 en accès direct, même avec de faux en-têtes,
 et fonctionner via Cloudflare. Vérifier séparément Nextcloud et la sonde de santé.
 
-Ce filtrage identifie le réseau Cloudflare, pas un compte Cloudflare particulier.
-Il ne masque pas l'IP partagée avec Nextcloud/Plex et n'empêche pas une saturation
-du lien Internet. Authenticated Origin Pulls avec un certificat propre ou un
-tunnel peuvent renforcer cette séparation dans une évolution distincte.
+### Certificat client Cloudflare dédié (AOP)
+
+Le filtrage IP est complété par Authenticated Origin Pulls au niveau de la zone
+`hexaflare.net`, avec un certificat client propre à cette zone. Caddy fait confiance
+uniquement à `lib/cloudflare-aop-ca.pem`, et non à l'autorité AOP partagée de
+Cloudflare. `lib/cloudflare-aop-client.pem` est une copie publique permettant de
+contrôler l'expiration. Aucune clé privée ni jeton API n'entre dans Git ou Caddy.
+Les clés de cette émission sont conservées hors dépôt dans le répertoire privé
+`~/.local/share/nixos-config/cloudflare-aop/2026-10-05/` du poste d'administration.
+
+Le réglage `my-services.networking.caddy.requireOriginCertificate` permet une
+mise en place en deux étapes : `false` demande et vérifie le certificat s'il est
+présent, puis `true` le rend obligatoire. Ne passer à `true` qu'après observation
+de l'empreinte attendue dans `aop_client_fingerprint` des journaux d'accès des six
+sites. Le certificat public se contrôle avec
+`openssl x509 -in lib/cloudflare-aop-client.pem -noout -fingerprint -sha256`.
+`strict_sni_host on` refuse un Host protégé présenté avec le SNI Nextcloud (421).
+Nextcloud ne demande pas de certificat client.
+
+Test TLS complémentaire (certificats de test éphémères, aucun accès production) :
+
+```sh
+nix shell --inputs-from . nixpkgs#python3 nixpkgs#openssl --command python3 scripts/check-caddy-mtls.py "$caddy_package/bin/caddy" /tmp/caddy-vhosts.json
+```
+
+Il vérifie 50 cas en TLS 1.2 et 1.3 : certificat autorisé, certificat inconnu,
+absence de certificat selon le mode, contournement SNI/Host et exception Nextcloud.
+Lorsque le certificat devient obligatoire, les tests directs sans certificat
+doivent échouer dès TLS, avant le 403 HTTP du filtrage IP. La lecture publique des
+pages via Cloudflare et la sonde de santé doivent continuer à fonctionner.
+
+Le certificat client initial expire le 4 octobre 2028. Le timer quotidien
+`cloudflare-aop-expiry.timer` vérifie les certificats publics client et CA avec
+une marge de 60 jours. Un échec apparaît dans `systemctl --failed` et dans le
+journal de `cloudflare-aop-expiry.service`; ce contrôle ne renouvelle pas le
+certificat et n'envoie pas de notification externe.
+
+Pour renouveler : émettre un nouveau certificat client signé par la même CA
+(EKU clientAuth, CA:FALSE), l'importer via l'API AOP de la zone, vérifier son
+activation et sa présentation sur tous les sites, puis actualiser la copie
+publique dans Git et déployer. Si la CA change, déployer d'abord un bundle de
+confiance contenant les deux CA avant de changer le certificat Cloudflare.
+Conserver l'ancien certificat pendant la transition. Le jeton de maintenance
+requiert `Zone / SSL and Certificates / Edit`, limité à `hexaflare.net`.
+
+En cas de panne AOP, restaurer temporairement `requireOriginCertificate = false`
+via le parcours de livraison habituel avant de désactiver AOP côté Cloudflare.
+Un certificat invalide encore présenté reste refusé en mode `verify_if_given` :
+si nécessaire, revenir à la configuration précédant AOP, qui conserve le filtre
+IP. Ne pas remplacer la CA dédiée par une confiance générale dans tous les
+certificats Cloudflare.
+
+AOP authentifie le lien Cloudflare–Caddy. Il ne remplace pas la 2FA des applications,
+ne masque pas l'IP partagée avec Nextcloud/Plex et n'empêche pas une saturation du
+lien Internet.

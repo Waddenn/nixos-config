@@ -4,6 +4,9 @@
   pkgs,
   ...
 }: let
+  cfg = config.my-services.networking.caddy;
+  aopCA = ../../../lib/cloudflare-aop-ca.pem;
+  aopClient = ../../../lib/cloudflare-aop-client.pem;
   cloudflareIPs = builtins.fromJSON (builtins.readFile ../../../lib/cloudflare-ips.json);
   cloudflareRanges = lib.concatStringsSep " " (cloudflareIPs.ipv4_cidrs ++ cloudflareIPs.ipv6_cidrs);
   declared = import ../../../lib/provisioned-services.nix {inherit lib;};
@@ -25,18 +28,30 @@
       Permissions-Policy "geolocation=(), microphone=(), camera=()"
     }
   '';
-  commonConfig =
+  tlsConfig = clientAuth:
     securityHeaders
     + ''
       tls {
         dns cloudflare {env.CF_API_TOKEN}
+        ${lib.optionalString clientAuth ''
+        client_auth {
+          mode ${
+          if cfg.requireOriginCertificate
+          then "require_and_verify"
+          else "verify_if_given"
+        }
+          trust_pool file ${aopCA}
+        }
+      ''}
       }
     '';
+  commonConfig = tlsConfig false;
   # Check the TCP peer, never a visitor-controlled forwarded header. The route
   # preserves this check before forward_auth as well as the application proxy.
   cloudflareOnly = upstream:
-    commonConfig
+    tlsConfig true
     + ''
+      log_append aop_client_fingerprint {http.request.tls.client.fingerprint}
       route {
         @outsideCloudflare not remote_ip ${cloudflareRanges}
         respond @outsideCloudflare "Direct origin access is forbidden" 403
@@ -44,7 +59,14 @@
       }
     '';
 in {
-  options.my-services.networking.caddy.enable = lib.mkEnableOption "Enable Caddy";
+  options.my-services.networking.caddy = {
+    enable = lib.mkEnableOption "Enable Caddy";
+    requireOriginCertificate = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Require the dedicated Cloudflare origin client certificate after verifying its presentation.";
+    };
+  };
 
   config = lib.mkIf config.my-services.networking.caddy.enable {
     sops.secrets.cf_api_token = {
@@ -94,6 +116,7 @@ in {
         # Cloudflare IP ranges for trusted_proxies
         # https://www.cloudflare.com/ips/
         servers {
+          strict_sni_host on
           trusted_proxies static private_ranges ${cloudflareRanges}
         }
 
@@ -185,6 +208,31 @@ in {
     systemd.services.caddy = {
       after = ["caddy-env-setup.service"];
       requires = ["caddy-env-setup.service"];
+    };
+
+    # Public certificates only: the signing key and client key never reach Caddy.
+    systemd.services.cloudflare-aop-expiry = {
+      description = "Check Cloudflare origin authentication certificate expiry";
+      serviceConfig = {
+        Type = "oneshot";
+        DynamicUser = true;
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateNetwork = true;
+      };
+      script = ''
+        ${pkgs.openssl}/bin/openssl x509 -checkend 5184000 -noout -in ${aopClient}
+        ${pkgs.openssl}/bin/openssl x509 -checkend 5184000 -noout -in ${aopCA}
+      '';
+    };
+    systemd.timers.cloudflare-aop-expiry = {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        RandomizedDelaySec = "1h";
+      };
     };
   };
 }
