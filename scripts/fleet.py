@@ -207,13 +207,16 @@ class Fleet:
                     warnings[name] = "low-space"
         self.state.mkdir(parents=True, exist_ok=True)
         atomic_json(self.state / "capacity.json", measurements)
+        unavailable = sorted(n for n, m in measurements.items() if m.get("error"))
+        print(f"Capacity measured for {len(measurements)-len(unavailable)}/{len(measurements)} hosts; "
+              f"unavailable: {', '.join(unavailable) or 'none'}", flush=True)
         previous = self.state / "last-capacity-notification.json"
         old = json.loads(previous.read_text()) if previous.exists() else {}
         for name in old:
             if measurements.get(name, {}).get("error"):
                 warnings[name] = old[name]
         if warnings == old:
-            return 1 if any(m.get("error") for m in measurements.values()) else 0
+            return 0
         lines = ["NixOS capacity warning" if warnings else "NixOS capacity recovered"]
         for name in sorted(warnings):
             if measurements[name].get("error"):

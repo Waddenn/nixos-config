@@ -324,7 +324,7 @@ class PolicyTests(unittest.TestCase):
             f.capacity_monitor()
             f.notify.assert_called_once()
             f.ssh.side_effect = fleet.FleetError("offline")
-            self.assertEqual(f.capacity_monitor(), 1)
+            self.assertEqual(f.capacity_monitor(), 0)
             f.notify.assert_called_once()
             f.ssh.side_effect = None
             f.ssh.return_value = f"{10*1024**3} {16*1024**3}"

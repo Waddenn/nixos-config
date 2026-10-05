@@ -358,5 +358,7 @@ affichent les Gio disponibles et nécessaires.
 activation, indépendamment de la CI. Les alertes Discord existantes signalent
 moins de 3 Gio libres (5 Gio sur le contrôleur) ou moins de 20 % libres, puis
 le retour à la normale. Elles sont dédupliquées tant que les hôtes concernés
-ne changent pas ; un hôte injoignable n'est jamais déclaré rétabli. Les mesures
+ne changent pas ; un hôte injoignable n'est jamais déclaré rétabli. Une mesure
+indisponible reste explicite dans le rapport et les journaux, sans faire échouer
+le service de surveillance. Les mesures
 sont dans `/var/lib/internal-gitops/capacity.json`.
