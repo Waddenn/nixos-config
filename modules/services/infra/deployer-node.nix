@@ -14,12 +14,24 @@ in {
   options.my-services.infra.deployer-node.enable = lib.mkEnableOption "Enable internal GitOps controller";
 
   config = lib.mkIf config.my-services.infra.deployer-node.enable {
+    # Preserve the fleet's historical name while using the existing tailnet peer.
+    programs.ssh.extraConfig = ''
+      Host valheim
+        HostName valheim-server.${declared.tailnet}
+        HostKeyAlias valheim-server
+    '';
     programs.ssh.knownHosts =
       lib.mapAttrs (_: s: {
         hostNames = [s.hostname "${s.hostname}.${declared.tailnet}"];
         publicKey = (declared.identity s).hostKey;
       })
-      declared.services;
+      declared.services
+      // {
+        valheim-server = {
+          hostNames = ["valheim-server" "valheim-server.${declared.tailnet}"];
+          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID5sIRPHHmvlJYO0Mb5FI7rHQBnmr1MqTRweq0KV4efP";
+        };
+      };
     environment.shellAliases = {
       gitops-force = "sudo touch /var/lib/internal-gitops/force && sudo systemctl start internal-gitops.service";
     };
