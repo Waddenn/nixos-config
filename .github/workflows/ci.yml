@@ -27,7 +27,7 @@ jobs:
       - name: Run policy tests without Nix or infrastructure access
         run: python3 -m unittest discover -s tests -p 'test_*.py'
       - name: Check shell scripts
-        run: shellcheck scripts/deploy-fleet.sh scripts/fleet-status.sh scripts/pull-update-host.sh scripts/update-caddy-plugin-hash.sh
+        run: shellcheck scripts/deploy-fleet.sh scripts/fleet-status.sh scripts/pull-update-host.sh scripts/update-caddy-plugin-hash.sh proxmox/hardening/manage.sh
 
   validation-mode:
     needs: quick-checks

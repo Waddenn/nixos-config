@@ -1,0 +1,41 @@
+# Host firewall only. Guest NIC firewall flags and guest policies are unchanged.
+[OPTIONS]
+enable: 1
+policy_in: DROP
+policy_out: ACCEPT
+
+[IPSET cluster_peers]
+192.168.1.1
+192.168.1.3
+
+[IPSET controllers]
+192.168.1.205 # dev-nixos: provisioning controller
+192.168.1.253 # terraform: existing infrastructure tooling
+
+[RULES]
+# Cluster peers are mutually trusted: Corosync, migration, replication, VXLAN/FRR.
+IN ACCEPT -source +cluster_peers
+# Tailnet identity and SSH authorization remain governed by existing Tailscale ACLs.
+IN ACCEPT -i tailscale0 -p tcp -dport 22
+IN ACCEPT -i tailscale0 -p tcp -dport 8006
+IN ACCEPT -i tailscale0 -p tcp -dport 3128
+IN ACCEPT -i tailscale0 -p tcp -dport 5900:5999
+IN ACCEPT -source +controllers -p tcp -dport 22
+IN ACCEPT -source +controllers -p tcp -dport 8006
+IN ACCEPT -i tailscale0 -source 100.117.177.66 -p tcp -dport 45876
+IN ACCEPT -i tailscale0 -source fd7a:115c:a1e0::b401:b142 -p tcp -dport 45876
+# Keep Tailscale direct peer connectivity; UDP payloads remain authenticated.
+IN ACCEPT -p udp -dport 41641
+# Override PVE's implicit management allowance for the entire local /24.
+# Keep this BEFORE the built-in management rules, including in IPv6.
+IN DROP -p tcp -dport 22 -log nolog
+IN DROP -p tcp -dport 8006 -log nolog
+IN DROP -p tcp -dport 3128 -log nolog
+IN DROP -p tcp -dport 5900:5999 -log nolog
+IN DROP -p tcp -dport 60000:60050 -log nolog
+
+# Preserve the existing, currently unused guest security group.
+[group blocklanaccess]
+IN ACCEPT -log nolog
+OUT ACCEPT -dest 192.168.1.254 -log nolog
+OUT DROP -dest 192.168.1.0/24 -log info
