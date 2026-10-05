@@ -47,7 +47,7 @@ class AutheliaSecretsTests(unittest.TestCase):
         self.assertNotIn('then config.sops.templates."authelia-users-database.yml".path', module)
 
     def test_password_hash_secrets_are_sops_encrypted(self):
-        secrets = (REPO_ROOT / "secrets/secrets.yaml").read_text()
+        secrets = (REPO_ROOT / "secrets/authelia.yaml").read_text()
         for name in (
             "authelia_user_admin_password_hash",
             "authelia_user_tom_password_hash",

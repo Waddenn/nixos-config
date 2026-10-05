@@ -344,42 +344,42 @@ in {
     sops.secrets =
       {
         authelia_jwt_secret = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
         authelia_session_secret = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
         authelia_storage_encryption_key = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
         authelia_oidc_hmac_secret = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
         authelia_oidc_jwk_private_key = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
           restartUnits = ["authelia.service"];
         };
         authelia_immich_oidc_client_secret_digest = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
@@ -388,7 +388,7 @@ in {
       }
       // lib.optionalAttrs (cfg.database.type == "postgres") {
         authelia_db_password = {
-          sopsFile = ../../../secrets/secrets.yaml;
+          sopsFile = ../../../secrets/authelia.yaml;
           owner = "authelia";
           group = "authelia";
           mode = "0400";
@@ -398,7 +398,7 @@ in {
       // builtins.listToAttrs (map (name: {
           inherit name;
           value = {
-            sopsFile = ../../../secrets/secrets.yaml;
+            sopsFile = ../../../secrets/authelia.yaml;
             restartUnits = ["authelia.service"];
           };
         })

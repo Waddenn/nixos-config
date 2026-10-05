@@ -50,7 +50,7 @@ in {
     ];
 
     sops.secrets.discord-webhook = {
-      sopsFile = ../../../secrets/secrets.yaml;
+      sopsFile = ../../../secrets/controller.yaml;
       owner = "nixos";
     };
     systemd.services.internal-gitops = let

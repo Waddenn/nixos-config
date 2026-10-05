@@ -43,7 +43,7 @@
     };
 
     sops.secrets.immich_oauth_client_secret = {
-      sopsFile = ../../../secrets/secrets.yaml;
+      sopsFile = ../../../secrets/immich.yaml;
       owner = "immich";
       group = "immich";
       restartUnits = ["immich-server.service"];

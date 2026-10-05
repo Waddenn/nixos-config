@@ -45,19 +45,17 @@ fleet-status:
 
 # === SOPS Secrets Management ===
 
-# Edit secrets.yaml with SOPS
-secrets-edit:
-    nix shell nixpkgs#sops --command sops secrets/secrets.yaml
+# Edit one service file (usage: just secrets-edit secrets/caddy.yaml)
+secrets-edit file:
+    nix shell nixpkgs#sops --command sops "{{file}}"
 
-# View decrypted secrets.yaml (read-only)
-secrets-view:
-    nix shell nixpkgs#sops --command sops -d secrets/secrets.yaml
+# View one decrypted service file (read-only)
+secrets-view file:
+    nix shell nixpkgs#sops --command sops -d "{{file}}"
 
-# Re-encrypt all secrets after adding a new host key
-secrets-rekey:
-    @echo "🔄 Re-encrypting all secrets..."
-    nix shell nixpkgs#sops --command sops updatekeys -y secrets/secrets.yaml
-    @echo "✅ All secrets re-encrypted"
+# Update recipients only for the explicitly selected service file
+secrets-rekey file:
+    nix shell nixpkgs#sops --command sops updatekeys -y "{{file}}"
 
 # Add a new host to SOPS (usage: just secrets-add-host hostname)
 secrets-add-host hostname:
