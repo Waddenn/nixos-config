@@ -210,7 +210,8 @@ in {
       after = ["caddy-env-setup.service"];
       requires = ["caddy-env-setup.service"];
       # This proxy neither changes routes nor uses transparent proxying.
-      serviceConfig.AmbientCapabilities = lib.mkForce ["CAP_NET_BIND_SERVICE"];
+      # Reset the upstream unit's additive ambient list before setting ours.
+      serviceConfig.AmbientCapabilities = lib.mkForce ["" "CAP_NET_BIND_SERVICE"];
       serviceConfig.CapabilityBoundingSet = lib.mkForce ["CAP_NET_BIND_SERVICE"];
     };
 
