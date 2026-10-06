@@ -9,6 +9,8 @@ Les adresses et comptes doivent être actualisés après vérification de l'inve
 
 - `managed-server` sépare les serveurs du compte humain ; les rôles Caddy,
   Beszel, Terraform, Gatus et GitOps sont déclarés dans les configurations NixOS.
+  Le service `tailscale-tags` applique uniquement la préférence AdvertiseTags via
+  le socket local du daemon ; `tailscale set` ne prend pas ce flag en charge.
   Les deux hôtes Proxmox sont taggés dans la console et ne sont pas gérés par NixOS.
 - Les tags sont attribuables uniquement par les administrateurs (Gatus par le
   propriétaire). `nixos-pilot` conserve son enrôlement OAuth limité à `auth_keys`.

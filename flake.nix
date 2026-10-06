@@ -64,7 +64,7 @@
         local = name == "dev-nixos";
         oci = host.config.virtualisation.oci-containers.containers != {};
         canary = policy.canary or false;
-        units = ["tailscaled.service"] ++ lib.optional host.config.my-services.monitoring.beszel-agent.enable "beszel-agent.service" ++ (policy.units or []);
+        units = ["tailscaled.service"] ++ lib.optional (builtins.hasAttr "tailscale-tags" host.config.systemd.services) "tailscale-tags.service" ++ lib.optional host.config.my-services.monitoring.beszel-agent.enable "beszel-agent.service" ++ (policy.units or []);
         urls = policy.urls or [];
         expected = toString host.config.system.build.toplevel;
       })
