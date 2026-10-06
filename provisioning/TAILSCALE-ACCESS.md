@@ -7,12 +7,14 @@ OAuth keys ou accès API global. Ne pas réutiliser l'ancien client OAuth `all`.
 
 TagOwner configuré : `tag:nixos-pilot: [autogroup:admin]` aux tagOwners.
 Le fragment adjacent est une fusion ciblée, jamais un remplacement de la politique.
-Aucune règle réseau supplémentaire n'est nécessaire à ce jour : la politique
-existante contient déjà un grant `src=[..., "*", ...], dst=["*"], ip=["*"]`.
-**Le tag limite ce que le client OAuth peut enrôler, pas la connectivité réseau
-actuellement autorisée par ce grant global.** Aucun durcissement de toute la
-flotte n'est inclus dans le pilote. Pas d'exposition Internet/Funnel ni Tailscale SSH.
+La politique complète est maintenant versionnée dans un dépôt local privé,
+voir `tailscale/README.md`.
+Le grant global a été retiré : le contrôleur accède aux pilotes en TCP 22,
+Caddy/Gatus aux ports applicatifs 8080/8082. Les postes administrateurs
+conservent leurs droits explicites. Le tag pilote ne donne aucun droit SSH
+Tailscale et ne permet pas d'administrer les autres serveurs.
 L'accès SSH standard reste protégé par la clé du contrôleur et la clé hôte épinglée.
+Pas d'exposition Internet/Funnel pour ces pilotes.
 
 Le contrôleur conserve `tailscale-oauth.json` (client_id/client_secret) root:root
 0600 sous `/var/lib/proxmox-prototype`, sauvegardé uniquement dans les archives
@@ -34,7 +36,7 @@ inscrits. Pour retirer un appareil, opération explicite distincte dans Tailscal
 Ne pas lier cette révocation au retrait d'une déclaration Nix.
 
 Client ID public : `k4oCtQm2cw11CNTRL`. Le tag et les scopes ont été vérifiés
-dans la console. Aucun grant réseau existant n’a été modifié.
+dans la console. Le client OAuth historique avec scope `all` a été révoqué le 6 octobre 2026.
 
 Sources : [OAuth Tailscale](https://tailscale.com/docs/features/oauth-clients),
 [clés d'authentification](https://tailscale.com/docs/features/access-control/auth-keys).
