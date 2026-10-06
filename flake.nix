@@ -66,6 +66,7 @@
         canary = policy.canary or false;
         units =
           ["tailscaled.service"]
+          ++ lib.optional (builtins.hasAttr "tailscale-tags" host.config.systemd.services) "tailscale-tags.service"
           ++ lib.optional host.config.my-services.monitoring.beszel-agent.enable "beszel-agent.service"
           ++ lib.optional (host.config.my-services.monitoring.beszel-agent.enable && host.config.virtualisation.docker.enable) "beszel-docker-proxy.service"
           ++ (policy.units or []);

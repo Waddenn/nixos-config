@@ -73,6 +73,7 @@ in {
       sopsFile = ../../../secrets/caddy.yaml;
       owner = config.services.caddy.user;
       mode = "0400";
+      restartUnits = ["caddy-env-setup.service" "caddy.service"];
     };
 
     # Script pour générer le fichier d'environnement Caddy
@@ -104,7 +105,7 @@ in {
     services.caddy = {
       enable = true;
       package = pkgs.caddy.withPlugins {
-        plugins = ["github.com/caddy-dns/cloudflare@v0.2.1"];
+        plugins = ["github.com/caddy-dns/cloudflare@v0.2.4"];
         hash = lib.removeSuffix "\n" (builtins.readFile ./caddy-plugin-hash.txt);
       };
 

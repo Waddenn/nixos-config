@@ -1,8 +1,15 @@
 {
   config,
   lib,
+  pkgs,
   ...
-}: {
+}: let
+  cfg = config.my-services.networking.tailscale;
+  tagPrefs = pkgs.writeText "tailscale-tag-prefs.json" (builtins.toJSON {
+    AdvertiseTags = cfg.tags;
+    AdvertiseTagsSet = true;
+  });
+in {
   options.my-services.networking.tailscale = {
     enable = lib.mkEnableOption "Tailscale Service";
     role = lib.mkOption {
@@ -14,6 +21,11 @@
       type = lib.types.listOf lib.types.str;
       default = [];
       description = "Persistent Tailscale settings; does not reset unspecified preferences.";
+    };
+    tags = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = lib.optional (cfg.role == "server") "tag:managed-server";
+      description = "Server identities owned by tailnet admins; personal clients stay user-owned.";
     };
     authKeyFile = lib.mkOption {
       type = lib.types.str;
@@ -32,10 +44,23 @@
       restartIfChanged = false;
     };
 
+    # Tags are absent from `tailscale set` in 1.102.5. Patch only this preference
+    # through the same local API as the CLI, preserving routes, DNS and SSH.
+    systemd.services.tailscale-tags = lib.mkIf (cfg.tags != []) {
+      after = ["tailscaled.service" "tailscaled-autoconnect.service" "tailscaled-set.service"];
+      requires = ["tailscaled.service"];
+      wantedBy = ["tailscaled.service"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.curl}/bin/curl --fail --silent --show-error --max-time 20 --retry 5 --retry-connrefused --retry-delay 1 --unix-socket /run/tailscale/tailscaled.sock --request PATCH --header Content-Type:application/json --data-binary @${tagPrefs} --output /dev/null http://local-tailscaled.sock/localapi/v0/prefs";
+      };
+    };
+
     services.tailscale = {
       enable = true;
       openFirewall = true;
-      extraSetFlags = config.my-services.networking.tailscale.extraSetFlags;
+      extraSetFlags = cfg.extraSetFlags;
       useRoutingFeatures = config.my-services.networking.tailscale.role;
       # Conditionally set authKeyFile only if client?
       # Original client used it. Server didn't.
