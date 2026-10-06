@@ -1,4 +1,6 @@
 {...}: {
+  imports = [../../modules/services/infra/opnsense-maintenance.nix];
+  my-services.infra.opnsense-maintenance.controller = true;
   my-services.networking.tailscale.tags = ["tag:managed-server" "tag:gitops-controller"];
   profiles.lxc-base.enable = true;
   my-services.infra.pull-updater.enable = true;
