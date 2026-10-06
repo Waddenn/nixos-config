@@ -13,7 +13,7 @@
   nixosSystems =
     lib.mapAttrsToList (name: host: {
       name = beszelConfig.nameOverrides.${name} or name;
-      host = "${name}.${beszelConfig.tailnet}";
+      host = (beszelConfig.hostOverrides or {}).${name} or "${name}.${beszelConfig.tailnet}";
       port = beszelConfig.port;
       users = beszelConfig.beszelUsers;
     })
@@ -78,6 +78,10 @@ in {
             if [ -f /home/nixos/beszel_data/config.yml ]; then
               cp /home/nixos/beszel_data/config.yml "$backup/config.yml"
             fi
+          fi
+          # Preserve Valheim's record before the hub reconciles its corrected host.
+          if [ -f /home/nixos/beszel_data/data.db ]; then
+            ${pkgs.sqlite}/bin/sqlite3 /home/nixos/beszel_data/data.db "UPDATE systems SET host='valheim-server.salamander-scala.ts.net' WHERE name='valheim' AND host='valheim.salamander-scala.ts.net';"
           fi
           install -m 0644 ${configFile} /home/nixos/beszel_data/config.yml.new
           mv /home/nixos/beszel_data/config.yml.new /home/nixos/beszel_data/config.yml

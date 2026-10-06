@@ -9,6 +9,7 @@
 
   # Preserve existing Beszel identities and their history.
   nameOverrides.nextcloud-pgsql = "nextcloud";
+  hostOverrides.valheim = "valheim-server.salamander-scala.ts.net";
   tailnet = "salamander-scala.ts.net";
   port = 45876;
   beszelUsers = ["tom@patelas.com"];
