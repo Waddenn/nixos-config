@@ -73,6 +73,7 @@ in {
       sopsFile = ../../../secrets/caddy.yaml;
       owner = config.services.caddy.user;
       mode = "0400";
+      restartUnits = ["caddy-env-setup.service" "caddy.service"];
     };
 
     # Script pour générer le fichier d'environnement Caddy
