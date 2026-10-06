@@ -45,6 +45,9 @@
     };
 
     my-services.networking.openssh.enable = true;
+    # Administration travels over the authenticated tailnet, not a shared VLAN.
+    services.openssh.openFirewall = false;
+    networking.firewall.interfaces.tailscale0.allowedTCPPorts = [22];
     nix.settings.experimental-features = ["nix-command" "flakes"];
     my-services.programs.fish.enable = true;
     documentation.man.enable = false;

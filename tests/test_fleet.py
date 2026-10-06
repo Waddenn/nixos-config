@@ -19,6 +19,13 @@ def host(canary=False, local=False):
 
 
 class PolicyTests(unittest.TestCase):
+    @patch.object(fleet, "run")
+    def test_ssh_never_enrolls_an_unknown_host_key(self, run):
+        fleet.Fleet().ssh("app", "true")
+        args = run.call_args.args[0]
+        self.assertIn("StrictHostKeyChecking=yes", args)
+        self.assertNotIn("StrictHostKeyChecking=accept-new", args)
+
     def setUp(self):
         space = patch.object(fleet.os, "statvfs", return_value=Mock(f_bavail=20, f_frsize=1024**3))
         space.start()

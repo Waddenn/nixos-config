@@ -103,7 +103,7 @@ class Fleet:
     def ssh(self, host, command):
         return run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
                     "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2",
-                    "-o", "StrictHostKeyChecking=accept-new", f"root@{host}", command], timeout=45)
+                    "-o", "StrictHostKeyChecking=yes", f"root@{host}", command], timeout=45)
 
     def systems(self, host, cfg):
         command = "readlink -f /run/current-system; readlink -f /nix/var/nix/profiles/system"

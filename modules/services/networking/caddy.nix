@@ -209,6 +209,9 @@ in {
     systemd.services.caddy = {
       after = ["caddy-env-setup.service"];
       requires = ["caddy-env-setup.service"];
+      # This proxy neither changes routes nor uses transparent proxying.
+      serviceConfig.AmbientCapabilities = lib.mkForce ["CAP_NET_BIND_SERVICE"];
+      serviceConfig.CapabilityBoundingSet = lib.mkForce ["CAP_NET_BIND_SERVICE"];
     };
 
     # Public certificates only: the signing key and client key never reach Caddy.
