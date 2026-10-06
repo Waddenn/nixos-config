@@ -3,6 +3,8 @@ import json
 import sys
 import os
 import subprocess
+import io
+import lzma
 import tempfile
 import unittest
 from pathlib import Path
@@ -44,6 +46,22 @@ class MaintenanceTests(unittest.TestCase):
                     collect.main()
             self.assertEqual(old.read_bytes(), b'recoverable')
             self.assertFalse((state / 'status.json').exists())
+
+    def test_truncated_database_never_replaces_existing_audit(self):
+        compressed = lzma.compress(b'<vuxml><vuln/></vuxml>')
+        class Response(io.BytesIO):
+            headers = {'Content-Length': str(len(compressed))}
+        opener = Mock(side_effect=lambda *a, **kw: Response(compressed[:10]))
+        with self.assertRaisesRegex(RuntimeError, 'three attempts'):
+            collect.fetch_database(opener)
+        self.assertEqual(opener.call_count, 3)
+
+    def test_complete_database_passes_transport_and_xz_integrity_checks(self):
+        xml = b'<vuxml><vuln/></vuxml>'
+        compressed = lzma.compress(xml)
+        class Response(io.BytesIO):
+            headers = {'Content-Length': str(len(compressed))}
+        self.assertEqual(collect.fetch_database(lambda *a, **kw: Response(compressed)), xml)
 
     def test_forced_dispatch_denies_shell_injection_and_other_commands(self):
         dispatch = SOURCE.with_name('dispatch.sh')

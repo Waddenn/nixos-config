@@ -39,6 +39,29 @@ def health_issues(status, now):
     return issues
 
 
+def fetch_database(opener=None):
+    """Reject partial downloads; never replace a valid audit DB with a prefix."""
+    opener = opener or urllib.request.urlopen
+    error = None
+    for _ in range(3):
+        try:
+            with opener("https://vuxml.freebsd.org/freebsd/vuln.xml.xz", timeout=30) as response:
+                compressed = response.read(4194305)
+                length = response.headers.get("Content-Length")
+            if len(compressed) > 4194304:
+                raise RuntimeError("Compressed vulnerability database too large")
+            if length and len(compressed) != int(length):
+                raise RuntimeError("Vulnerability database HTTP response truncated")
+            decoder = lzma.LZMADecompressor()
+            database = decoder.decompress(compressed, max_length=33554433)
+            if not decoder.eof or decoder.unused_data or len(database) > 33554432:
+                raise RuntimeError("Vulnerability database truncated or too large")
+            return database
+        except (OSError, RuntimeError, lzma.LZMAError) as exc:
+            error = exc
+    raise RuntimeError("Official vulnerability download failed after three attempts") from error
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state-dir", type=Path, required=True)
@@ -64,19 +87,17 @@ def main():
         ssh(host, "certificate", identity, native=True, input_data=json.dumps(bundle).encode())
     refreshed = state / "database-refreshed"
     now = dt.datetime.now(dt.timezone.utc).timestamp()
+    refresh_issues = []
     if not refreshed.exists() or now - refreshed.stat().st_mtime >= 86400:
-        with urllib.request.urlopen("https://vuxml.freebsd.org/freebsd/vuln.xml.xz", timeout=30) as response:
-            compressed = response.read(4194305)
-        if len(compressed) > 4194304:
-            raise RuntimeError("Compressed vulnerability database too large")
-        decoder = lzma.LZMADecompressor()
-        database = decoder.decompress(compressed, max_length=33554433)
-        if not decoder.eof or len(database) > 33554432:
-            raise RuntimeError("Vulnerability database truncated or too large")
-        ssh(host, "vulnerability-db", identity, native=True, input_data=database)
-        atomic(refreshed, stamp.encode())
+        try:
+            database = fetch_database()
+            ssh(host, "vulnerability-db", identity, native=True, input_data=database)
+            atomic(refreshed, stamp.encode())
+        except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
+            # Existing DB stays intact; preserve backup/status evidence and alert.
+            refresh_issues.append(f"Vulnerability database refresh failed: {exc}")
     status = json.loads(ssh(host, "status", identity, native=True))
-    status["issues"] = health_issues(status, dt.datetime.now(dt.timezone.utc).timestamp())
+    status["issues"] = health_issues(status, dt.datetime.now(dt.timezone.utc).timestamp()) + refresh_issues
     status["last_successful_backup"] = stamp
     atomic(state / "status.json", json.dumps(status, indent=2).encode())
     # Rotation only follows a successful backup AND health collection.
