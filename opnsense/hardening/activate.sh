@@ -19,7 +19,7 @@ case "${1:-}" in
     pfctl -nf "$staged/candidate.pf"
     printf '%s\n' "$expected" > "$state/expected.sha256"
     : > "$state/staged.sha256"
-    for file in activate.sh configure.php validate.php render-filter.php policy.json credentials.json certificate.json maintenance.php maintenance.sh dispatch.sh sudoers backup-public.pem; do
+    for file in activate.sh configure.php validate.php render-filter.php policy.json credentials.json certificate.json maintenance.php maintenance.sh dispatch.sh sudoers backup-public.pem ensure-webgui.sh webgui-boot-hook.sh; do
       printf '%s %s\n' "$file" "$(sha256 -q "$staged/$file")" >> "$state/staged.sha256"
     done
     ;;
@@ -33,10 +33,15 @@ case "${1:-}" in
     [ "$(sha256 -q /conf/config.xml)" = "$expected" ] || { echo 'Config changed since preparation' >&2; exit 1; }
     mkdir -p /conf/opnsense-hardening
     chmod 700 /conf/opnsense-hardening
-    for file in maintenance.php maintenance.sh dispatch.sh backup-public.pem; do cp "$staged/$file" "/conf/opnsense-hardening/$file"; done
+    for file in maintenance.php maintenance.sh dispatch.sh backup-public.pem ensure-webgui.sh; do cp "$staged/$file" "/conf/opnsense-hardening/$file"; done
     chmod 755 /conf/opnsense-hardening /conf/opnsense-hardening/dispatch.sh
     chmod 700 /conf/opnsense-hardening/maintenance.sh
     chmod 600 /conf/opnsense-hardening/maintenance.php /conf/opnsense-hardening/backup-public.pem
+    chmod 700 /conf/opnsense-hardening/ensure-webgui.sh
+    hook=/usr/local/etc/rc.syshook.d/start/96-opnsense-private-webgui
+    [ ! -e "$hook" ] || { echo 'Unexpected boot hook; refuse overwrite' >&2; exit 1; }
+    cp "$staged/webgui-boot-hook.sh" "$hook"
+    chmod 755 "$hook"
     sudoers=/usr/local/etc/sudoers.d/opnsense-maintenance
     [ ! -e "$sudoers" ] || { echo 'Unexpected sudoers entry; refuse overwrite' >&2; exit 1; }
     cp "$staged/sudoers" "$sudoers"
@@ -66,7 +71,7 @@ case "${1:-}" in
       exit 1
     fi
     cp -p "$original/config.xml" /conf/config.xml
-    rm -f /tmp/config.cache /usr/local/etc/sudoers.d/opnsense-maintenance
+    rm -f /tmp/config.cache /usr/local/etc/sudoers.d/opnsense-maintenance /usr/local/etc/rc.syshook.d/start/96-opnsense-private-webgui
     php -r 'require_once "config.inc"; require_once "auth.inc"; local_sync_accounts();'
     /usr/local/sbin/pluginctl -s openssh restart
     /usr/local/sbin/configctl unbound restart
