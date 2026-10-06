@@ -45,7 +45,10 @@ in {
         wants = ["network-online.target"];
         after = ["network-online.target" "caddy-env-setup.service"];
         requires = ["caddy-env-setup.service"];
-        environment.XDG_DATA_HOME = "/var/lib/opnsense-certificate";
+        environment = {
+          XDG_DATA_HOME = "/var/lib/opnsense-certificate";
+          XDG_CONFIG_HOME = "/var/lib/opnsense-certificate/config";
+        };
         serviceConfig = {
           User = config.services.caddy.user;
           Group = config.services.caddy.group;

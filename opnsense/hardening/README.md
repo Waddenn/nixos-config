@@ -20,6 +20,10 @@ OPNsense. Les secrets, exports XML et clés privées restent hors dépôt.
   rendre les règles « Internet uniquement » effectives hors des seuls VLAN locaux.
 - Unbound limité à LAN/loopback, DNSSEC, ACL par défaut refuse et clients précis ;
   exception TCP/UDP 53 sur LAN pour ces clients.
+- Le compte de maintenance possède page-all, requis par OPNsense pour créer un
+  shell SSH dans wheel ; il ne possède pas de secret OTP et ne peut donc pas
+  utiliser le web avec le backend MFA exclusif. Sa clé n'autorise que les cinq
+  commandes exactes du dispatcher, sans forwarding ni commande libre.
 - SSH natif sans root ni mot de passe, limité à dev-nixos `192.168.1.205` vers WAN
   `192.168.1.4:22`, avec clé dédiée et commandes forcées. WAN est ici un LAN amont
   privé : désactivation de blockpriv avec maintien du refus par défaut et de

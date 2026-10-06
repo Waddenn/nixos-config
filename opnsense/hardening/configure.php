@@ -95,6 +95,9 @@ function update_policy(array $cfg, array $policy, array $credentials = []): arra
             'otp_seed' => $credentials['tom_otp_seed'], 'disabled' => '0', 'priv' => ['page-all']];
         $users[] = ['name' => 'opnsense-maint', 'descr' => 'Restricted controller maintenance',
             'scope' => 'user', 'uid' => (string)($uid + 1), 'disabled' => '0', 'shell' => '/bin/sh',
+            // Native local_sync_accounts permits SSH shells only with page-all.
+            // Web MFA rejects this account without an OTP seed; its key is forced.
+            'priv' => ['page-all'],
             'password' => password_hash(bin2hex(random_bytes(48)), PASSWORD_BCRYPT),
             'authorizedkeys' => base64_encode('restrict,from="' . $policy['controller_address'] .
                 '",command="/conf/opnsense-hardening/dispatch.sh" ' . $credentials['maintenance_public_key']),
