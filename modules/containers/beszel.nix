@@ -13,7 +13,7 @@
   nixosSystems =
     lib.mapAttrsToList (name: host: {
       name = beszelConfig.nameOverrides.${name} or name;
-      host = "${name}.${beszelConfig.tailnet}";
+      host = (beszelConfig.hostOverrides or {}).${name} or "${name}.${beszelConfig.tailnet}";
       port = beszelConfig.port;
       users = beszelConfig.beszelUsers;
     })
