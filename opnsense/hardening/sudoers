@@ -1,0 +1,1 @@
+opnsense-maint ALL=(root) NOPASSWD: /conf/opnsense-hardening/maintenance.sh backup, /conf/opnsense-hardening/maintenance.sh logs, /conf/opnsense-hardening/maintenance.sh status, /conf/opnsense-hardening/maintenance.sh certificate, /conf/opnsense-hardening/maintenance.sh vulnerability-db
