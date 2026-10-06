@@ -488,3 +488,33 @@ filtré et `beszel-agent.service`, puis tester une lecture `/version` via le soc
 Ne pas rétablir l'appartenance de l'agent au groupe `docker` pour contourner un
 problème de proxy. Les tests de filtrage tournent contre un faux démon Unix dans
 le check Nix `deployment-scripts` ; ils ne créent ni ne suppriment de conteneurs.
+
+### Administration locale de Caddy
+
+L’API d’administration écoute sur `unix//run/caddy/admin.sock`. Le répertoire
+`/run/caddy` est réservé à `caddy` (mode `0700`) et le socket est créé en `0600`
+par le mode explicite `|0600`, avec un umask `0077` pour les fichiers créés. Les autres comptes locaux, dont l’agent `beszel`, ne peuvent
+pas lire ni modifier la configuration. Le rechargement systemd utilise
+explicitement ce socket : `systemctl reload caddy` reste la procédure habituelle.
+
+`http://127.0.0.1:2019/metrics` conserve les métriques locales en lecture seule.
+Les autres chemins et méthodes retournent `404`; ce port n’est plus l’API admin.
+Le listener est lié uniquement à `127.0.0.1` et aucun port de supervision
+supplémentaire n’est ouvert dans le pare-feu.
+
+Pour vérifier l’isolation après activation sur Caddy :
+
+```sh
+stat -c '%a %U %G' /run/caddy /run/caddy/admin.sock
+curl --unix-socket /run/caddy/admin.sock -o /dev/null -w '%{http_code}\n' http://localhost/config/
+runuser -u beszel -- curl --unix-socket /run/caddy/admin.sock http://localhost/config/
+curl -o /dev/null -w '%{http_code}\n' http://127.0.0.1:2019/config/
+curl -o /dev/null -w '%{http_code}\n' http://127.0.0.1:2019/metrics
+systemctl reload caddy
+```
+
+Résultats attendus : `0700`/`0600`, accès root `200`, refus Unix pour Beszel,
+configuration TCP `404`, métriques `200`, rechargement réussi. Ne pas afficher
+le contenu de la configuration ou des secrets pendant ces contrôles.
+Le test isolé `scripts/check-caddy-admin.py` vérifie deux identités Unix,
+les chemins d’administration, les métriques et le rechargement avec le vrai Caddy.
