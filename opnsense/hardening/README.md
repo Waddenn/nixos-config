@@ -10,6 +10,9 @@ OPNsense. Les secrets, exports XML et clés privées restent hors dépôt.
   `https://opnsense.hexaflare.net`, DNS A vers `100.103.199.91`, sans proxy public.
   Ne pas autoriser l'adresse LAN du routeur comme source d'administration : le
   SNAT des routes Tailscale pourrait sinon contourner la sélection des postes.
+- Au boot, un hook asynchrone attend au maximum 60 secondes l'adresse Tailscale
+  et relance le webgui sur ses interfaces privées ; le démarrage initial précède
+  parfois l'adresse du VPN. Il ne change ni les listeners prévus ni les règles PF.
 - Compte nominatif `tom`, mot de passe suivi du code OTP ; seul le backend
   `OPNsense MFA` est utilisé pour le web. Le compte root conserve ses identifiants
   pour console et secours Tailscale SSH, mais n'a pas de secours web sans OTP.
