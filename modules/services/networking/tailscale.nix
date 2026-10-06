@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  cfg = config.my-services.networking.tailscale;
+in {
   options.my-services.networking.tailscale = {
     enable = lib.mkEnableOption "Tailscale Service";
     role = lib.mkOption {
@@ -14,6 +16,11 @@
       type = lib.types.listOf lib.types.str;
       default = [];
       description = "Persistent Tailscale settings; does not reset unspecified preferences.";
+    };
+    tags = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = lib.optional (cfg.role == "server") "tag:managed-server";
+      description = "Server identities owned by tailnet admins; personal clients stay user-owned.";
     };
     authKeyFile = lib.mkOption {
       type = lib.types.str;
@@ -35,7 +42,9 @@
     services.tailscale = {
       enable = true;
       openFirewall = true;
-      extraSetFlags = config.my-services.networking.tailscale.extraSetFlags;
+      extraSetFlags =
+        cfg.extraSetFlags
+        ++ lib.optional (cfg.tags != []) "--advertise-tags=${lib.concatStringsSep "," cfg.tags}";
       useRoutingFeatures = config.my-services.networking.tailscale.role;
       # Conditionally set authKeyFile only if client?
       # Original client used it. Server didn't.
