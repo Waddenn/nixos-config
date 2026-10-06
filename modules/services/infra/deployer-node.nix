@@ -16,6 +16,9 @@ in {
   config = lib.mkIf config.my-services.infra.deployer-node.enable {
     # Preserve the fleet's historical name while using the existing tailnet peer.
     programs.ssh.extraConfig = ''
+      Host *
+        StrictHostKeyChecking yes
+
       Host valheim
         HostName valheim-server.${declared.tailnet}
         HostKeyAlias valheim-server

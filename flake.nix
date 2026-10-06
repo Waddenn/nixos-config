@@ -64,7 +64,11 @@
         local = name == "dev-nixos";
         oci = host.config.virtualisation.oci-containers.containers != {};
         canary = policy.canary or false;
-        units = ["tailscaled.service"] ++ lib.optional host.config.my-services.monitoring.beszel-agent.enable "beszel-agent.service" ++ (policy.units or []);
+        units =
+          ["tailscaled.service"]
+          ++ lib.optional host.config.my-services.monitoring.beszel-agent.enable "beszel-agent.service"
+          ++ lib.optional (host.config.my-services.monitoring.beszel-agent.enable && host.config.virtualisation.docker.enable) "beszel-docker-proxy.service"
+          ++ (policy.units or []);
         urls = policy.urls or [];
         expected = toString host.config.system.build.toplevel;
       })
@@ -131,7 +135,7 @@
             pkgs.runCommand "seerr-data-compatibility-check" {} "touch $out";
         deployment-scripts =
           pkgs.runCommand "deployment-scripts-check" {
-            nativeBuildInputs = [pkgs.shellcheck pkgs.python3];
+            nativeBuildInputs = [pkgs.shellcheck pkgs.python3 pkgs.haproxy];
           } ''
             shellcheck \
               ${./scripts/deploy-fleet.sh} \
@@ -145,6 +149,8 @@
               CI_PROMOTION_ROOT=${./.} python3 ${./tests/test_ci_promotion.py}
             CI_CACHE_ROOT=${./.} python3 ${./tests/test_ci_cache.py}
             BESZEL_UPDATER=${./scripts/update-beszel.py} python3 ${./tests/test_beszel_release.py}
+            BESZEL_PROXY_CONFIG=${./modules/services/monitoring/beszel-docker-proxy.cfg} \
+              python3 ${./tests/test_beszel_docker_proxy.py}
             touch "$out"
           '';
       };

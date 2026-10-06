@@ -3,6 +3,7 @@ import json
 import os
 import pwd
 import re
+import shutil
 import stat
 import subprocess
 import tempfile
@@ -109,7 +110,8 @@ else:
         fake.chmod(0o700)
         return fake
 
-    def _run_initializer(self, seed, target, marker, yq, validator="/bin/true"):
+    def _run_initializer(self, seed, target, marker, yq, validator=None):
+        validator = validator or shutil.which("true")
         owner = pwd.getpwuid(os.getuid()).pw_name
         group = grp.getgrgid(os.getgid()).gr_name
         return subprocess.run(

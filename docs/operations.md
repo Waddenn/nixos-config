@@ -455,3 +455,36 @@ certificats Cloudflare.
 AOP authentifie le lien Cloudflare–Caddy. Il ne remplace pas la 2FA des applications,
 ne masque pas l'IP partagée avec Nextcloud/Plex et n'empêche pas une saturation du
 lien Internet.
+
+### Administration SSH et monitoring Docker
+
+Les LXC de la flotte historique exposent OpenSSH uniquement sur `tailscale0`.
+Le contrôleur et les opérateurs utilisent les noms Tailscale ; une connexion LAN
+à TCP 22 n'est plus une voie d'administration prévue. Les pilotes en réseau
+Tailscale userspace conservent leur mécanisme de bootstrap distinct : ne pas
+leur appliquer une règle pour une interface `tailscale0` inexistante.
+
+Le contrôleur refuse les clés SSH inconnues (`StrictHostKeyChecking yes`), y
+compris dans les sondes et dans les commandes Colmena. Pour ajouter ou remplacer
+une machine, vérifier sa clé hôte depuis sa console Proxmox ou un accès déjà
+authentifié, puis déclarer/installer cette clé sur le contrôleur avant déploiement.
+Ne pas résoudre un échec en supprimant la vérification ou en acceptant une clé
+obtenue uniquement par un scan réseau.
+
+Sur les hôtes Docker, l'agent Beszel n'appartient plus au groupe `docker` et son
+espace de fichiers masque `/run/docker.sock`. Il utilise
+`unix:///run/beszel-docker-proxy/docker.sock`. Un processus HAProxy distinct,
+sans accès réseau IP externe, accepte uniquement GET/HEAD vers les API de
+version, information moteur, liste des conteneurs, statistiques, inspection et
+logs. Les opérations de création, exécution, arrêt, suppression et l'API
+`archive` sont refusées. Le proxy conserve donc l'accès aux métadonnées et logs
+Docker, qui peuvent contenir des informations sensibles ; l'accès au hub Beszel
+reste un accès de confiance. Un montage `docker.sock:ro` seul ne filtre pas les
+méthodes de l'API Docker.
+
+Les contrôles de flotte incluent `beszel-docker-proxy.service` lorsque Docker
+est activé. En cas d'absence de statistiques : vérifier cette unité, le socket
+filtré et `beszel-agent.service`, puis tester une lecture `/version` via le socket.
+Ne pas rétablir l'appartenance de l'agent au groupe `docker` pour contourner un
+problème de proxy. Les tests de filtrage tournent contre un faux démon Unix dans
+le check Nix `deployment-scripts` ; ils ne créent ni ne suppriment de conteneurs.
