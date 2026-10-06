@@ -5,6 +5,7 @@
   ...
 }: let
   cfg = config.my-services.networking.caddy;
+  adminAddress = "unix//run/caddy/admin.sock";
   aopCA = ../../../lib/cloudflare-aop-ca.pem;
   aopClient = ../../../lib/cloudflare-aop-client.pem;
   cloudflareIPs = builtins.fromJSON (builtins.readFile ../../../lib/cloudflare-ips.json);
@@ -114,6 +115,9 @@ in {
       environmentFile = "/run/caddy/env";
 
       globalConfig = ''
+        # Filesystem permissions isolate administration from other local services.
+        admin ${adminAddress}|0600
+
         # Cloudflare IP ranges for trusted_proxies
         # https://www.cloudflare.com/ips/
         servers {
@@ -138,6 +142,18 @@ in {
           '';
         }
         // {
+          # Preserve the local metrics URL without exposing the admin API on TCP.
+          "http://127.0.0.1:2019".extraConfig = ''
+            bind 127.0.0.1
+            route {
+              @metrics {
+                method GET
+                path /metrics
+              }
+              metrics @metrics
+              respond 404
+            }
+          '';
           "nextcloud.hexaflare.net" = {
             extraConfig =
               commonConfig
@@ -192,7 +208,7 @@ in {
     };
 
     # Port 443 (HTTPS) exposed publicly
-    # Port 2019 (Caddy metrics) is only accessible locally for monitoring
+    # TCP 2019 serves only local read-only metrics; administration uses a Unix socket.
     networking.firewall.allowedTCPPorts = [443];
     # No public listener allowance: this validation proxy is tailnet-only.
     networking.firewall.interfaces.tailscale0.allowedTCPPorts =
@@ -213,6 +229,12 @@ in {
       # Reset the upstream unit's additive ambient list before setting ours.
       serviceConfig.AmbientCapabilities = lib.mkForce ["" "CAP_NET_BIND_SERVICE"];
       serviceConfig.CapabilityBoundingSet = lib.mkForce ["CAP_NET_BIND_SERVICE"];
+      serviceConfig.UMask = "0077";
+      serviceConfig.ExecReload = lib.mkForce (
+        [""]
+        ++ lib.optional config.services.caddy.enableReload
+        "${lib.getExe config.services.caddy.package} reload --config /etc/caddy/caddy_config --adapter caddyfile --address ${adminAddress} --force"
+      );
     };
 
     # Public certificates only: the signing key and client key never reach Caddy.
