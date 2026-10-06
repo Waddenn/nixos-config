@@ -547,6 +547,16 @@ Gatus conserve ses contrôles internes et son historique.
 - Le Worker renvoie 404 pour les requêtes HTTP et ne publie pas ses résultats.
   Le domaine `workers.dev` et les URL de preview de production doivent rester
   désactivés. Le test de planification du tableau de bord reste disponible.
+- La règle géographique `country access` conserve France/Belgique pour les
+  visiteurs. Son exception de surveillance est conservée dans
+  `monitoring/external/geographic-rule.expression` : elle exige l'identité
+  Cloudflare `cf.worker.upstream_zone = patelas-tom.workers.dev`, le User-Agent
+  exact de la sonde, GET, aucun paramètre et les six couples hôte/chemin proxifiés.
+  Cette identité désigne les Workers du compte, pas un script individuel ;
+  le User-Agent seul n'est pas une preuve d'identité. Les POST de connexion,
+  les autres chemins et les autres règles de protection ne sont pas exemptés.
+  Nextcloud est en DNS seul et n'utilise pas cette exception. Ne pas étendre
+  cette expression à tous les Workers, à un ASN entier ou à un simple en-tête.
 
 Validation locale : `node --test monitoring/external/worker.test.mjs`.
 Déploiement manuel : depuis `monitoring/external`, `npx wrangler deploy`, ou
