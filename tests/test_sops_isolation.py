@@ -28,8 +28,6 @@ SHARED_FILES = {
     "classeur-origin": ({"caddy", "classeur", "dev-nixos"}, {"classeur-origin-token"}),
     "classeur-turnstile": ({"classeur"}, {"turnstile-secret-key"}),
     "classeur-session": ({"classeur"}, {"session-secret"}),
-}
-PENDING_FILES = {
     "classeur": ({"classeur"}, {"classeur-environment"}),
 }
 
@@ -60,7 +58,7 @@ class SopsIsolationTests(unittest.TestCase):
             r"path_regex:\s*(\S+)\s+key_groups:\s+- age:\s*\[([^\]]+)\]",
             self.policy,
         )
-        self.assertEqual(len(FILES) + len(SHARED_FILES) + len(PENDING_FILES) + 1, len(rules))
+        self.assertEqual(len(FILES) + len(SHARED_FILES) + 1, len(rules))
         for service, (host, _) in FILES.items():
             path = f"secrets/{service}.yaml"
             matching = [aliases for pattern, aliases in rules if re.search(pattern, path)]
@@ -68,7 +66,7 @@ class SopsIsolationTests(unittest.TestCase):
             actual = set(re.findall(r"\*([\w-]+)", matching[0]))
             expected = {"primary", "workstation"} | ({host} if host else set())
             self.assertEqual(expected, actual, path)
-        for service, (hosts, _) in {**SHARED_FILES, **PENDING_FILES}.items():
+        for service, (hosts, _) in SHARED_FILES.items():
             path = f"provisioning/secrets/{service}.yaml"
             matching = [aliases for pattern, aliases in rules if re.search(pattern, path)]
             self.assertTrue(matching, path)

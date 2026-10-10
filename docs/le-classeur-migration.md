@@ -42,8 +42,10 @@ n'a été installée. Le build applicatif complet attend le SOPS réel, sans fau
   Le pool Node doit être borné (au plus 15 connexions par processus, cleanup
   compris avec une marge dans les 50 connexions PostgreSQL) et conserver une
   connexion pour toute transaction.
-- Le secret SOPS `classeur-environment` contiendra les valeurs OAuth Google et
-  la liste d'accès héritée. Le template d'environnement systemd ajoute les
+- Le secret SOPS `classeur-environment` contient le nouveau client OAuth Google,
+  la clé publique Turnstile et `BETA_EMAILS` vide : les accès déjà accordés
+  résident dans `beta_access` sur la base restaurée. Le template
+  d'environnement systemd ajoute les
   secrets Turnstile et de signature de session depuis leurs fichiers SOPS
   distincts. La clé de session d'origine étant introuvable, sa rotation
   imposera une reconnexion ; les comptes et cartes en base restent conservés.
@@ -52,7 +54,10 @@ n'a été installée. Le build applicatif complet attend le SOPS réel, sans fau
   `PORT` ou `DATABASE_URL`. Son fichier chiffré est
   `provisioning/secrets/classeur.yaml`, pour la clé CT découverte et les deux
   clés de récupération, sans accès du contrôleur ni de Caddy au contenu.
-  Le secret Turnstile actuel a été récupéré sans rotation et conservé dans
+  Le secret OAuth a été téléchargé depuis le client bêta Google correspondant
+  au rappel `https://classeur.hexaflare.net/api/auth/callback/google`, chiffré
+  directement depuis le JSON local et vérifié par déchiffrement. Le secret
+  Turnstile actuel a été récupéré sans rotation et conservé dans
   `provisioning/secrets/classeur-turnstile.yaml`, chiffré pour les mêmes
   destinataires. La nouvelle clé de session est dans
   `provisioning/secrets/classeur-session.yaml`, également chiffrée pour le CT
