@@ -39,6 +39,22 @@ supprime la sonde impossible en gardant celle du proxy et ses alertes existantes
 L'inventaire refuse de désactiver la sonde directe sans proxy déclaré.
 Ce correctif nécessite la promotion/CI puis l'activation ciblée de Gatus.
 
+Nginx n'avait aucune limitation avant PostgreSQL. La configuration proposée
+limite maintenant les routes dynamiques à 15 requêtes/s/IP avec rafale de 60,
+et les illustrations en base à 20 requêtes/s/IP avec rafale de 120. Les bundles
+statiques `/assets/` sont exemptés. La clé utilise le CF-Connecting-IP transmis
+par Caddy authentifié ; remote_addr reste intact pour le contrôle du proxy.
+Les dépassements répondent 429 avant Node. Ce n'est pas une défense volumétrique
+contre une attaque distribuée et la limite applicative reste nécessaire.
+
+Test réel sur nginx isolé, sans requête en production : 60 requêtes dynamiques
+et 120 illustrations simultanées réussissent, 300 bundles réussissent ; une
+rafale abusive de 300 requêtes dynamiques produit 235 refus 429 ; 60 requêtes
+d'une autre IP réussissent immédiatement. Le script reproductible est
+`scripts/classeur-ingress-check.py --nginx <binaire-nginx-Nix>`. Build NixOS
+ciblé du CT réussi ; aucune activation. Les seuils restent à observer après
+déploiement pour éviter de limiter les NAT partagés.
+
 HSTS public observé : `max-age=31536000; includeSubDomains; preload` ; F-052
 est déjà résolu par la configuration en amont. Ne pas ajouter un second réglage
 concurrent dans Node. Ce relevé confirme l'en-tête, pas une inscription à la
