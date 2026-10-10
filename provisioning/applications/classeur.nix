@@ -132,12 +132,10 @@ in {
     # The /run secret include exists only on the guest; nginx validates it at start.
     validateConfigFile = false;
     # Rendered only in /run by sops-nix; no token appears in the store or logs.
-    # The full bearer string is a map key; nginx's default 64-byte bucket is
-    # too small once the key and hash metadata are included.
-    appendHttpConfig = ''
-      map_hash_bucket_size 128;
-      include ${config.sops.templates.classeur-origin-auth.path};
-    '';
+    # NixOS emits this before its own upgrade map; adding the directive to
+    # appendHttpConfig places it too late and nginx reports a duplicate.
+    mapHashBucketSize = 128;
+    appendHttpConfig = "include ${config.sops.templates.classeur-origin-auth.path};";
     virtualHosts.classeur = {
       listen = [
         {
