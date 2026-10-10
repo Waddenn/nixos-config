@@ -8,7 +8,7 @@
   config = lib.mkIf config.my-services.infra.classeur-backup.enable {
     assertions = [
       {
-        assertion = config.networking.hostName == "dev-nixos";
+        assertion = config.my-services.infra.deployer-node.enable;
         message = "Only dev-nixos may hold the Le classeur backup transport credentials";
       }
     ];
