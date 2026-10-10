@@ -23,6 +23,8 @@
     && builtins.isBool (s.startOnBoot or false)
     && s.application.port > 1024
     && s.application.port < 65536
+    && builtins.isBool (s.application.directMonitoring or true)
+    && ((s.application.directMonitoring or true) || (s.gitops.internalProxy or false))
     && s.tailscaleTags != []
     && lib.all builtins.isBool (builtins.attrValues (s.gitops or {}))
     && lib.all (key: builtins.elem key ["enable" "canary" "internalProxy"]) (builtins.attrNames (s.gitops or {}));

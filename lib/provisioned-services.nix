@@ -7,6 +7,7 @@
   proxyHost = "caddy.${tailnet}";
   proxyPort = 8085;
   proxyServices = lib.filterAttrs (_: s: s.gitops.internalProxy) active;
+  directServices = lib.filterAttrs (_: s: s.application.directMonitoring or true) active;
   identity = s: builtins.fromJSON (builtins.readFile (../provisioning/identities + "/${s.name}.json"));
 in {
   inherit services active tailnet proxyHost proxyPort identity;
@@ -19,7 +20,7 @@ in {
         conditions = s.application.conditions;
         interval = "30s";
       })
-      active)
+      directServices)
     ++ lib.mapAttrsToList (name: s: {
       name = "${name}-proxy";
       group = "declared-services";
