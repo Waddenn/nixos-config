@@ -128,6 +128,13 @@ Le schéma applicatif et ses scripts de migration restent la source de vérité.
    avec `cloudflareOnly`. Conserver Cloudflare DNS/protection et le domaine
    `classeur.hexaflare.net`. Traiter les anciennes routes Workers avant la
    bascule DNS/origin pour éviter qu'elles continuent d'intercepter les requêtes.
+   État observé le 10 octobre 2026 : le domaine possède un AAAA proxifié
+   `100::` utilisé avec le domaine personnalisé Worker ; les autres services
+   publics pointent vers l'IPv4 `82.66.67.155`. Vérifier de nouveau ces valeurs,
+   retirer l'association du domaine personnalisé Worker, puis créer l'entrée A
+   proxifiée vers l'origine Caddy lors de la bascule. La règle géographique
+   Cloudflare `country access` exclut explicitement ce hostname ; préserver
+   cette expression et les autres contrôles WAF.
 7. Après fusion autorisée, attendre la CI verte du **SHA exact de main** avant
    activation Caddy par le contrôleur. Vérifier réellement via Cloudflare et
    vérifier que l'origine directe refuse l'accès. Ne pas annoncer la migration
