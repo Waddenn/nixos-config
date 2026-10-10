@@ -58,6 +58,7 @@
           ;
         inherit (s.application) port healthPath units healthBody conditions generatedSecrets;
         secretProbe = s.application.secretProbe or null;
+        startOnBoot = s.startOnBoot or false;
       })
       inventory;
     checks.${system}.single-declaration = let

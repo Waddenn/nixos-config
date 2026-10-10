@@ -24,6 +24,12 @@ FILES = {
     "gatus": ("gatus", {"discord-webhook"}),
     "operator": (None, {"gh-token", "cachix-auth-token"}),
 }
+SHARED_FILES = {
+    "classeur-origin": ({"caddy", "classeur", "dev-nixos"}, {"classeur-origin-token"}),
+    "classeur-turnstile": ({"classeur"}, {"turnstile-secret-key"}),
+    "classeur-session": ({"classeur"}, {"session-secret"}),
+    "classeur": ({"classeur"}, {"classeur-environment"}),
+}
 
 
 class SopsIsolationTests(unittest.TestCase):
@@ -52,7 +58,7 @@ class SopsIsolationTests(unittest.TestCase):
             r"path_regex:\s*(\S+)\s+key_groups:\s+- age:\s*\[([^\]]+)\]",
             self.policy,
         )
-        self.assertEqual(len(FILES) + 1, len(rules))
+        self.assertEqual(len(FILES) + len(SHARED_FILES) + 1, len(rules))
         for service, (host, _) in FILES.items():
             path = f"secrets/{service}.yaml"
             matching = [aliases for pattern, aliases in rules if re.search(pattern, path)]
@@ -60,6 +66,12 @@ class SopsIsolationTests(unittest.TestCase):
             actual = set(re.findall(r"\*([\w-]+)", matching[0]))
             expected = {"primary", "workstation"} | ({host} if host else set())
             self.assertEqual(expected, actual, path)
+        for service, (hosts, _) in SHARED_FILES.items():
+            path = f"provisioning/secrets/{service}.yaml"
+            matching = [aliases for pattern, aliases in rules if re.search(pattern, path)]
+            self.assertTrue(matching, path)
+            self.assertEqual({"primary", "workstation"} | hosts,
+                             set(re.findall(r"\*([\w-]+)", matching[0])))
         fallback = [aliases for pattern, aliases in rules if re.search(pattern, "secrets/new-service.yaml")]
         self.assertEqual(1, len(fallback))
         self.assertEqual({"primary", "workstation"}, set(re.findall(r"\*([\w-]+)", fallback[0])))
@@ -76,11 +88,25 @@ class SopsIsolationTests(unittest.TestCase):
             text = (ROOT / module).read_text()
             references = re.findall(r"sopsFile\s*=\s*([^;]+);", text)
             self.assertTrue(references, module)
-            self.assertEqual({f"../../../secrets/{service}.yaml"}, set(references), module)
+            expected = {f"../../../secrets/{service}.yaml"}
+            if service == "caddy":
+                expected.add("../../../provisioning/secrets/classeur-origin.yaml")
+            self.assertEqual(expected, set(references), module)
         lxc = (ROOT / "modules/infra/proxmox-lxc-config.nix").read_text()
         self.assertNotIn("sops.defaultSopsFile", lxc)
         self.assertFalse((ROOT / "secrets/secrets.yaml").exists())
         self.assertNotIn("&github-runner", self.policy)
+
+    def test_pilot_secret_files_have_scoped_recipients(self):
+        for service, (hosts, keys) in SHARED_FILES.items():
+            path = ROOT / "provisioning" / "secrets" / f"{service}.yaml"
+            self.assertTrue(path.exists(), path)
+            text = path.read_text()
+            self.assertEqual(keys, set(re.findall(r"^([\w-]+):", text, re.MULTILINE)) - {"sops"})
+            self.assertEqual({self.aliases[x] for x in hosts | {"primary", "workstation"}},
+                             set(re.findall(r"recipient:\s+(age1[\w]+)", text)))
+            for key in keys:
+                self.assertRegex(text, rf"(?m)^{re.escape(key)}: ENC\[AES256_GCM,")
 
 
 if __name__ == "__main__":
