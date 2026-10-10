@@ -12,7 +12,7 @@
     User = "le_classeur_app";
     Group = "le-classeur";
     WorkingDirectory = "${state}/current";
-    EnvironmentFile = config.sops.secrets.classeur-environment.path;
+    EnvironmentFile = config.sops.templates.classeur-runtime-env.path;
     NoNewPrivileges = true;
     ProtectSystem = "strict";
     ProtectHome = true;
@@ -38,8 +38,24 @@
   };
 in {
   sops.secrets.classeur-environment = {
+    sopsFile = ../secrets/classeur.yaml;
     mode = "0400";
     restartUnits = ["le-classeur.service"];
+  };
+  sops.secrets.classeur-turnstile = {
+    sopsFile = ../secrets/classeur-turnstile.yaml;
+    key = "turnstile-secret-key";
+    mode = "0400";
+    restartUnits = ["le-classeur.service"];
+  };
+  sops.templates.classeur-runtime-env = {
+    owner = "le_classeur_app";
+    group = "le-classeur";
+    mode = "0400";
+    content = ''
+      ${config.sops.placeholder.classeur-environment}
+      TURNSTILE_SECRET_KEY=${config.sops.placeholder.classeur-turnstile}
+    '';
   };
   sops.secrets.classeur-origin-token = {
     sopsFile = ../secrets/classeur-origin.yaml;

@@ -42,9 +42,10 @@ n'a été installée. Le build applicatif complet attend le SOPS réel, sans fau
   Le pool Node doit être borné (au plus 15 connexions par processus, cleanup
   compris avec une marge dans les 50 connexions PostgreSQL) et conserver une
   connexion pour toute transaction.
-- Le secret SOPS `classeur-environment` contiendra un fichier d'environnement
-  systemd, avec les valeurs OAuth Google, Turnstile et signature de session
-  validées. Si la clé de session d'origine reste introuvable, sa rotation
+- Le secret SOPS `classeur-environment` contiendra les valeurs OAuth Google,
+  la liste d'accès héritée et la signature de session validées. Le template
+  d'environnement systemd ajoute le secret Turnstile depuis son fichier SOPS
+  distinct. Si la clé de session d'origine reste introuvable, sa rotation
   imposera une reconnexion ; les comptes et cartes en base restent conservés.
   Il ne doit
   pas modifier les valeurs fixes `APP_ENV`, `APP_RUNTIME`, `APP_ORIGIN`, `HOST`,
