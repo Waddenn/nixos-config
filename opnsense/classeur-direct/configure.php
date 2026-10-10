@@ -1,5 +1,6 @@
 <?php
 /* Native, root-only configuration transaction. Never changes NAT or other rules. */
+require_once 'util.inc';
 require_once 'config.inc';
 const LINK_UUID = '50c4a6cd-6578-4a10-bd92-1741d6f379a7';
 function link_rule(): array {
