@@ -121,6 +121,26 @@ class ActivationTests(unittest.TestCase):
         self.assertEqual(self.app.calls, [])
         self.assertEqual((self.state / 'current').resolve(), self.previous)
 
+    def test_success_retention_keeps_five_newest_active_previous_and_operator_data(self):
+        releases = self.state / 'releases'
+        for number in range(7):
+            revision = f'{number:040x}'
+            directory = releases / revision
+            directory.mkdir()
+            (directory / '.activation.json').write_text('{}')
+            staged = self.staging / f'{revision}-{"f"*64}'
+            staged.mkdir()
+            (staged / 'package.tar.gz').write_bytes(b'old')
+        operator = self.state / 'operator'
+        operator.mkdir()
+        (operator / 'backup').write_text('preserve')
+        self.app.activate(NEW, self.digest)
+        self.assertTrue(self.previous.is_dir())
+        self.assertTrue((releases / NEW).is_dir())
+        self.assertFalse((releases / ('0' * 40)).exists())
+        self.assertEqual((operator / 'backup').read_text(), 'preserve')
+        self.assertLessEqual(len(list(self.staging.iterdir())), 6)
+
     def test_staging_directory_symlink_rejected(self):
         staged = self.staging / f'{NEW}-{self.digest}'
         hidden = self.staging / 'hidden'

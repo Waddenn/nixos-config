@@ -79,9 +79,12 @@ class Activation:
         target = self.state / 'releases' / revision
         marker = {'revision': revision, 'sha256': digest}
         if target.exists() or target.is_symlink():
-            if target.is_symlink() or json.loads((target / '.activation.json').read_text()) != marker:
+            recorded = json.loads((target / '.activation.json').read_text())
+            if target.is_symlink() or any(recorded.get(key) != value for key, value in marker.items()):
                 raise ValueError('Existing release has no matching verified provenance')
             return target
+        if shutil.disk_usage(self.state).free < 3 * 1024 * 1024 * 1024:
+            raise ValueError('Insufficient space for candidate and rollback')
         temporary = Path(tempfile.mkdtemp(prefix='.activate-', dir=target.parent))
         try:
             with tarfile.open(archive, 'r:gz') as tar:
@@ -98,7 +101,13 @@ class Activation:
             assets = temporary / 'build/client/assets'
             if assets.is_symlink() or not assets.is_dir():
                 raise ValueError('Missing static assets')
+            marker['assets'] = sorted(path.name for path in assets.iterdir() if path.is_file() and not path.is_symlink())
+            previous_marker = previous / '.activation.json'
+            previous_assets = set(json.loads(previous_marker.read_text())['assets']) if previous_marker.is_file() else None
             for source in sorted((previous / 'build/client/assets').iterdir()):
+                # Carry N-1's own chunks, not every chunk inherited since launch.
+                if previous_assets is not None and source.name not in previous_assets:
+                    continue
                 if source.is_symlink() or not source.is_file():
                     continue
                 if not re.fullmatch(r'[A-Za-z0-9_.-]+-[A-Za-z0-9_-]{8,}\.[A-Za-z0-9.]+', source.name):
@@ -122,6 +131,27 @@ class Activation:
             os.chown(path, 0, gid, follow_symlinks=False)
             if not path.is_symlink():
                 path.chmod(0o750 if path.is_dir() or path.stat().st_mode & 0o111 else 0o640)
+
+    def prune(self, revision, previous):
+        keep_revisions = {revision, previous}
+        roots = [
+            (self.state / 'releases', r'[a-f0-9]{40}', True),
+            (self.state / 'verified-packages', r'[a-f0-9]{40}-[a-f0-9]{64}', False),
+            (Path(self.config['staging']), r'[a-f0-9]{40}-[a-f0-9]{64}', False),
+        ]
+        for root, pattern, release in roots:
+            candidates = []
+            for path in root.iterdir():
+                if path.is_symlink() or not path.is_dir() or not re.fullmatch(pattern, path.name):
+                    continue
+                # Never collect operator releases without our provenance marker.
+                if release and not (path / '.activation.json').is_file():
+                    continue
+                candidates.append(path)
+            candidates.sort(key=lambda path: path.stat().st_mtime_ns, reverse=True)
+            for path in candidates[5:]:
+                if path.name[:40] not in keep_revisions:
+                    shutil.rmtree(path)
 
     def candidate(self, target):
         runtime = [
@@ -236,6 +266,11 @@ class Activation:
                 self.systemctl('restart', 'le-classeur.service')
                 self.ready(8083, revision)
                 self.ready(8083, revision, public=True)
+                # Retention failure must not roll back otherwise healthy code.
+                try:
+                    self.prune(revision, old_revision)
+                except OSError:
+                    print('Release retention needs operator attention', file=sys.stderr)
                 return {'revision': revision, 'sha256': digest, 'status': 'activated'}
             except BaseException:
                 if switched:
