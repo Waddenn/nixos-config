@@ -27,6 +27,7 @@ FILES = {
 SHARED_FILES = {
     "classeur-origin": ({"caddy", "classeur", "dev-nixos"}, {"classeur-origin-token"}),
     "classeur-turnstile": ({"classeur"}, {"turnstile-secret-key"}),
+    "classeur-session": ({"classeur"}, {"session-secret"}),
 }
 PENDING_FILES = {
     "classeur": ({"classeur"}, {"classeur-environment"}),

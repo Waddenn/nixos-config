@@ -48,12 +48,19 @@ in {
     mode = "0400";
     restartUnits = ["le-classeur.service"];
   };
+  sops.secrets.classeur-session = {
+    sopsFile = ../secrets/classeur-session.yaml;
+    key = "session-secret";
+    mode = "0400";
+    restartUnits = ["le-classeur.service"];
+  };
   sops.templates.classeur-runtime-env = {
     owner = "le_classeur_app";
     group = "le-classeur";
     mode = "0400";
     content = ''
       ${config.sops.placeholder.classeur-environment}
+      SESSION_SECRET=${config.sops.placeholder.classeur-session}
       TURNSTILE_SECRET_KEY=${config.sops.placeholder.classeur-turnstile}
     '';
   };
