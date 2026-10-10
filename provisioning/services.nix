@@ -1,11 +1,11 @@
 # Single declaration: infrastructure, OS, application and health share this identity.
 {
   classeur = {
-    # VMID/resources must be audited on the live cluster before provisioning.
+    # Production origin, enrolled and verified on the live cluster.
     gitops = {
-      enable = false;
-      canary = false;
-      internalProxy = false;
+      enable = true;
+      canary = true;
+      internalProxy = true;
     };
     environment = "pilot";
     hostname = "nixos-classeur";
