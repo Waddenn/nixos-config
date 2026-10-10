@@ -37,6 +37,7 @@
     DATABASE_URL = "postgresql://le_classeur_app@localhost/le_classeur_beta?host=/run/postgresql";
   };
 in {
+  imports = [./classeur-cd-staging.nix];
   sops.secrets.classeur-environment = {
     sopsFile = ../secrets/classeur.yaml;
     mode = "0400";

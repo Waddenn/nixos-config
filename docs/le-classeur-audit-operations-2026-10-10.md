@@ -157,3 +157,46 @@ Un retour à une release exige un journal de migrations compatible. Un retour
 Les alertes Discord HTTP Gatus existent ; les alertes dédiées sauvegarde/espace
 et une revue périodique des invariants restent à compléter sans annoncer qu'elles
 sont déjà activées.
+
+## CD : transport isolé préparé, non activé
+
+L’application prépare un `workflow_dispatch` GitHub main-only de staging via
+Tailscale OIDC. Le dépôt privé n’accepte pas les reviewers obligatoires sur son
+plan actuel ; l’environnement est limité à main et `NODE_CD_ENABLED=false`.
+Une identité fédérée dédiée, une règle réseau TCP22 ciblée et une clé SSH
+limitée ont été configurées côté GitHub/Tailscale. Les tests de politique
+acceptent le CT TCP22 et refusent PostgreSQL, HTTP origin et les autres cibles
+administratives. Aucune session runner réelle n’a été exécutée ; aucun accès
+root du contrôleur n’est exporté.
+
+Le module `provisioning/applications/classeur-cd-staging.nix` est importé par
+Classeur, mais **`my-services.infra.classeur-cd-staging.enable=false` par défaut**.
+Il prépare, s’il est activé ultérieurement par une PR revue, le compte
+`classeur_cd` sans sudo ni groupe applicatif, une clé dédiée avec `restrict`,
+une `ForceCommand` et un répertoire indépendant 0700. La clé publiée est publique
+uniquement ; la privée demeure hors Git et dans le secret GitHub de staging.
+
+Le récepteur `scripts/classeur-stage-release.py` est la copie revue du transport
+applicatif `scripts/cd/stage-release.py` ; toute modification de son protocole
+doit garder ces copies/testeurs cohérentes. Le source est fixé dans le Nix store
+par la commande forcée. Il vérifie SHA, Linux x64, non-répétition, identité,
+chemins/liens, unicité des membres et limites de taille avant de conserver un
+paquet opaque. Il sérialise l’entrée et refuse un cumul supérieur à 2 GiB ou
+moins de 1 GiB libre. Il n’extrait, n’exécute, ne migre et ne redémarre rien.
+
+Aucun compte, récepteur ou nouveau service n’a été installé en production.
+L’activation applicative demeure une maintenance opérateur après sauvegarde,
+application explicite des migrations, vérification du schéma/grants, préflight
+et plan de rollback compatible N−1. Ce transport n’est pas un CD d’activation.
+La politique CI exacte de main NixOS avant toute installation reste conservée.
+
+Validation du module désactivé : aucun compte CD dans la configuration normale.
+Une configuration de répétition avec option activée a été construite entièrement
+sur le contrôleur, y compris validation sshd ; aucune activation. Le compte
+produit n’a aucun groupe supplémentaire. Format Nix et tests du récepteur passent.
+
+Chemin SSH effectif : Tailscale userspace, `RunSSH=false`, OpenSSH socket activé
+sur TCP22. SSH standard du contrôleur vers l’IP Tailscale du CT réussit avec
+la clé hôte existante. Serve expose seulement 8084 ; aucun nouveau forward
+22 ou activation Tailscale SSH n’est requis/proposé. L’accès du runner OIDC
+reste à vérifier après une installation autorisée du compte et du récepteur.
