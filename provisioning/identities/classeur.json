@@ -1,0 +1,4 @@
+{
+  "hostKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGrgowxSxUEORIC/qAcJ2EatoiiWXCksFeVlrVod4aZg root@nixos-classeur",
+  "sshPublicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIiJbWaWpe6nbLv3ETEJMHVt0E2fJPGgQ5cCHdre6q0r nixos-classeur"
+}
