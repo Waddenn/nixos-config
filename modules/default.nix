@@ -29,6 +29,7 @@
     ./services/dev/k3s.nix
     ./services/dev/kubernetes.nix
     ./services/infra/deployer-node.nix
+    ./services/infra/classeur-backup.nix
     ./services/infra/deployment-target.nix
     ./services/infra/pull-updater.nix
     ./services/media/calibre-web.nix

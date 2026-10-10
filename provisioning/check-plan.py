@@ -12,7 +12,26 @@ def has_unknown(value):
     return bool(value)
 
 
-def check(plan, manifest, selected=None, allow_disk_growth=False):
+def capacity_growth(before, after, declaration):
+    old_rest, new_rest = dict(before), dict(after)
+    grew = False
+    for attribute, field, declared in [('cpu', 'cores', 'cores'),
+                                       ('memory', 'dedicated', 'memoryMiB'),
+                                       ('disk', 'size', 'diskGiB')]:
+        old, new = before.get(attribute), after.get(attribute)
+        if not isinstance(old, list) or not isinstance(new, list) or len(old) != 1 or len(new) != 1:
+            return False
+        old, new = old[0], new[0]
+        if (type(old.get(field)) not in (int, float) or type(new.get(field)) not in (int, float) or
+                new[field] != declaration.get(declared) or new[field] < old[field]):
+            return False
+        grew |= new[field] > old[field]
+        old_rest[attribute] = [{k: v for k, v in old.items() if k != field}]
+        new_rest[attribute] = [{k: v for k, v in new.items() if k != field}]
+    return grew and old_rest == new_rest
+
+
+def check(plan, manifest, selected=None, allow_disk_growth=False, allow_boot_enable=False, allow_capacity_growth=False):
     if plan.get('errored') or plan.get('complete') is False:
         raise ValueError('Incomplete or errored plan')
     if any('delete' in r.get('change', {}).get('actions', []) for r in plan.get('resource_drift', [])):
@@ -30,9 +49,21 @@ def check(plan, manifest, selected=None, allow_disk_growth=False):
             raise ValueError('Duplicate resource change')
         observed.add(address)
         s, change = expected[address], resource['change']
-        if allow_disk_growth and change['actions'] == ['create']:
-            raise ValueError('Resize cannot create resources')
-        if change['actions'] == ['update'] and allow_disk_growth:
+        if (allow_disk_growth or allow_boot_enable or allow_capacity_growth) and change['actions'] == ['create']:
+            raise ValueError('Maintenance cannot create resources')
+        if change['actions'] == ['update'] and allow_capacity_growth:
+            if (s['name'] != selected or not capacity_growth(change.get('before') or {}, change.get('after') or {}, s) or
+                    has_unknown(change.get('after_unknown', {})) or change.get('replace_paths')):
+                raise ValueError('Only selected declared CPU/memory/disk growth without other changes is allowed')
+        elif change['actions'] == ['update'] and allow_boot_enable:
+            before, after = change.get('before') or {}, change.get('after') or {}
+            if (s['name'] != selected or not s.get('startOnBoot') or
+                    before.get('start_on_boot') is not False or after.get('start_on_boot') is not True or
+                    {k: v for k, v in before.items() if k != 'start_on_boot'} !=
+                    {k: v for k, v in after.items() if k != 'start_on_boot'} or
+                    has_unknown(change.get('after_unknown', {})) or change.get('replace_paths')):
+                raise ValueError('Only selected declared autostart enablement without other changes is allowed')
+        elif change['actions'] == ['update'] and allow_disk_growth:
             before, after = change.get('before') or {}, change.get('after') or {}
             old_disks, new_disks = before.get('disk'), after.get('disk')
             if not isinstance(old_disks, list) or not isinstance(new_disks, list) or len(old_disks) != 1 or len(new_disks) != 1:

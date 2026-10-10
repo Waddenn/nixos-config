@@ -54,6 +54,68 @@ class ProvisioningPlanTests(unittest.TestCase):
             MODULE.check(self.plan, self.manifest)
         MODULE.check(self.plan, self.manifest, allow_disk_growth=True)
 
+    def autostart_plan(self):
+        self.manifest['demo']['startOnBoot'] = True
+        change = self.plan['resource_changes'][0]['change']
+        change.update(actions=['update'], before=dict(change['after'], start_on_boot=False))
+        change['after']['start_on_boot'] = True
+        return change
+
+    def test_autostart_requires_explicit_action_and_selected_declared_identity(self):
+        self.autostart_plan()
+        with self.assertRaises(ValueError):
+            MODULE.check(self.plan, self.manifest, 'demo')
+        MODULE.check(self.plan, self.manifest, 'demo', allow_boot_enable=True)
+        with self.assertRaises(ValueError):
+            MODULE.check(self.plan, self.manifest, 'another', allow_boot_enable=True)
+
+    def test_autostart_rejects_other_changes_unknowns_and_creation(self):
+        self.autostart_plan()
+        for mutate in [lambda c: c['after'].update(started=False),
+                       lambda c: c.update(after_unknown={'disk': [True]}),
+                       lambda c: c.update(actions=['create']),
+                       lambda c: c.update(replace_paths=[['start_on_boot']]),
+                       lambda c: c['after'].update(start_on_boot=False)]:
+            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
+                plan = copy.deepcopy(self.plan)
+                mutate(plan['resource_changes'][0]['change'])
+                MODULE.check(plan, self.manifest, 'demo', allow_boot_enable=True)
+        self.manifest['demo']['startOnBoot'] = False
+        with self.assertRaises(ValueError):
+            MODULE.check(self.plan, self.manifest, 'demo', allow_boot_enable=True)
+
+    def capacity_plan(self):
+        self.manifest['demo'].update(cores=4, memoryMiB=8192, diskGiB=64)
+        change = self.plan['resource_changes'][0]['change']
+        change.update(actions=['update'], before=dict(change['after'],
+                      cpu=[{'cores': 2}], memory=[{'dedicated': 4096, 'swap': 0}],
+                      disk=[{'size': 32, 'datastore_id': 'pool'}]))
+        change['after'].update(cpu=[{'cores': 4}], memory=[{'dedicated': 8192, 'swap': 0}],
+                               disk=[{'size': 64, 'datastore_id': 'pool'}])
+        return change
+
+    def test_selected_capacity_growth_only(self):
+        self.capacity_plan()
+        with self.assertRaises(ValueError):
+            MODULE.check(self.plan, self.manifest, 'demo')
+        MODULE.check(self.plan, self.manifest, 'demo', allow_capacity_growth=True)
+        with self.assertRaises(ValueError):
+            MODULE.check(self.plan, self.manifest, 'another', allow_capacity_growth=True)
+
+    def test_capacity_growth_rejects_shrink_other_changes_and_unknowns(self):
+        self.capacity_plan()
+        for mutate in [lambda c: c['after']['cpu'][0].update(cores=1),
+                       lambda c: c['after']['memory'][0].update(swap=512),
+                       lambda c: c['after']['disk'][0].update(datastore_id='other'),
+                       lambda c: c['after'].update(start_on_boot=True),
+                       lambda c: c.update(after_unknown={'cpu': [True]}),
+                       lambda c: c.update(actions=['create']),
+                       lambda c: c.update(actions=['delete', 'create'])]:
+            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
+                plan = copy.deepcopy(self.plan)
+                mutate(plan['resource_changes'][0]['change'])
+                MODULE.check(plan, self.manifest, 'demo', allow_capacity_growth=True)
+
     def test_disk_growth_rejects_shrink_other_changes_and_unknowns(self):
         self.growth_plan()
         for mutate in [lambda c: c['after']['disk'][0].update(size=2),

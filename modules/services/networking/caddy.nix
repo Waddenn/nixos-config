@@ -11,6 +11,7 @@
   cloudflareIPs = builtins.fromJSON (builtins.readFile ../../../lib/cloudflare-ips.json);
   cloudflareRanges = lib.concatStringsSep " " (cloudflareIPs.ipv4_cidrs ++ cloudflareIPs.ipv6_cidrs);
   declared = import ../../../lib/provisioned-services.nix {inherit lib;};
+  classeur = (import ../../../provisioning/inventory.nix {inherit lib;}).classeur;
   internalRoutes = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: s: ''
       handle_path /${name}/* {
         reverse_proxy http://${s.hostname}.${declared.tailnet}:${toString s.application.port}
@@ -67,11 +68,18 @@ in {
       default = true;
       description = "Require the dedicated Cloudflare origin client certificate after verifying its presentation.";
     };
+    classeurOrigin.enable = lib.mkEnableOption "Route Le classeur to the verified NixOS origin after migration";
   };
 
   config = lib.mkIf config.my-services.networking.caddy.enable {
     sops.secrets.cf_api_token = {
       sopsFile = ../../../secrets/caddy.yaml;
+      owner = config.services.caddy.user;
+      mode = "0400";
+      restartUnits = ["caddy-env-setup.service" "caddy.service"];
+    };
+    sops.secrets.classeur-origin-token = lib.mkIf cfg.classeurOrigin.enable {
+      sopsFile = ../../../provisioning/secrets/classeur-origin.yaml;
       owner = config.services.caddy.user;
       mode = "0400";
       restartUnits = ["caddy-env-setup.service" "caddy.service"];
@@ -92,6 +100,9 @@ in {
         mkdir -p /run/caddy
         cat > /run/caddy/env <<EOF
         CF_API_TOKEN=$(cat ${config.sops.secrets.cf_api_token.path})
+        ${lib.optionalString cfg.classeurOrigin.enable ''
+          CLASSEUR_ORIGIN_TOKEN=$(cat ${config.sops.secrets.classeur-origin-token.path})
+        ''}
         EOF
         chmod 600 /run/caddy/env
         chown ${config.services.caddy.user}:${config.services.caddy.group} /run/caddy/env
@@ -138,6 +149,16 @@ in {
               respond @outside 403
               ${internalRoutes}
               respond 404
+            }
+          '';
+        }
+        // lib.optionalAttrs cfg.classeurOrigin.enable {
+          "classeur.hexaflare.net".extraConfig = cloudflareOnly ''
+            reverse_proxy http://${classeur.hostname}.${declared.tailnet}:${toString classeur.application.port} {
+              header_up Host classeur.hexaflare.net
+              header_up X-Forwarded-Proto https
+              header_up Authorization "Bearer {env.CLASSEUR_ORIGIN_TOKEN}"
+              header_up CF-Connecting-IP {http.request.header.CF-Connecting-IP}
             }
           '';
         }

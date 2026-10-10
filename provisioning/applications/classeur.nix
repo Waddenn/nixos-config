@@ -1,0 +1,215 @@
+{
+  config,
+  lib,
+  pkgs,
+  service,
+  ...
+}: let
+  state = "/var/lib/le-classeur";
+  node = "${pkgs.nodejs_24}/bin/node";
+  proxyAllow = lib.concatMapStringsSep "\n" (cidr: "allow ${cidr};") (service.application.trustedProxyCIDRs or ["127.0.0.1"]);
+  runtime = {
+    User = "le_classeur_app";
+    Group = "le-classeur";
+    WorkingDirectory = "${state}/current";
+    EnvironmentFile = config.sops.secrets.classeur-environment.path;
+    NoNewPrivileges = true;
+    ProtectSystem = "strict";
+    ProtectHome = true;
+    PrivateTmp = true;
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectControlGroups = true;
+    RestrictSUIDSGID = true;
+    RestrictAddressFamilies = ["AF_UNIX" "AF_INET" "AF_INET6"];
+    UMask = "0077";
+    LimitNOFILE = 4096;
+  };
+  environment = {
+    NODE_ENV = "production";
+    # Sharp's Linux prebuilt libvips requires the C++ runtime in a NixOS guest.
+    LD_LIBRARY_PATH = lib.makeLibraryPath [pkgs.stdenv.cc.cc.lib];
+    APP_ENV = "beta";
+    APP_RUNTIME = "node";
+    APP_ORIGIN = "https://classeur.hexaflare.net";
+    HOST = "127.0.0.1";
+    PORT = "8083";
+    DATABASE_URL = "postgresql://le_classeur_app@localhost/le_classeur_beta?host=/run/postgresql";
+  };
+in {
+  sops.secrets.classeur-environment = {
+    mode = "0400";
+    restartUnits = ["le-classeur.service"];
+  };
+  sops.secrets.classeur-origin-token = {
+    sopsFile = ../secrets/classeur-origin.yaml;
+    mode = "0400";
+    restartUnits = ["nginx.service"];
+  };
+  sops.templates.classeur-origin-auth = {
+    owner = config.services.nginx.user;
+    mode = "0400";
+    content = ''
+      map $http_authorization $classeur_origin_authorized {
+        default 0;
+        "Bearer ${config.sops.placeholder.classeur-origin-token}" 1;
+      }
+    '';
+  };
+  users.groups.le-classeur = {};
+  users.users.le_classeur_app = {
+    isSystemUser = true;
+    group = "le-classeur";
+  };
+  users.users.le_classeur_beta_owner = {
+    isSystemUser = true;
+    group = "le-classeur";
+  };
+  systemd.tmpfiles.rules = [
+    "d ${state} 0750 root le-classeur -"
+    "d ${state}/releases 0750 root le-classeur -"
+    "d /var/backup/le-classeur 0700 postgres postgres -"
+  ];
+  services.postgresql = {
+    enable = true;
+    package = pkgs.postgresql_18;
+    enableTCPIP = false;
+    ensureDatabases = ["le_classeur_beta"];
+    ensureUsers = [
+      {name = "le_classeur_beta_owner";}
+      {name = "le_classeur_app";}
+    ];
+    authentication = lib.mkForce ''
+      local all postgres peer
+      local le_classeur_beta le_classeur_beta_owner peer
+      local le_classeur_beta le_classeur_app peer
+      local all all reject
+    '';
+    settings = {
+      max_connections = 50;
+      shared_buffers = "512MB";
+      work_mem = "8MB";
+      log_statement = "none";
+      log_min_error_statement = "panic";
+    };
+  };
+  # Restore owns the schema and grants runtime privileges explicitly. No automatic
+  # migration or broad default table grant can change a reviewed release.
+  systemd.services.postgresql.postStart = lib.mkAfter ''
+    ${config.services.postgresql.package}/bin/psql -v ON_ERROR_STOP=1 -d postgres <<'SQL'
+    ALTER DATABASE le_classeur_beta OWNER TO le_classeur_beta_owner;
+    REVOKE ALL ON DATABASE le_classeur_beta FROM PUBLIC;
+    GRANT CONNECT ON DATABASE le_classeur_beta TO le_classeur_app;
+    SQL
+  '';
+  services.nginx = {
+    enable = true;
+    # The /run secret include exists only on the guest; nginx validates it at start.
+    validateConfigFile = false;
+    # Rendered only in /run by sops-nix; no token appears in the store or logs.
+    appendHttpConfig = "include ${config.sops.templates.classeur-origin-auth.path};";
+    virtualHosts.classeur = {
+      listen = [
+        {
+          addr = "0.0.0.0";
+          port = service.application.port;
+        }
+      ];
+      locations."= /health" = {
+        proxyPass = "http://127.0.0.1:8083";
+        extraConfig = ''
+          proxy_set_header Host classeur.hexaflare.net;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header CF-Connecting-IP "";
+        '';
+      };
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8083";
+        extraConfig = ''
+          proxy_set_header Host classeur.hexaflare.net;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-Host classeur.hexaflare.net;
+          ${proxyAllow}
+          deny all;
+          if ($classeur_origin_authorized = 0) { return 403; }
+          proxy_set_header Authorization "";
+          # Caddy overwrites the bearer header and validates the Cloudflare peer.
+          proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+          proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+          client_max_body_size 20m;
+        '';
+      };
+    };
+  };
+  # A bearer token is mandatory even for loopback: userspace Tailscale may proxy
+  # remote peers through loopback. Health remains reachable for provisioner checks.
+  networking.firewall.allowedTCPPorts = [service.application.port];
+  systemd.services.le-classeur = {
+    description = "Le classeur Node application (operator-selected release)";
+    wantedBy = ["multi-user.target"];
+    after = ["postgresql.service" "network-online.target"];
+    wants = ["network-online.target"];
+    requires = ["postgresql.service"];
+    inherit environment;
+    unitConfig.ConditionPathExists = "${state}/current/build/server/index.js";
+    serviceConfig =
+      runtime
+      // {
+        ExecStart = "${node} ${state}/current/build/server/index.js";
+        Restart = "on-failure";
+        RestartSec = "5s";
+        MemoryMax = "2G";
+      };
+  };
+  systemd.services.le-classeur-cleanup = {
+    description = "Expire Le classeur trade reservations";
+    after = ["postgresql.service" "le-classeur.service"];
+    requires = ["postgresql.service"];
+    inherit environment;
+    unitConfig.ConditionPathExists = "${state}/current/build/server/index.js";
+    serviceConfig =
+      runtime
+      // {
+        Type = "oneshot";
+        ExecStart = "${node} ${state}/current/build/server/index.js --cleanup";
+        TimeoutStartSec = "50s";
+        MemoryMax = "512M";
+      };
+  };
+  systemd.timers.le-classeur-cleanup = {
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnCalendar = "*-*-* *:*:00";
+      Persistent = true;
+    };
+  };
+  systemd.services.le-classeur-backup = {
+    description = "Versioned logical backup of Le classeur including database assets";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "postgres";
+      UMask = "0077";
+    };
+    after = ["postgresql.service"];
+    requires = ["postgresql.service"];
+    path = [config.services.postgresql.package pkgs.coreutils pkgs.findutils];
+    script = ''
+      set -eu
+      stamp=$(date -u +%Y%m%dT%H%M%SZ)
+      target=/var/backup/le-classeur/$stamp.dump
+      pg_dump --format=custom --file="$target.tmp" le_classeur_beta
+      pg_restore --list "$target.tmp" >/dev/null
+      mv "$target.tmp" "$target"
+      sha256sum "$target" > "$target.sha256"
+      # Retention only after a newly completed dump; off-host copies are required.
+      find /var/backup/le-classeur -name '*.dump*' -mtime +14 -delete
+    '';
+  };
+  systemd.timers.le-classeur-backup = {
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnCalendar = "*-*-* 02:15:00";
+      Persistent = true;
+    };
+  };
+}

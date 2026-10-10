@@ -25,7 +25,7 @@ in {
       features.nesting = true;
       protection = true;
       started = true;
-      start_on_boot = false;
+      start_on_boot = s.startOnBoot or false;
       cpu.cores = s.cores;
       memory = {
         dedicated = s.memoryMiB;

@@ -8,9 +8,14 @@ keys:
   - &authelia age1ktmlt86xq8jzaxvc7zmy9y32urqydurvwcmz3m7gx7jljhca5pjql4jlds
   - &immich age1ssppsf2v0grlhq5n8ssny65gk26fm504q85x20pt86ytaxemdecq64a37g
   - &gatus age1w3rhlgkxk2ycur82lcpswn3u8c40gg4h755mtu5dp5fhj755jajsmj96jr
+  # CT 9903 key authenticated via Proxmox discovery on 2026-10-10.
+  - &classeur age1y6q3ljnlahtgfvutleagcx7mq3qgj4t64wxj6qc84kwmh6z8vyksgthhjn
 # Each service owns its encrypted file; the personal key remains the recovery key.
 # Unclassified files are operator-only until an explicit host rule is added.
 creation_rules:
+  - path_regex: ^provisioning/secrets/classeur-origin\.yaml$
+    key_groups:
+      - age: [*primary, *workstation, *caddy, *classeur, *dev-nixos]
   - path_regex: ^secrets/caddy\.yaml$
     key_groups:
       - age: [*primary, *workstation, *caddy]

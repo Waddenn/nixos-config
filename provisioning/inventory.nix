@@ -20,6 +20,7 @@
     && s.cores > 0
     && s.memoryMiB >= 256
     && s.diskGiB >= 16
+    && builtins.isBool (s.startOnBoot or false)
     && s.application.port > 1024
     && s.application.port < 65536
     && s.tailscaleTags != []
