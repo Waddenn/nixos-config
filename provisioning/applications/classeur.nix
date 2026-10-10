@@ -38,6 +38,7 @@
   };
 in {
   imports = [./classeur-cd-staging.nix];
+  my-services.infra.classeur-cd-staging.enable = true;
   sops.secrets.classeur-environment = {
     sopsFile = ../secrets/classeur.yaml;
     mode = "0400";

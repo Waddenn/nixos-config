@@ -170,7 +170,10 @@ administratives. Aucune session runner réelle n’a été exécutée ; aucun ac
 root du contrôleur n’est exporté.
 
 Le module `provisioning/applications/classeur-cd-staging.nix` est importé par
-Classeur, mais **`my-services.infra.classeur-cd-staging.enable=false` par défaut**.
+Classeur, avec **`my-services.infra.classeur-cd-staging.enable=false` par défaut**.
+La déclaration Classeur active désormais explicitement cette option après
+autorisation de mise en production ; sa livraison attend la CI exacte de main
+et la coordination des sauvegardes/migrations applicatives.
 Il prépare, s’il est activé ultérieurement par une PR revue, le compte
 `classeur_cd` sans sudo ni groupe applicatif, une clé dédiée avec `restrict`,
 une `ForceCommand` et un répertoire indépendant 0700. La clé publiée est publique
