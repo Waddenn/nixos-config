@@ -132,7 +132,12 @@ in {
     # The /run secret include exists only on the guest; nginx validates it at start.
     validateConfigFile = false;
     # Rendered only in /run by sops-nix; no token appears in the store or logs.
-    appendHttpConfig = "include ${config.sops.templates.classeur-origin-auth.path};";
+    # The full bearer string is a map key; nginx's default 64-byte bucket is
+    # too small once the key and hash metadata are included.
+    appendHttpConfig = ''
+      map_hash_bucket_size 128;
+      include ${config.sops.templates.classeur-origin-auth.path};
+    '';
     virtualHosts.classeur = {
       listen = [
         {
