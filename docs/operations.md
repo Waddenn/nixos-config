@@ -518,3 +518,56 @@ configuration TCP `404`, métriques `200`, rechargement réussi. Ne pas afficher
 le contenu de la configuration ou des secrets pendant ces contrôles.
 Le test isolé `scripts/check-caddy-admin.py` vérifie deux identités Unix,
 les chemins d’administration, les métriques et le rechargement avec le vrai Caddy.
+
+## Surveillance HTTP extérieure
+
+La sonde `hexaflare-external-monitor` est hébergée dans Cloudflare Workers,
+hors du homelab. Son code et sa configuration sont dans `monitoring/external/`.
+Gatus conserve ses contrôles internes et son historique.
+
+- Le déclencheur `*/5 * * * *` contrôle les accès HTTPS publics toutes les cinq
+  minutes. Les erreurs DNS, TLS, HTTP et les réponses de santé incorrectes sont
+  des échecs. Chaque requête expire après quinze secondes.
+- Authelia, Vaultwarden, Immich, Jellyseerr, Home Assistant et Nextcloud sont
+  contrôlés avec leurs réponses publiques de santé. La maintenance Nextcloud
+  et une migration de base de données en attente sont des échecs.
+- Codex vérifie uniquement le renvoi de son accès public vers Authelia
+  (redirection ou 401 accompagné de l'adresse de connexion Authelia) ;
+  cela ne valide pas son backend après authentification. Aucun identifiant
+  utilisateur ni jeton de session n'est envoyé aux services.
+- Trois échecs consécutifs déclenchent une alerte Discord ; le rétablissement
+  déclenche une notification unique. Un échec isolé ne déclenche pas d'alerte.
+  Les alertes non livrées sont conservées pour être réessayées.
+- `MONITOR_STATE` est lié au namespace KV dédié
+  `bb16aa379d2f4031bae459e32cde6008`. La clé `state` conserve le dernier contrôle,
+  les compteurs et les alertes en attente ; aucune réponse applicative ni cookie
+  n'est enregistré.
+- `DISCORD_WEBHOOK` doit être un secret Cloudflare, jamais une variable en clair
+  ni une valeur dans le dépôt. Il utilise le même canal que Gatus.
+- Le Worker renvoie 404 pour les requêtes HTTP et ne publie pas ses résultats.
+  Le domaine `workers.dev` et les URL de preview de production doivent rester
+  désactivés. Le test de planification du tableau de bord reste disponible.
+- La règle géographique `country access` conserve France/Belgique pour les
+  visiteurs. Son exception de surveillance est conservée dans
+  `monitoring/external/geographic-rule.expression` : elle exige l'identité
+  Cloudflare `cf.worker.upstream_zone = patelas-tom.workers.dev`, le User-Agent
+  exact de la sonde, GET, aucun paramètre et les six couples hôte/chemin proxifiés.
+  Cette identité désigne les Workers du compte, pas un script individuel ;
+  le User-Agent seul n'est pas une preuve d'identité. Les POST de connexion,
+  les autres chemins et les autres règles de protection ne sont pas exemptés.
+  Nextcloud est en DNS seul et n'utilise pas cette exception. Ne pas étendre
+  cette expression à tous les Workers, à un ASN entier ou à un simple en-tête.
+
+Validation locale : `node --test monitoring/external/worker.test.mjs`.
+Déploiement manuel : depuis `monitoring/external`, `npx wrangler deploy`, ou
+éditeur Cloudflare avec le contenu exact de `worker.mjs`. Ne pas modifier le
+secret lors d'une simple mise à jour du code. Après publication, contrôler les
+sept résultats dans les logs puis la date du dernier contrôle KV lors d'une
+véritable exécution du cron. Une exécution de preview seule ne valide pas le cron.
+
+Cette sonde vérifie la validité TLS au moment du contrôle, sans calculer le
+nombre de jours avant expiration. Elle est indépendante du homelab, mais dépend
+encore de Cloudflare ; une panne globale de ce fournisseur nécessite une seconde
+sonde chez un autre hébergeur. Une alerte HTTP 403 peut signaler un blocage WAF
+plutôt qu'une panne applicative : examiner les événements de sécurité avant
+d'élargir le filtrage géographique.
