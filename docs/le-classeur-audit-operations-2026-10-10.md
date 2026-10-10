@@ -66,8 +66,10 @@ liste preload des navigateurs.
 F-004 : l'API Turnstile du connecteur a refusé la lecture avec l'erreur
 Cloudflare 10000. Le hostname autorisé reste à attester en console ; aucune
 rotation ni modification de widget. F-005 : le rapport de bascule atteste
-l'URI callback Google et l'initiation ; un retour utilisateur complet reste
-distinct et non vérifié ici.
+l’URI callback Google et l’initiation. Après livraison, un aller-retour Google
+réel avec un compte bêta existant a réussi jusqu’au profil et à la communauté.
+Le challenge Turnstile et le parcours d’un nouvel inscrit restent distincts,
+non vérifiés ici.
 
 ## Restauration hors hôte vérifiée
 
@@ -125,7 +127,8 @@ Procédure utilisée dans la fenêtre approuvée :
 La répétition sur une copie fraîche a réussi avant intervention. En production,
 les trois bases ont ensuite été réindexées et rafraîchies : versions 2.44/2.44,
 zéro index invalide. Cette maintenance ne copie ni ne réinitialise progression,
-assets ou numérotation. Le login Google complet reste une validation distincte.
+assets ou numérotation. Le login Google d’un compte existant a ensuite été attesté par le navigateur
+opérateur ; le parcours nouvel inscrit/Turnstile reste distinct.
 
 ## Droits du rôle runtime
 
@@ -249,7 +252,10 @@ a été vérifié par le run de staging réel cité ci-dessus.
   Illustration décodée WebP736×1159 ; ancien asset JavaScript N−1 répond200.
   Vérification navigateur public : trois illustrations stables au reload,
   zoom, mentions/contact et navigation Connexion Google ; zéro warning/error.
-  Ceci ne prouve pas un aller-retour OAuth/Turnstile complet.
+  Puis sélection de compte Google, callback, profil et communauté réussis
+  avec un compte bêta existant, sans nouvelle acceptation CGU ni opération
+  économique ; aucune identité personnelle consignée. Cela ne valide pas le
+  challenge Turnstile ni le parcours d’un nouvel inscrit.
 - Nettoyage repris : exécution Resultsuccess, minuterie active chaque minute.
   Candidat, maintenance et verrou opérateur arrêtés après contrôle public.
   Minuterie GitOps habituelle restaurée active(waiting). Son démarrage a
