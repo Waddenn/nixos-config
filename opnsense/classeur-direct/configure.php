@@ -60,7 +60,9 @@ try {
         $afterWithoutRules = $after;
         unset($beforeWithoutRules['filter']['rule'],$afterWithoutRules['filter']['rule']);
         if ($beforeWithoutRules !== $afterWithoutRules) throw new RuntimeException('Unexpected configuration change');
-        $cnf->fromArray($after);
+        // Legacy write_config reads the global array, not just the MVC singleton.
+        $config = $after;
+        $cnf->fromArray($config);
         if (!is_array(write_config('Classeur direct Tailscale link: '.$mode)))
             throw new RuntimeException('Configuration save failed');
         file_put_contents("$state/$mode.sha256", hash_file('sha256','/conf/config.xml'));
