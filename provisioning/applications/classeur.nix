@@ -37,6 +37,8 @@
     DATABASE_URL = "postgresql://le_classeur_app@localhost/le_classeur_beta?host=/run/postgresql";
   };
 in {
+  imports = [./classeur-cd-staging.nix];
+  my-services.infra.classeur-cd-staging.enable = true;
   sops.secrets.classeur-environment = {
     sopsFile = ../secrets/classeur.yaml;
     mode = "0400";
@@ -135,7 +137,28 @@ in {
     # NixOS emits this before its own upgrade map; adding the directive to
     # appendHttpConfig places it too late and nginx reports a duplicate.
     mapHashBucketSize = 128;
-    appendHttpConfig = "include ${config.sops.templates.classeur-origin-auth.path};";
+    appendHttpConfig = ''
+      include ${config.sops.templates.classeur-origin-auth.path};
+      # CF-Connecting-IP is forwarded only by the authenticated Caddy origin.
+      # Do not rewrite remote_addr: the ingress allow/deny checks the proxy peer.
+      map $http_cf_connecting_ip $classeur_client_key {
+        "" $binary_remote_addr;
+        default $http_cf_connecting_ip;
+      }
+      map $uri $classeur_dynamic_key {
+        default $classeur_client_key;
+        ~^/assets/ "";
+        ~^/(api/admin|__admin-api)/assets/ "";
+        ~^/accueil/illustrations/ "";
+      }
+      map $uri $classeur_artwork_key {
+        default "";
+        ~^/(api/admin|__admin-api)/assets/ $classeur_client_key;
+        ~^/accueil/illustrations/ $classeur_client_key;
+      }
+      limit_req_zone $classeur_dynamic_key zone=classeur_dynamic:10m rate=15r/s;
+      limit_req_zone $classeur_artwork_key zone=classeur_artwork:10m rate=20r/s;
+    '';
     virtualHosts.classeur = {
       listen = [
         {
@@ -149,6 +172,8 @@ in {
           proxy_set_header Host classeur.hexaflare.net;
           proxy_set_header X-Forwarded-Proto https;
           proxy_set_header CF-Connecting-IP "";
+          limit_req zone=classeur_dynamic burst=60 nodelay;
+          limit_req_status 429;
         '';
       };
       locations."/" = {
@@ -164,6 +189,11 @@ in {
           # Caddy overwrites the bearer header and validates the Cloudflare peer.
           proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
           proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+          # Allow two full binder views to fetch thumbnails together. Requests
+          # rejected here never reach Node or PostgreSQL; static bundles are exempt.
+          limit_req zone=classeur_dynamic burst=60 nodelay;
+          limit_req zone=classeur_artwork burst=120 nodelay;
+          limit_req_status 429;
           client_max_body_size 20m;
         '';
       };

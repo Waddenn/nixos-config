@@ -26,6 +26,9 @@
       units = ["postgresql.service" "nginx.service" "le-classeur.service"];
       healthBody = {status = "ok";};
       conditions = ["[STATUS] == 200" "[BODY].status == ok"];
+      # Gatus is deliberately outside the origin's Tailscale ACL. Monitor via
+      # the authenticated Caddy proxy instead of generating a failing direct probe.
+      directMonitoring = false;
       # OAuth/session/Turnstile values must be supplied, never randomly replaced.
       generatedSecrets = [];
     };
