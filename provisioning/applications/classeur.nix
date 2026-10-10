@@ -118,7 +118,9 @@ in {
   };
   # Restore owns the schema and grants runtime privileges explicitly. No automatic
   # migration or broad default table grant can change a reviewed release.
-  systemd.services.postgresql.postStart = lib.mkAfter ''
+  # ensureUsers/ensureDatabases run in postgresql-setup.service, after the
+  # server starts. Apply ownership only after those roles and DB exist.
+  systemd.services.postgresql-setup.postStart = lib.mkAfter ''
     ${config.services.postgresql.package}/bin/psql -v ON_ERROR_STOP=1 -d postgres <<'SQL'
     ALTER DATABASE le_classeur_beta OWNER TO le_classeur_beta_owner;
     REVOKE ALL ON DATABASE le_classeur_beta FROM PUBLIC;
@@ -170,9 +172,9 @@ in {
   systemd.services.le-classeur = {
     description = "Le classeur Node application (operator-selected release)";
     wantedBy = ["multi-user.target"];
-    after = ["postgresql.service" "network-online.target"];
+    after = ["postgresql-setup.service" "network-online.target"];
     wants = ["network-online.target"];
-    requires = ["postgresql.service"];
+    requires = ["postgresql-setup.service"];
     inherit environment;
     unitConfig.ConditionPathExists = "${state}/current/build/server/index.js";
     serviceConfig =
@@ -186,8 +188,8 @@ in {
   };
   systemd.services.le-classeur-cleanup = {
     description = "Expire Le classeur trade reservations";
-    after = ["postgresql.service" "le-classeur.service"];
-    requires = ["postgresql.service"];
+    after = ["postgresql-setup.service" "le-classeur.service"];
+    requires = ["postgresql-setup.service"];
     inherit environment;
     unitConfig.ConditionPathExists = "${state}/current/build/server/index.js";
     serviceConfig =
@@ -213,8 +215,8 @@ in {
       User = "postgres";
       UMask = "0077";
     };
-    after = ["postgresql.service"];
-    requires = ["postgresql.service"];
+    after = ["postgresql-setup.service"];
+    requires = ["postgresql-setup.service"];
     path = [config.services.postgresql.package pkgs.coreutils pkgs.findutils];
     script = ''
       set -eu
