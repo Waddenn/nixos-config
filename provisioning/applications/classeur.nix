@@ -202,6 +202,14 @@ in {
   # A bearer token is mandatory even for loopback: userspace Tailscale may proxy
   # remote peers through loopback. Health remains reachable for provisioner checks.
   networking.firewall.allowedTCPPorts = [service.application.port];
+  # Caddy's direct WireGuard transport is SNATed by OPNsense (192.168.1.4).
+  # Userspace Tailscale has no tun interface; permit only this encrypted UDP path.
+  networking.firewall.extraCommands = ''
+    iptables -I nixos-fw 1 -i eth0 -s 192.168.1.4/32 -p udp --dport 41641 -j nixos-fw-accept
+  '';
+  networking.firewall.extraStopCommands = ''
+    iptables -D nixos-fw -i eth0 -s 192.168.1.4/32 -p udp --dport 41641 -j nixos-fw-accept 2>/dev/null || true
+  '';
   systemd.services.le-classeur = {
     description = "Le classeur Node application (operator-selected release)";
     wantedBy = ["multi-user.target"];
