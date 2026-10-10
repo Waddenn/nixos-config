@@ -118,6 +118,11 @@ accepte SELECT/INSERT sur ces tables. L'ancien préflight exige le DML complet :
 ne pas retirer les droits avant sa mise à jour. Aucune application automatique
 par GitOps ou NixOS. Ne pas appliquer avec un rôle applicatif.
 
+La politique SQL a été exécutée sur six tables synthétiques d'une base jetable :
+révocation et vérification réussies. Un droit UPDATE hérité de PUBLIC a ensuite
+provoqué le refus attendu ; vérification du rollback réussie, base supprimée.
+Les privilèges du rôle dans la base de production n'ont pas été modifiés.
+
 ## Rétention et incident
 
 CT : 14 jours configurés. Hors hôte : pas de suppression automatique. Une
