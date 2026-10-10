@@ -1,8 +1,9 @@
 # Audit après bascule — exploitation et capacité
 
 Observations du 10 octobre 2026, vers 11 h 48–11 h 55 Europe/Paris, en lecture
-seule sur la production. Les tests de restauration modifient uniquement une base
-jetable, supprimée à la fin. Aucun déploiement ni redémarrage de production.
+seule sur la production. Les tests de restauration utilisent une base
+jetable, supprimée à la fin. Après autorisation explicite de mise en production,
+la maintenance et les activations ciblées décrites ci-dessous ont été exécutées.
 
 ## Capacité et latence mesurées
 
@@ -32,14 +33,15 @@ un sujet réel : elle augmente disque et sauvegardes, sans egress Neon actif.
 
 ## Monitoring et protections
 
-Gatus fonctionne. Sa sonde directe `classeur` vers le CT expire après 10 s ;
+Au relevé initial, Gatus fonctionnait. Sa sonde directe `classeur` vers le CT expire après 10 s ;
 sonde `classeur-proxy` via Caddy : 200 en 13,7 ms. L'ACL de bascule autorise
 Caddy et le contrôleur, pas Gatus. Le champ `application.directMonitoring=false`
 supprime la sonde impossible en gardant celle du proxy et ses alertes existantes.
 L'inventaire refuse de désactiver la sonde directe sans proxy déclaré.
-Ce correctif nécessite la promotion/CI puis l'activation ciblée de Gatus.
+Ce correctif a été activé sur Gatus après CI de main ; son service et son
+endpoint `/health` sont actifs (`UP`). Aucun autre hôte de la flotte n’a été activé.
 
-Nginx n'avait aucune limitation avant PostgreSQL. La configuration proposée
+Nginx n’avait aucune limitation avant PostgreSQL. La configuration activée
 limite maintenant les routes dynamiques à 15 requêtes/s/IP avec rafale de 60,
 et les illustrations en base à 20 requêtes/s/IP avec rafale de 120. Les bundles
 statiques `/assets/` sont exemptés. La clé utilise le CF-Connecting-IP transmis
@@ -52,8 +54,9 @@ et 120 illustrations simultanées réussissent, 300 bundles réussissent ; une
 rafale abusive de 300 requêtes dynamiques produit 235 refus 429 ; 60 requêtes
 d'une autre IP réussissent immédiatement. Le script reproductible est
 `scripts/classeur-ingress-check.py --nginx <binaire-nginx-Nix>`. Build NixOS
-ciblé du CT réussi ; aucune activation. Les seuils restent à observer après
-déploiement pour éviter de limiter les NAT partagés.
+ciblé du CT et activation réussis. `nginx -T` sur le fichier chargé confirme les
+deux zones et rafales ci-dessus. Aucun test de saturation n’a été lancé en
+production. Les seuils restent à observer pour éviter de limiter les NAT partagés.
 
 HSTS public observé : `max-age=31536000; includeSubDomains; preload` ; F-052
 est déjà résolu par la configuration en amont. Ne pas ajouter un second réglage
@@ -63,8 +66,10 @@ liste preload des navigateurs.
 F-004 : l'API Turnstile du connecteur a refusé la lecture avec l'erreur
 Cloudflare 10000. Le hostname autorisé reste à attester en console ; aucune
 rotation ni modification de widget. F-005 : le rapport de bascule atteste
-l'URI callback Google et l'initiation ; un retour utilisateur complet reste
-distinct et non vérifié ici.
+l’URI callback Google et l’initiation. Après livraison, un aller-retour Google
+réel avec un compte bêta existant a réussi jusqu’au profil et à la communauté.
+Le challenge Turnstile et le parcours d’un nouvel inscrit restent distincts,
+non vérifiés ici.
 
 ## Restauration hors hôte vérifiée
 
@@ -92,16 +97,16 @@ Répéter après modification PostgreSQL/libc et périodiquement. Le test prouve
 restauration du contenu, pas un login Google ou une ouverture de booster.
 Conserver les fichiers SOPS et la release compatible pour une reprise complète.
 
-## Collation : maintenance préparée, non exécutée
+## Collation : maintenance exécutée
 
-`le_classeur_beta`, `postgres` et `template1` déclarent la version libc 2.42,
-alors que PostgreSQL observe 2.44. template0 n'a pas de version enregistrée.
+Avant maintenance, `le_classeur_beta`, `postgres` et `template1` déclaraient
+la version libc 2.42, alors que PostgreSQL observait 2.44. template0 n'a pas de version enregistrée.
 Les avertissements ne prouvent pas une corruption. Ils imposent d'examiner et
 reconstruire les objets dépendants avant de rafraîchir la métadonnée. Voir la
 [documentation PostgreSQL REINDEX](https://www.postgresql.org/docs/18/sql-reindex.html)
 et [ALTER DATABASE](https://www.postgresql.org/docs/18/sql-alterdatabase.html).
 
-Procédure à exécuter dans une fenêtre approuvée :
+Procédure utilisée dans la fenêtre approuvée :
 
 1. Produire et vérifier une sauvegarde fraîche du CT puis hors hôte. Capturer
    les compteurs/empreintes de progression et index ; garder la release courante.
@@ -119,13 +124,15 @@ Procédure à exécuter dans une fenêtre approuvée :
    session Google, journaux et rapprochement administrateur. Si reconstruction
    échoue, conserver la métadonnée ancienne et diagnostiquer avant réouverture.
 
-La reconstruction sur la base jetable a réussi ; l'interruption exacte ne
-peut pas être garantie pour la production. Cette maintenance ne copie ni
-réinitialise progression, assets ou numérotation.
+La répétition sur une copie fraîche a réussi avant intervention. En production,
+les trois bases ont ensuite été réindexées et rafraîchies : versions 2.44/2.44,
+zéro index invalide. Cette maintenance ne copie ni ne réinitialise progression,
+assets ou numérotation. Le login Google d’un compte existant a ensuite été attesté par le navigateur
+opérateur ; le parcours nouvel inscrit/Turnstile reste distinct.
 
 ## Droits du rôle runtime
 
-F-020 est partiellement confirmé : rôle non propriétaire/non superuser, sans
+Avant maintenance, F-020 était partiellement confirmé : rôle non propriétaire/non superuser, sans
 CREATE sur schéma/base, mais UPDATE/DELETE sur les six journaux append-only.
 `provisioning/applications/classeur-runtime-grants.sql` prépare le retrait exact
 avec vérification des privilèges effectifs et rollback transactionnel si un droit
@@ -137,7 +144,10 @@ par GitOps ou NixOS. Ne pas appliquer avec un rôle applicatif.
 La politique SQL a été exécutée sur six tables synthétiques d'une base jetable :
 révocation et vérification réussies. Un droit UPDATE hérité de PUBLIC a ensuite
 provoqué le refus attendu ; vérification du rollback réussie, base supprimée.
-Les privilèges du rôle dans la base de production n'ont pas été modifiés.
+La même politique a ensuite été appliquée explicitement en production pendant
+la maintenance, après validation de l’application compatible. Les six journaux
+autorisent désormais SELECT/INSERT, sans UPDATE/DELETE effectifs. Le préflight
+du paquet applicatif a réussi avec ces droits réels.
 
 ## Rétention et incident
 
@@ -158,23 +168,26 @@ Les alertes Discord HTTP Gatus existent ; les alertes dédiées sauvegarde/espac
 et une revue périodique des invariants restent à compléter sans annoncer qu'elles
 sont déjà activées.
 
-## CD : transport isolé préparé, non activé
+## CD : transport installé et vérifié, activation opérateur
 
-L’application prépare un `workflow_dispatch` GitHub main-only de staging via
+L’application fournit un `workflow_dispatch` GitHub main-only de staging via
 Tailscale OIDC. Le dépôt privé n’accepte pas les reviewers obligatoires sur son
-plan actuel ; l’environnement est limité à main et `NODE_CD_ENABLED=false`.
+plan actuel ; l’environnement est limité à main et `NODE_CD_ENABLED=true`.
+Le workflow reste exclusivement manuel et ne déclenche aucune activation applicative.
 Une identité fédérée dédiée, une règle réseau TCP22 ciblée et une clé SSH
 limitée ont été configurées côté GitHub/Tailscale. Les tests de politique
 acceptent le CT TCP22 et refusent PostgreSQL, HTTP origin et les autres cibles
-administratives. Aucune session runner réelle n’a été exécutée ; aucun accès
-root du contrôleur n’est exporté.
+administratives. Le run réel de staging
+[38048136678](https://github.com/Waddenn/le-classeur/actions/runs/38048136678)
+a réussi : identité OIDC, connexion Tailscale et transfert SSH au récepteur.
+Aucun accès root du contrôleur n’est exporté.
 
 Le module `provisioning/applications/classeur-cd-staging.nix` est importé par
 Classeur, avec **`my-services.infra.classeur-cd-staging.enable=false` par défaut**.
 La déclaration Classeur active désormais explicitement cette option après
-autorisation de mise en production ; sa livraison attend la CI exacte de main
-et la coordination des sauvegardes/migrations applicatives.
-Il prépare, s’il est activé ultérieurement par une PR revue, le compte
+autorisation de mise en production. Après CI exacte de main, le CT a été
+activé avant les migrations afin de préserver la compatibilité de l’ancien
+processus pendant l’installation du compte. Il installe le compte
 `classeur_cd` sans sudo ni groupe applicatif, une clé dédiée avec `restrict`,
 une `ForceCommand` et un répertoire indépendant 0700. La clé publiée est publique
 uniquement ; la privée demeure hors Git et dans le secret GitHub de staging.
@@ -182,24 +195,77 @@ uniquement ; la privée demeure hors Git et dans le secret GitHub de staging.
 Le récepteur `scripts/classeur-stage-release.py` est la copie revue du transport
 applicatif `scripts/cd/stage-release.py` ; toute modification de son protocole
 doit garder ces copies/testeurs cohérentes. Le source est fixé dans le Nix store
-par la commande forcée. Il vérifie SHA, Linux x64, non-répétition, identité,
+par la commande forcée. Il vérifie SHA, Linux x64, `rehearsal=false`, identité,
 chemins/liens, unicité des membres et limites de taille avant de conserver un
 paquet opaque. Il sérialise l’entrée et refuse un cumul supérieur à 2 GiB ou
 moins de 1 GiB libre. Il n’extrait, n’exécute, ne migre et ne redémarre rien.
 
-Aucun compte, récepteur ou nouveau service n’a été installé en production.
-L’activation applicative demeure une maintenance opérateur après sauvegarde,
+Le compte et le récepteur sont installés en production. Une commande SSH
+`id` avec la clé dédiée et la clé hôte vérifiée est refusée par la commande
+forcée ; `sshd -T` confirme publickey-only, ForceCommand, interdiction du PTY
+et du forwarding. L’activation applicative demeure une maintenance opérateur après sauvegarde,
 application explicite des migrations, vérification du schéma/grants, préflight
 et plan de rollback compatible N−1. Ce transport n’est pas un CD d’activation.
 La politique CI exacte de main NixOS avant toute installation reste conservée.
 
-Validation du module désactivé : aucun compte CD dans la configuration normale.
+Validation du module avec option désactivée : aucun compte CD produit.
 Une configuration de répétition avec option activée a été construite entièrement
-sur le contrôleur, y compris validation sshd ; aucune activation. Le compte
+sur le contrôleur, y compris validation sshd, puis livrée avec l’option Classeur
+activée. Le compte
 produit n’a aucun groupe supplémentaire. Format Nix et tests du récepteur passent.
 
 Chemin SSH effectif : Tailscale userspace, `RunSSH=false`, OpenSSH socket activé
 sur TCP22. SSH standard du contrôleur vers l’IP Tailscale du CT réussit avec
 la clé hôte existante. Serve expose seulement 8084 ; aucun nouveau forward
 22 ou activation Tailscale SSH n’est requis/proposé. L’accès du runner OIDC
-reste à vérifier après une installation autorisée du compte et du récepteur.
+a été vérifié par le run de staging réel cité ci-dessus.
+
+
+## Livraison effective et portée
+
+- Infrastructure : main `14e9c8868618ac67c04ee4c470afaacd4b71aacf`,
+  [CI complète 38047203728](https://github.com/Waddenn/nixos-config/actions/runs/38047203728)
+  réussie. Activations ciblées uniquement CT9903 et Gatus après dry-run ;
+  génération CT `k70ahi35k4b69lz9sd9p8fh3czzgwr8k`. L’installation infra a
+  conservé le PID applicatif 5624 et PostgreSQL actif.
+- Application : main `fcaf2a791ce03184eb931a7be535b4ddef557b1d`,
+  [packaging 38048075367](https://github.com/Waddenn/le-classeur/actions/runs/38048075367)
+  réussi, archive 44 676 655 octets, SHA-256
+  `f81b96a916dfe25eafc29190c27e0f440644ad33304b0bc1d47d7592b2646151`.
+  L’opérateur a figé une copie root-only, revalidé puis extrait sans exécuter
+  de scripts d’installation. Release root:le-classeur, 35 anciens assets
+  hashés conservés sans écraser les nouveaux pour les onglets ouverts.
+- Sauvegarde finale `20261010T112516Z.dump`, CT/contrôleur/stockage séparé
+  vérifiés, SHA-256
+  `1042b3bcf02ea4a8a70a212f7477a146d6a4b75a255286b36b2df648bdfa008e`.
+  Répétition restore/migrations/grants/préflight sur clone jetable réussie ;
+  clone supprimé. Aucun restore de progression en production.
+- Maintenance : ancien service et nettoyage arrêtés, zéro connexion du rôle
+  applicatif à 11:24:17 UTC. Un serveur sans accès DB/secrets répondait 503
+  en français avec Retry-After30, no-store et CSP restrictive. Migrations
+  additives 0023–0025 appliquées explicitement : journal exact de 26 entrées.
+  Empreintes inventaire/compteurs/soldes identiques avant/après (3323 instances,
+  3865 événements), quatre invariants à zéro.
+- Candidat privé 8085 : préflight réel, santé/accueil/trois pages légales 200,
+  nonce/CSP, illustration GET/HEAD et Sharp validés. Sélection atomique de la
+  release puis production 8083 active à **11:28:03 UTC**, PID11546, NRestarts0.
+  Illustration décodée WebP736×1159 ; ancien asset JavaScript N−1 répond200.
+  Vérification navigateur public : trois illustrations stables au reload,
+  zoom, mentions/contact et navigation Connexion Google ; zéro warning/error.
+  Puis sélection de compte Google, callback, profil et communauté réussis
+  avec un compte bêta existant, sans nouvelle acceptation CGU ni opération
+  économique ; aucune identité personnelle consignée. Cela ne valide pas le
+  challenge Turnstile ni le parcours d’un nouvel inscrit.
+- Nettoyage repris : exécution Resultsuccess, minuterie active chaque minute.
+  Candidat, maintenance et verrou opérateur arrêtés après contrôle public.
+  Minuterie GitOps habituelle restaurée active(waiting). Son démarrage a
+  déclenché un rattrapage immédiat, arrêté pendant la préparation avant toute
+  activation de flotte ; worktree temporaire supprimé, aucun enfant Colmena.
+  Le précédent rapport global reste inchangé : aucun succès de flotte entière
+  n’est attribué à ces deux activations ciblées.
+
+L’ancien paquet `1f3d919` exige 23 migrations et les anciens droits des journaux :
+il n’est pas un fallback compatible après ce changement. Ne pas falsifier le
+journal, réaccorder UPDATE/DELETE ou restaurer automatiquement une sauvegarde
+sur la progression courante. Un échec après migration exige une correction
+compatible ou une procédure d’incident explicitement revue.
