@@ -1,5 +1,10 @@
 # Migration Le classeur vers NixOS
 
+La bascule a été exécutée le 10 octobre 2026. Voir le
+[rapport d'exécution](le-classeur-cutover-report-2026-10-10.md) pour l'état
+validé, les actions et les points restants. Les paragraphes de préparation
+ci-dessous décrivent les étapes historiques et le contrat opérationnel.
+
 État de cette préparation : déclaration proposée `classeur` (CT **9903**, VMID
 vérifié libre avant création), `proxade` / `Storage2`, 4 CPU, 8192 MiB, 64 GiB.
 Le service reste isolé du GitOps principal et la route publique reste désactivée.
