@@ -13,6 +13,12 @@ keys:
 # Each service owns its encrypted file; the personal key remains the recovery key.
 # Unclassified files are operator-only until an explicit host rule is added.
 creation_rules:
+  - path_regex: ^provisioning/secrets/classeur\.yaml$
+    key_groups:
+      - age: [*primary, *workstation, *classeur]
+  - path_regex: ^provisioning/secrets/classeur-turnstile\.yaml$
+    key_groups:
+      - age: [*primary, *workstation, *classeur]
   - path_regex: ^provisioning/secrets/classeur-origin\.yaml$
     key_groups:
       - age: [*primary, *workstation, *caddy, *classeur, *dev-nixos]

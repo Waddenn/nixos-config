@@ -26,6 +26,10 @@ FILES = {
 }
 SHARED_FILES = {
     "classeur-origin": ({"caddy", "classeur", "dev-nixos"}, {"classeur-origin-token"}),
+    "classeur-turnstile": ({"classeur"}, {"turnstile-secret-key"}),
+}
+PENDING_FILES = {
+    "classeur": ({"classeur"}, {"classeur-environment"}),
 }
 
 
@@ -55,7 +59,7 @@ class SopsIsolationTests(unittest.TestCase):
             r"path_regex:\s*(\S+)\s+key_groups:\s+- age:\s*\[([^\]]+)\]",
             self.policy,
         )
-        self.assertEqual(len(FILES) + len(SHARED_FILES) + 1, len(rules))
+        self.assertEqual(len(FILES) + len(SHARED_FILES) + len(PENDING_FILES) + 1, len(rules))
         for service, (host, _) in FILES.items():
             path = f"secrets/{service}.yaml"
             matching = [aliases for pattern, aliases in rules if re.search(pattern, path)]
@@ -63,7 +67,7 @@ class SopsIsolationTests(unittest.TestCase):
             actual = set(re.findall(r"\*([\w-]+)", matching[0]))
             expected = {"primary", "workstation"} | ({host} if host else set())
             self.assertEqual(expected, actual, path)
-        for service, (hosts, _) in SHARED_FILES.items():
+        for service, (hosts, _) in {**SHARED_FILES, **PENDING_FILES}.items():
             path = f"provisioning/secrets/{service}.yaml"
             matching = [aliases for pattern, aliases in rules if re.search(pattern, path)]
             self.assertTrue(matching, path)
@@ -94,11 +98,10 @@ class SopsIsolationTests(unittest.TestCase):
         self.assertFalse((ROOT / "secrets/secrets.yaml").exists())
         self.assertNotIn("&github-runner", self.policy)
 
-    def test_shared_origin_file_excludes_application_secrets(self):
+    def test_pilot_secret_files_have_scoped_recipients(self):
         for service, (hosts, keys) in SHARED_FILES.items():
             path = ROOT / "provisioning" / "secrets" / f"{service}.yaml"
-            if not path.exists():
-                self.skipTest("Origin secret awaits explicit staging generation")
+            self.assertTrue(path.exists(), path)
             text = path.read_text()
             self.assertEqual(keys, set(re.findall(r"^([\w-]+):", text, re.MULTILINE)) - {"sops"})
             self.assertEqual({self.aliases[x] for x in hosts | {"primary", "workstation"}},

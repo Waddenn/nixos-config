@@ -6,7 +6,8 @@ Le service reste isolé du GitOps principal et la route publique reste désactiv
 Ce document ne constitue pas une preuve de création, restauration ou bascule.
 
 La création isolée a ensuite été vérifiée le 10 octobre 2026 : CT 9903 en cours
-d'exécution, hostname `nixos-classeur`, 4 GiB RAM / 32 GiB disque, DHCP observé
+d'exécution, hostname `nixos-classeur`, puis porté à 8 GiB RAM / 64 GiB disque
+et 4 CPU ; DHCP observé
 `192.168.1.159`. La découverte authentifiée a vérifié sa clé SSH et son hostname.
 Cette IP est un fait de cette exécution, pas une adresse à recopier dans Nix.
 Le bootstrap SSH est construit et actif ; aucune release ni base applicative
@@ -30,7 +31,7 @@ n'a été installée. Le build applicatif complet attend le SOPS réel, sans fau
   `/health`, y compris loopback : Tailscale userspace peut présenter une IP locale.
   Caddy écrase `Authorization` avec son bearer ; nginx valide le bearer puis
   supprime cet en-tête avant Node. Le fichier partagé `provisioning/secrets/classeur-origin.yaml`
-  doit être chiffré pour Caddy, la clé CT authentifiée et les clés de récupération.
+  est chiffré pour Caddy, la clé CT authentifiée et les clés de récupération.
   Aucun jeton en Nix store ni dans les logs. L'authentification applicative demeure
   les cookies existants ; aucun bearer métier n'est ajouté.
 - PostgreSQL 18 n'écoute aucun port TCP. La connexion runtime utilise
@@ -41,13 +42,22 @@ n'a été installée. Le build applicatif complet attend le SOPS réel, sans fau
   Le pool Node doit être borné (au plus 15 connexions par processus, cleanup
   compris avec une marge dans les 50 connexions PostgreSQL) et conserver une
   connexion pour toute transaction.
-- Le secret SOPS `classeur-environment` contient un fichier d'environnement
+- Le secret SOPS `classeur-environment` contiendra un fichier d'environnement
   systemd, avec les valeurs OAuth Google, Turnstile et signature de session
-  existantes. Aucun remplacement aléatoire des secrets de session. Il ne doit
+  validées. Si la clé de session d'origine reste introuvable, sa rotation
+  imposera une reconnexion ; les comptes et cartes en base restent conservés.
+  Il ne doit
   pas modifier les valeurs fixes `APP_ENV`, `APP_RUNTIME`, `APP_ORIGIN`, `HOST`,
   `PORT` ou `DATABASE_URL`. Son fichier chiffré est
-  `provisioning/secrets/classeur.yaml`, pour la clé CT découverte et celle du
-  contrôleur, plus la clé de récupération approuvée. Ne jamais versionner le clair.
+  `provisioning/secrets/classeur.yaml`, pour la clé CT découverte et les deux
+  clés de récupération, sans accès du contrôleur ni de Caddy au contenu.
+  Le secret Turnstile actuel a été récupéré sans rotation et conservé dans
+  `provisioning/secrets/classeur-turnstile.yaml`, chiffré pour les mêmes
+  destinataires. Le jeton Caddy est dans `classeur-origin.yaml` avec des
+  destinataires différents. Ne jamais versionner le clair ; vérifier le
+  déchiffrement sur le CT et restaurer depuis une copie chiffrée avant toute
+  rotation. Après une rotation, mettre à jour SOPS et redémarrer uniquement les
+  services concernés, puis vérifier l'authentification et les sauvegardes.
 
 ## Préparation sur dev-nixos
 
